@@ -3,8 +3,8 @@
 ## Install
 
 ```bash
-npm install @gqltb/cli --save-dev
-npm install @gqltb/runtime --save
+npm install @gql-unicorn/cli --save-dev
+npm install @gql-unicorn/runtime --save
 ```
 
 ## Usage

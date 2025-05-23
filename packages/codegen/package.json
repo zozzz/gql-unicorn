@@ -1,7 +1,7 @@
 {
-    "name": "@gqltb/codegen",
+    "name": "@gql-unicorn/codegen",
     "version": "0.1.0-dev.1",
     "dependencies": {
-        "@gqltb/runtime": "workspace:*"
+        "@gql-unicorn/runtime": "workspace:*"
     }
 }
