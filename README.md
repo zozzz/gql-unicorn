@@ -1,4 +1,9 @@
-# Graphql TypeScript Builder
+# Graphql Unicorn
+
+Name of this package is a combination of `GraphQl` + `unicorn` (beacuse this is a 🦄 )
+
+> [!IMPORTANT]
+> Currently in development, this info is potentially wrong or incomplete.
 
 ## Install
 
