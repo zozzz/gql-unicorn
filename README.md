@@ -14,13 +14,12 @@ npm install @gqltb/runtime --save
 ```typescript
 import { Query, Type, $ } from "genrated-pacakge-name"
 
-const GetUser = Query.users({id: $("userId")})("id", "name")
-const xxx = GetUser({ userId: "..." })
-const yyy = GetUser("extra_field")({ userId: "..." })
+const fragment = Type.News.author(q => q.id.name)
+const on = Type.Blog.some_field
 
-const UserWithWorkers = Query.users({id: $("userId")})("id", Type.Worker("worker_field"))
+Query.articles().id.name.tags({count: $.count}, q => q.id.name).another_field[fragment][on]
 
-const ArticleWithTags = Query.articles()("id", Type.Article.tags({count: 10}))
+Query.articles().id.name.tags({count: $.count}, q => q.id.name).author(q => q.id.name)
 ```
 
 #### Nested args
@@ -28,8 +27,21 @@ const ArticleWithTags = Query.articles()("id", Type.Article.tags({count: 10}))
 ```typescript
 import { Query, $ } from "genrated-pacakge-name"
 
-const GetUser = Query.users({paging: {offset: $("offset"), limit: $("limit")}})("id", "name")
-const xxx = GetUser({offset: 0, limit: 10})
+const GetUser = Query.users({paging: {offset: $("offset"), limit: $("limit")}}).id.name
+const xxx = GetUser.$build({offset: 0, limit: 10})
+
+// alternatives
+const GetUser = Query.users({paging: $}).id.name
+const xxx = GetUser.$build({paging: {offset: 0, limit: 10}})
+
+// shothand 1
+const GetUser = Query.users($).id.name
+const xxx = GetUser.$build({paging: {offset: 0, limit: 10}})
+
+// shothand 2
+const GetUser = Query.users().id.name
+const xxx = GetUser.$build({paging: {offset: 0, limit: 10}})
+
 ```
 
 
@@ -60,6 +72,20 @@ import { Query, Type, TypeOf, $ } from "genrated-pacakge-name"
 
 const GetUser = Query.users({id: $("userId")})("id", "name")
 type User = TypeOf<typeof GetUser>
+```
+
+### Variables
+
+```typescript
+import { $, Query } from "genrated-pacakge-name"
+
+const q = Query.users({ filter: $("filter"), offset: $("offset"), count: $("count") }).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
+// or simplified version (this is the default, so it can simplify more to: Query.users()...)
+const q = Query.users($).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
+// or with shorthands
+const q = Query.users({ filter: $, offset: $, count: $ }).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
+// works with nested args too
+const q = Query.users({ filter: { is_active: true, name: $ }, offset: $, count: $ }).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
 ```
 
 ## Compatibility

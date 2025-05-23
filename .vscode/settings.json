@@ -1,0 +1,24 @@
+{
+    "[typescript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        }
+    },
+
+    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "typescript.format.enable": false,
+    "eslint.enable": true,
+    "eslint.format.enable": true,
+    "eslint.lintTask.enable": true,
+    "eslint.packageManager": "bun",
+    "eslint.probe": [
+      "typescript",
+      "json"
+    ],
+    "eslint.validate": [
+      "typescript",
+      "json"
+    ]
+}

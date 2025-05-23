@@ -1,0 +1,22 @@
+name: NPM
+
+on:
+  push:
+    tags: ["*"]
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+
+      - name: Publish
+        # run: for package in dist/packages/*; do pnpm publish "$package"; done
+        run: bun publish --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

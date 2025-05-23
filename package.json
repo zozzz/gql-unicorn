@@ -6,15 +6,33 @@
     "packages/*"
   ],
   "scripts": {
-    "release": ""
+    "release:major": "release-it -i major --ci",
+    "release:minor": "release-it -i minor --ci",
+    "release:patch": "release-it -i patch --ci",
+    "release:dev": "release-it -i dev --ci",
+    "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.9",
+    "@eslint/markdown": "^6.4.0",
     "@release-it/bumper": "^7.0.5",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
+    "@stylistic/eslint-plugin-ts": "^4.2.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/bun": "latest",
-    "release-it": "^19.0.2"
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-jsonc": "^2.20.1",
+    "eslint-plugin-prettier": "^5.4.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "release-it": "^19.0.2",
+    "typescript-eslint": "^8.32.1"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "graphql": "^16.11.0",
+    "typescript": "^5.0.0",
+    "utility-types": "^3.11.0"
   },
   "release-it": {
     "git": {
