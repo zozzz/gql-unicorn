@@ -1,4 +1,6 @@
 {
     "name": "@gql-unicorn/runtime",
-    "version": "0.1.0-dev.1"
+    "version": "0.1.0-dev.1",
+    "peerDependencies": {
+        "graphql": "^16.11.0"}
 }

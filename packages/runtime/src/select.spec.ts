@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-base-to-string */
 import { describe, expect, test } from "bun:test"
 
-import { type Operation } from "./operation"
+import { type OpFunction } from "./operation"
 import { select } from "./select"
 import { $ } from "./var"
 
@@ -10,20 +9,20 @@ type User = {
     id: string
     name: string
     roles: Role[]
-    articles: Operation<{ count: number }, Article[]>
+    articles: OpFunction<{ count: number }, Article[]>
 }
 
 type MultipleOp = {
     __typename: "MultipleOp"
-    roles: Operation<{ filter?: { name: string }; offset?: number }, Role[]>
-    articles: Operation<{ count: number }, Article[]>
+    roles: OpFunction<{ filter?: { name: string }; offset?: number }, Role[]>
+    articles: OpFunction<{ count: number }, Article[]>
 }
 
 type Article = {
     __typename: "Article"
     id: string
     name: string
-    author: Operation<{ id: string }, User>
+    author: OpFunction<{ id: string }, User>
 }
 
 type Role = {
@@ -34,7 +33,7 @@ type Role = {
 
 describe("select", () => {
     test("User primitive", () => {
-        const s = select<User>([]).id.name
+        const s = select<User>({ pth: [] }).id
         expect(String(s.$build())).toBe("{id,name}")
     })
 
@@ -45,7 +44,7 @@ describe("select", () => {
     })
 
     test("User named var", () => {
-        const s = select<User>([])
+        const s = select<User>({ pth: [] })
             .articles({ count: $("varName") }, q => q.id)
             .$build({ varName: 10 })
     })
@@ -53,9 +52,9 @@ describe("select", () => {
     test("Optional var", () => {
         type OptionalVar = {
             __typename: "OptionalVar"
-            get: Operation<{ optional?: string }, User>
+            get: OpFunction<{ optional?: string }, User>
         }
-        const s = select<OptionalVar>([]).get({ optional: $ }, q => q.id)
+        const s = select<OptionalVar>({ pth: [] }).get({ optional: $ }, q => q.id)
 
         expect(String(s.$build())).toBe("{get(optional:$get__optional){id}}")
         expect(String(s.$build({}))).toBe("{get(optional:$get__optional){id}}")

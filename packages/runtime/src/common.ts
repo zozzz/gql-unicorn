@@ -16,3 +16,7 @@ export type Concat<SEP extends string, VALS extends string[]> = VALS extends [
     : never
 
 type ConcatTail<SEP extends string, V extends string> = V extends never ? "" : `${SEP}${V}`
+
+export type SObject = Record<string, unknown>
+
+export type IsEmptyObject<I> = I extends { [key: string]: any } ? (keyof I extends never ? true : false) : never

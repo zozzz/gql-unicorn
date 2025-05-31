@@ -1,0 +1,118 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`codegen query without parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { queryBuilder, fragmentBuilder, typeBuilder } from "@gql-unicorn/runtime"
+export type User = {
+    __typename: "User"
+    /**
+     * User id
+     */
+    id: string
+    name: string
+}
+export type __Query = {
+    /**
+     * Curent user
+     */
+    currentUser: User | null
+}
+type __TypeMap = {
+    User: User
+}
+export const Query = queryBuilder<__Query>()
+export const Type = typeBuilder<__TypeMap>()
+export const Fragment = fragmentBuilder<__TypeMap>()"
+`;
+
+exports[`codegen query with parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { type OpQuery, queryBuilder, fragmentBuilder, typeBuilder } from "@gql-unicorn/runtime"
+export type User = {
+    __typename: "User"
+    /**
+     * User id
+     */
+    id: string
+    name: string
+}
+export type __Query = {
+    user: OpQuery<{ id: string }, User | null>
+}
+type __TypeMap = {
+    User: User
+}
+export const Query = queryBuilder<__Query>()
+export const Type = typeBuilder<__TypeMap>()
+export const Fragment = fragmentBuilder<__TypeMap>()"
+`;
+
+exports[`codegen mutation without parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { mutationBuilder } from "@gql-unicorn/runtime"
+export type __Mutation = {
+    someMutaionThing: string
+}
+export const Mutation = mutationBuilder<__Mutation>()"
+`;
+
+exports[`codegen mutation with parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { type OpQuery, queryBuilder, fragmentBuilder, typeBuilder } from "@gql-unicorn/runtime"
+export type User = {
+    __typename: "User"
+    /**
+     * User id
+     */
+    id: string
+    name: string
+}
+export type __Query = {
+    updateUser: OpQuery<{ id: string, name: string }, User | null>
+}
+type __TypeMap = {
+    User: User
+}
+export const Query = queryBuilder<__Query>()
+export const Type = typeBuilder<__TypeMap>()
+export const Fragment = fragmentBuilder<__TypeMap>()"
+`;
+
+exports[`codegen subscription without parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { subscriptionBuilder } from "@gql-unicorn/runtime"
+export type __Subscription = {
+    onChangeSomething: string
+}
+export const Subscription = subscriptionBuilder<__Subscription>()"
+`;
+
+exports[`codegen subscription with parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { type OpSubscription, subscriptionBuilder, fragmentBuilder, typeBuilder } from "@gql-unicorn/runtime"
+export type SomeEvent = {
+    __typename: "SomeEvent"
+    id: string
+}
+export type __Subscription = {
+    onChangeSomething: OpSubscription<{ type: string }, SomeEvent>
+}
+type __TypeMap = {
+    SomeEvent: SomeEvent
+}
+export const Subscription = subscriptionBuilder<__Subscription>()
+export const Type = typeBuilder<__TypeMap>()
+export const Fragment = fragmentBuilder<__TypeMap>()"
+`;

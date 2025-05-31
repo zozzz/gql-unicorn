@@ -27,6 +27,16 @@ Query.articles().id.name.tags({count: $.count}, q => q.id.name).another_field[fr
 Query.articles().id.name.tags({count: $.count}, q => q.id.name).author(q => q.id.name)
 ```
 
+#### TODO Selected
+
+```typescript
+import { Query, $ } from "genrated-pacakge-name"
+
+const GetUser = Query.users({id: $("userId")}).id.name.articles(q => q.id.name)
+type SUser = Selected<User, ["id", "name", {"articles": ["id", "name"]}]>
+// SUser = {id: string; name: string; articles: {id: string; name: string}[]}
+```
+
 #### Nested args
 
 ```typescript

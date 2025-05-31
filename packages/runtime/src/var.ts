@@ -4,11 +4,16 @@ import { checker, VARIABLE } from "./symbols"
 //     [VAR_NAME]: N
 // } & (N extends undefined ? T & { [K in string]: Variable<T, K> } : T & Variable<T, N>)
 
-export type Variable<N extends string | undefined> = N extends undefined
-    ? (<K extends string>(k: K) => Variable<K>) & { [VARIABLE]: undefined }
-    : { [VARIABLE]: N }
+export type Variable<N extends string | undefined> = N extends undefined ? VarToken : VarRef<N>
+
+type VarToken = (<K extends string>(k: K) => Variable<K>) & { [VARIABLE]: undefined }
+type VarRef<N> = { [VARIABLE]: N }
 
 export const isVariable = checker<Variable<any>>(VARIABLE)
+
+export function variableName(obj: Variable<any>): string | undefined {
+    return obj[VARIABLE]
+}
 
 // export type Var<N extends string, T> = T & {
 //     [VAR_NAME]: N
@@ -23,3 +28,5 @@ export const isVariable = checker<Variable<any>>(VARIABLE)
 // with function call is easy: $("varName"), but is 3 bytes longer, and uglier i think
 export const $ = ((name: string) => ({ [VARIABLE]: name })) as Variable<undefined>
 $[VARIABLE] = undefined
+
+export type Vars = Record<string, any>

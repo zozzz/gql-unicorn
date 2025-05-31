@@ -1,0 +1,76 @@
+type Query {
+    nodes: Node
+    node(id: ID!): Node
+    user(id: ID!): User
+    articles(filter: ArticleFilter): [Article!]!
+    location(id: ID!): Location
+    currentUserId: ID
+}
+
+type Mutation {
+    updateArticle(params: ArticleUpdate!): Article!
+    doSomething(something: String): Int
+}
+
+type Subscription {
+    watch(event: String!): Event!
+}
+
+# TODO:
+# scalar DateTime
+
+interface Node {
+    id: ID!
+}
+
+type User implements Node {
+    id: ID!
+    name: String!
+    articles(count: Int!): [Article!]!
+}
+
+type Article implements Node {
+    id: ID!
+    title: String!
+    tags: [Tag!]
+}
+
+input ArticleFilter {
+    name: String!
+}
+
+input ArticleUpdate {
+    id: ID!
+    name: String!
+}
+
+type Tag implements Node {
+    id: ID!
+    tag: String!
+}
+
+
+interface Event {
+    source: String!
+}
+
+type UserChangeEvent implements Event {
+    prev: User!
+    curr: User!
+}
+
+type ArticleChangeEvent implements Event {
+    prev: Article!
+    curr: Article!
+}
+
+enum DistanceUnit {
+    METRIC
+    IMPERIAL
+}
+
+type Location {
+    id: ID!
+    name: String!
+    distance(lat: Float!, lng: Float!, unit: DistanceUnit!): Float!
+}

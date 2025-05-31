@@ -1,12 +1,11 @@
-export interface Config {
-    schema: string,
-    output: string,
+export interface UnicornConfig {
+    output: string
     scalars?: ScalarMap
 }
 
 export type ScalarFromPackage = {
-    import: string,
-    alias?: string,
+    import: string
+    alias?: string
     package: string
 }
 
