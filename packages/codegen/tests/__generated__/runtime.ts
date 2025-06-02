@@ -63,6 +63,8 @@ export type __Query = {
     currentUserId: string | null
     selfRecursive: Operation<{ id: string }, SelfRecursive | null>
     afc: AFC
+    atomicScalar: string
+    atomicArgsScalar: Operation<{ id?: string }, string | null>
 }
 export type ArticleUpdate = {
     title: string
@@ -99,9 +101,6 @@ type __TypeMap = {
     ArticleChangeEvent: ArticleChangeEvent
 }
 const __FieldDefs: FieldDefinitions = {
-    "Article": {
-        "tags": "Tag"
-    },
     "User": {
         "articles": [
             {
@@ -110,6 +109,10 @@ const __FieldDefs: FieldDefinitions = {
             "Article"
         ]
     },
+    "Article": {
+        "tags": "Tag"
+    },
+    "Tag": {},
     "Query": {
         "nodes": "Node",
         "node": [
@@ -142,31 +145,28 @@ const __FieldDefs: FieldDefinitions = {
             },
             "SelfRecursive"
         ],
-        "afc": "AFC"
+        "afc": "AFC",
+        "atomicArgsScalar": {
+            "id": "ID"
+        }
     },
     "Location": {
-        "distance": [
-            {
-                "lat": "Float!",
-                "lng": "Float!",
-                "unit": "DistanceUnit!"
-            },
-            "Float"
-        ]
+        "distance": {
+            "lat": "Float!",
+            "lng": "Float!",
+            "unit": "DistanceUnit!"
+        }
     },
     "SelfRecursive": {
         "parent": "SelfRecursive"
     },
     "AFC": {
         "parent": "AFC",
-        "distance": [
-            {
-                "lat": "Float!",
-                "lng": "Float!",
-                "unit": "DistanceUnit!"
-            },
-            "Float"
-        ],
+        "distance": {
+            "lat": "Float!",
+            "lng": "Float!",
+            "unit": "DistanceUnit!"
+        },
         "nearest": [
             {
                 "lat": "Float!",
@@ -184,12 +184,9 @@ const __FieldDefs: FieldDefinitions = {
             },
             "Article"
         ],
-        "doSomething": [
-            {
-                "something": "String"
-            },
-            "Int"
-        ]
+        "doSomething": {
+            "something": "String"
+        }
     },
     "UserChangeEvent": {
         "prev": "User",

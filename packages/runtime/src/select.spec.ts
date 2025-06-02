@@ -1,11 +1,11 @@
-import { type AFC, DistanceUnit, type Location, type UserChangeEvent } from "../../codegen/tests/__generated__/runtime"
-import { Flag, type Select } from "./select"
+import { $, Fragment, type Node, Query } from "../../codegen/tests/__generated__/runtime"
+import type { Interface } from "./type"
 
-type AFCS = Select<AFC, {}, {}, Flag.AutoTn | Flag.Buildable, []>
-type AtomicSelect = Select<string, {}, {}, Flag.AutoTn | Flag.Buildable, []>
-type UC = Select<UserChangeEvent, {}, {}, Flag.AutoTn | Flag.Buildable, []>
-type LOC = Select<Location, {}, {}, Flag.AutoTn | Flag.Buildable, []>
-const x: AFCS = null as any
-x.distance({ lat: 1, lng: 2, unit: DistanceUnit.METRIC }).id.hqName
+type ChildTypes<T> = T extends Interface<infer b, infer C> ? ChildTypes<C> : T
 
-const loc: LOC = null as any
+type Child = ChildTypes<Node>
+
+const UserFragmanet = Fragment.User.id.name.articles({ count: $ }, q => q.id)
+const ArticleFragment = Fragment.Article.id.title
+const x = Query.nodes.$on(UserFragmanet).$on(ArticleFragment)
+type XXXX = typeof x extends { $build: infer X } ? X : never

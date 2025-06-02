@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { parse as parseGql } from "graphql"
 
@@ -13,7 +14,10 @@ import { isVariable, variableName } from "./var"
  *    "users": [{id: "ID!"}, "User"]
  * }
  */
-export type FieldDefinitions = Record<string, Record<string, [Record<string, string>, string] | string>>
+export type FieldDefinitions = Record<
+    string,
+    Record<string, [Record<string, string>, string] | Record<string, string> | string>
+>
 
 type ContextType = "Query" | "Mutation" | "Subscription" | "Fragment" | "Type" | "Operation"
 
@@ -252,6 +256,10 @@ type OperationFn<I extends Input, O, R, F extends Flag, P extends string[]> = <A
     params: A
 ) => Select<BareType<O>, R, {} & ToVars<I, P, A>, F | TypeFlags<O>, P>
 
+type TypeBuilder<T extends TypeMap, F extends Flag> = {
+    [K in keyof T]: Select<T[K], {}, {}, F, []>
+}
+
 /**
  * @example
  * ```typescript
@@ -305,7 +313,7 @@ export function isSubscription(obj: any) {
  * ```
  */
 export function fragmentBuilder<T extends TypeMap>(opd: FieldDefinitions) {
-    return newRootBuilder<T>(new Context(opd, "Fragment", []))
+    return newTypeBuilder(new Context(opd, "Fragment", [])) as unknown as TypeBuilder<T, Flag.AutoTn>
 }
 
 export function isFragment(obj: any) {
@@ -320,7 +328,7 @@ export function isFragment(obj: any) {
  * ```
  */
 export function typeBuilder<T extends TypeMap>(opd: FieldDefinitions) {
-    return newRootBuilder<T>(new Context(opd, "Type", []))
+    return newTypeBuilder(new Context(opd, "Type", [])) as unknown as TypeBuilder<T, Flag.AutoTn>
 }
 
 export function isType(obj: any) {
@@ -334,24 +342,60 @@ function testContextType(obj: ProxyTarget | Context, type: ContextType): boolean
 
 /**
  * Root builders: Query, Mutation, Subscription
+ * ```ts
+ * Query("UserQuery").users()
+ * Query.users({...})
+ * Query.currentUser.id
+ * Query.currentUserId
+ * ```
  */
 function newRootBuilder<T extends TypeMap>(context: Context) {
     return _newBuilder(context, rootBuilderCall, RootBuilderProxy)
 }
 
 const RootBuilderProxy = {
-    get(target: ProxyTarget, key: string | symbol): any {
+    get(target: ProxyTarget, key: string | symbol, receiver: any): any {
         const context = target[CONTEXT]
         if (ContextSpecials.includes(key)) {
             return context[key as keyof typeof context]
         }
-        const nc = new Context(context.fieldDefs, context.type, [key.toString()])
-        nc.maybeMethod = true
-        return newTypeBuilder(nc)
+
+        if (typeof key !== "string") {
+            throw new Error(`Invalid key: ${String(key)}`)
+        }
+
+        const def = context.fieldDefs[context.type][key]
+
+        if (def == null) {
+            // Atomic type without args, eg: Query.currentUserId
+            return receiver
+        } else if (typeof def === "string") {
+            // Simple type without args, eg: Query.currentUser
+            return newTypeBuilder(context.sub("Type", [def]))
+        } else if (Array.isArray(def)) {
+            // Simple type with args, eg: Query.users({is_active: true}).id
+            return receiver
+        } else {
+            // Atomic type with args, eg, Query.,distance({lat: 1, lng: 2, from: ...})
+            return receiver
+        }
     }
 }
 
-function rootBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {}
+/**
+ * @param context Context is must have type: Query | Mutation | Subscription
+ */
+function rootBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
+    if (args.length === 1 && context.fields.length === 0) {
+        // Query("UserQuery")
+        if (typeof args[0] === "string") {
+            return proxy
+        }
+
+        throw new Error(`Invalid arguments: ${args[0]}, must be string`)
+    }
+    return proxy
+}
 
 // Type, Fragment
 function newTypeBuilder(context: Context) {
@@ -378,9 +422,9 @@ const TypeBuilderProxy = {
     }
 }
 
-// Query.users({...}) -> TypeBuilder("User")
-// Query.currentUser -> TypeBuilder("User")
-// Query.currentUserId -> TypeBuilder("User")
+/**
+ * @param context Context is must NOT have type: Query | Mutation | Subscription
+ */
 function typeBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
     if (!context.maybeMethod) {
         console.error(context.type, context.path.join("."))

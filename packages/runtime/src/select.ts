@@ -1,10 +1,12 @@
+/* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
 
 import type { FlagInclude, FlagRemove, ObjectSpread } from "./common"
 import type { Arguments, ToVars } from "./operation"
-import type { Input, IsAtomic, Operation, SimpleType } from "./type"
+import type { SELECTION } from "./symbols"
+import type { Input, Interface, IsAtomic, IsInterface, Operation, SimpleType } from "./type"
 import type { Vars } from "./var"
 
 type Result = any
@@ -40,10 +42,15 @@ type FlagAsCommon<F> = Extract<F, AllCommonFlags>
 
 // TODO: more specify selection
 // TODO: build only one level at a time
-export type Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> = _Select<T, R, V, F, P>
+export type Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> =
+    IsInterface<T> extends true ? _Select<T, R, V, F, P> & OnType<T, R, V, F, P> : _Select<T, R, V, F, P>
 
 type _Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> =
-    IsAtomic<T> extends true ? AtomicSelect<T, R, V, F, P> : T extends SimpleType ? TypeSelect<T, R, V, F, P> : unknown
+    IsAtomic<T> extends true
+        ? AtomicSelect<T, R, V, F, P> & Selection<R, V>
+        : T extends SimpleType
+          ? TypeSelect<T, R, V, F, P> & Selection<R, V>
+          : unknown
 
 type _AddFieldToResult<R extends Result, T extends SimpleType, K extends keyof T, V, F extends Flag> =
     FlagInclude<F, Flag.AutoTn> extends true
@@ -118,7 +125,7 @@ type TypeOperationField<
     O extends SimpleType,
     OF extends Flag
 > = <SR, SV extends Vars>(
-    select: (select: Select<O, {}, {}, FlagAsCommon<F>, P>) => Select<O, SR, SV, FlagAsCommon<F>, P>
+    select: (select: Select<O, {}, {}, FlagAsCommon<F>, P>) => Selection<SR, SV>
 ) => Select<T, _AddFieldToResult<R, T, K, SR, OF | FlagAsCommon<F>>, V & SV, F, RemoveLast<P>>
 
 type AtomicField<
@@ -156,7 +163,7 @@ type OperationField<
     I extends Input
 > = <SR, SV extends Vars, A extends Arguments<I>>(
     args: A,
-    select: (select: Select<O, {}, {}, FlagAsCommon<F>, P>) => Select<O, SR, SV, FlagAsCommon<F>, P>
+    select: (select: Select<O, {}, {}, FlagAsCommon<F>, P>) => Selection<SR, SV>
 ) => Select<T, _AddFieldToResult<R, T, K, SR, OF | FlagAsCommon<F>>, V & SV & ToVars<I, P, A>, F, RemoveLast<P>>
 
 type AtomicOperationField<
@@ -173,14 +180,35 @@ type AtomicOperationField<
     args: A
 ) => Select<T, _AddFieldToResult<R, T, K, O, OF | FlagAsCommon<F>>, V & ToVars<I, P, A>, F, RemoveLast<P>>
 
+/**
+ * !!! XXX csak union vagy interface
+ * ```ts
+ * Query.users.$on(Type.Worker.workplace({...}, q => q.name))
+ * const Pagination = Fragment.Pagintaion.offset.limit
+ * Query.users.$on(Pagination)
+ * ```
+ */
+type OnType<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> =
+    T extends Interface<infer _, infer CT>
+        ? CT extends SimpleType
+            ? {
+                  [TN in CT["__typename"]]: CT extends { __typename: TN } ? { $on: OnFn<T, R, V, F, P, CT> } : never
+              }[CT["__typename"]]
+            : never
+        : never
+
+type OnFn<T, R extends Result, V extends Vars, F extends Flag, P extends string[], O> = <OR, OV extends Vars>(
+    on: Selection<OR, OV>
+) => Select<T, R | OR, V & OV, F, P>
+
 export type Buildable<R, V extends Vars> = {
     $build: () => TypedDocumentNode<R, V>
     $gql: () => string
 }
 
-// export interface Selection<R, V extends Vars> {
-//     [SELECTION]: [R, V]
-// }
+export interface Selection<R, V extends Vars> {
+    [SELECTION]: [R, V]
+}
 
 type Last<P extends string[]> = P extends [...any, infer L] ? L : never
 type RemoveLast<P extends string[]> = P extends [...infer A, any] ? A : never

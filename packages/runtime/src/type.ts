@@ -63,7 +63,7 @@ export type IsInterface<T> = Is<typeof INTERFACE, T>
  * ```
  */
 export type Interface<I extends Record<string, unknown>, Impls extends SimpleType> = I & {
-    [INTERFACE]: true
+    [INTERFACE]: Impls
     __typename: Impls["__typename"]
 }
 

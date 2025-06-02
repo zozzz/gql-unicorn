@@ -7,6 +7,9 @@ type Query {
     currentUserId: ID
     selfRecursive(id: ID!): SelfRecursive
     afc: AFC!
+    atomicScalar: String!
+    atomicArgsScalar(id: ID): String
+
 }
 
 type Mutation {

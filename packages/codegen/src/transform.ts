@@ -298,8 +298,12 @@ class Transformer {
             result.push(`${name}: ${this.#typename(type)} | null`)
         }
 
-        if (context != null && !bareIsScalar(type)) {
-            this.addFieldDef(context, name, {}, this.#bareTypename(type))
+        if (context != null) {
+            if (bareIsScalar(type)) {
+                this.#addFieldDef(context, name, {}, undefined)
+            } else {
+                this.#addFieldDef(context, name, {}, this.#bareTypename(type))
+            }
         }
 
         return result
@@ -335,7 +339,7 @@ class Transformer {
             `${name}: Operation<{ ${compiledArgs.join(", ")} }, ${returnType}>`
         )
 
-        this.addFieldDef(context, name, opArgInfo, this.#bareTypename(type))
+        this.#addFieldDef(context, name, opArgInfo, bareIsScalar(type) ? undefined : this.#bareTypename(type))
 
         return result
     }
@@ -359,14 +363,25 @@ class Transformer {
         return [comment, result]
     }
 
-    addFieldDef(context: GraphQLType, name: string, args: Record<string, string>, returnType: string): void {
+    #addFieldDef(
+        context: GraphQLType,
+        name: string,
+        args: Record<string, string>,
+        returnType: string | undefined
+    ): void {
         if (isObjectType(context)) {
             const contextName = context.name
             const contextO = (this.#fieldDefs[contextName] ??= {})
             if (Object.keys(args).length === 0) {
-                contextO[name] = returnType
+                if (typeof returnType === "string") {
+                    contextO[name] = returnType
+                }
             } else {
-                contextO[name] = [args, returnType]
+                if (returnType == null) {
+                    contextO[name] = args
+                } else {
+                    contextO[name] = [args, returnType]
+                }
             }
         }
     }
@@ -435,16 +450,6 @@ class Transformer {
     }
 }
 
-/**
- * #bareTypename(type: GraphQLType): string {
-        if (isListType(type)) {
-            return this.#bareTypename(type.ofType)
-        } else if (isNonNullType(type)) {
-            return this.#bareTypename(type.ofType)
-        }
-        return type.name
-    }
- */
 function bareIsScalar(type: GraphQLType) {
     if (isListType(type)) {
         return bareIsScalar(type.ofType)
