@@ -1,161 +1,186 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
-import type { UnionToIntersection } from "utility-types"
 
-import type { SObject } from "./common"
-import type { Input, Operation, OperationKind, Params, ToVars } from "./operation"
-import { SELECTION } from "./symbols"
-import type { GType, IsInterface, IsUnion, SimpleType } from "./type"
+import type { FlagInclude, FlagRemove, ObjectSpread } from "./common"
+import type { Arguments, ToVars } from "./operation"
+import type { Input, IsAtomic, Operation, SimpleType } from "./type"
 import type { Vars } from "./var"
 
-export type Select<T extends GType, P extends string[], S extends SObject, V extends Vars> =
-    T extends Array<infer A>
-        ? A extends GType
-            ? Select<A, P, S, V>
-            : never
-        : IsInterface<T> extends true
-          ? // TODO:
-            never
-          : IsUnion<T> extends true
-            ? // TODO:
-              never
-            : T extends SimpleType
-              ? _Select<T, P, S, V>
-              : unknown
+type Result = any
 
-type _Select<T extends SimpleType, P extends string[], S extends SObject, V extends Vars> = SelectBase
-    & Selectable<T, P, S, V>
-    & Builder<S, V>
-
-export type WithTN = Record<"__typename", string>
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-type SelectRoot<T extends GType> = Select<T, [], WithTN, {}>
-type SubSelect<T extends GType, P extends string[], V extends Vars> = Select<T, P, WithTN, V>
-
-/**
- * ```typescript
- * const PagingFragment = fragment<Type.PagingInfo>("PagingInfo").offset.limit
- *
- * function generalPaging(select: AnySelect) {
- * }
- * ```
- */
-export type AnySelect = Select<any, any, any, any>
-
-/**
- * ```typescript
- * const PagingFragment = fragment<Type.PagingInfo>("PagingInfo").offset.limit
- * const Error = fragment<Type.Error>("Error").message.code
- *
- * function generalPaging(select: SelectConstraint<PagingFragment & Error>) {
- * }
- *
- * function generalPaging(select: SelectConstraint<PagingFragment | Error>) {
- * }
- *
- * const PartialUser = fragment<Type.User>("User").name.email
- *
- * function something(userSelect: SelectConstraint<PartialUser>) {
- * }
- * ```
- */
-export type SelectConstraint<X> = Select<any, any, any, any>
-
-// export type Selected<T extends GqlType, S extends Selection> = {}
-
-interface SelectBase {
-    [SELECTION]: Selection
+export const enum Flag {
+    None = 0,
+    Buildable = 1,
+    AutoTn = 2,
+    Array = 4,
+    Optional = 8,
+    OptionalItem = 16
 }
 
-type Selectable<T extends SimpleType, P extends string[], S extends SObject, V extends Vars> = Omit<
-    // TODO: support union & interface
-    _Selectable<S, RemapKeys<T, P, S, V>>,
-    "__typename"
->
-type _Selectable<S extends SObject, R> = UnionToIntersection<
-    {
-        [K in keyof R]: K extends keyof S ? never : Record<K, R[K]>
-    }[keyof R]
->
+type AllTypeFlags = Flag.Array | Flag.Optional | Flag.OptionalItem
+type AllCommonFlags = Flag.AutoTn
 
-type RemapKeys<T extends SimpleType, P extends string[], S extends SObject, V extends Vars> = {
-    [K in keyof T]: K extends "__typename"
-        ? never
-        : T[K] extends Function
-          ? never
-          : K extends string
-            ? T[K] extends Operation<infer I, infer O, OperationKind>
-                ? O extends Array<infer OO>
-                    ? OO extends SimpleType
-                        ? SimpleOperationSelect<T, P, S, V, I, OO, K, true>
-                        : OtherOperationSelect<T, P, S, V, I, OO, K, true>
-                    : O extends SimpleType
-                      ? SimpleOperationSelect<T, P, S, V, I, O, K, false>
-                      : OtherOperationSelect<T, P, S, V, I, O, K, false>
-                : T[K] extends Array<infer I>
-                  ? I extends SimpleType
-                      ? TypeSelect<T, P, S, V, I, K, true>
-                      : never
-                  : T[K] extends SimpleType
-                    ? TypeSelect<T, P, S, V, T[K], K, false>
-                    : Select<T, P, S & Record<K, T[K]>, V>
-            : never
+export type BareType<T> = T extends null ? BareType<NonNullable<T>> : T extends Array<infer A> ? BareType<A> : T
+
+export type TypeFlags<T> =
+    | (T extends null ? Flag.Optional : never)
+    | (T extends Array<infer A> ? Flag.Array | (A extends null ? Flag.OptionalItem : never) : never)
+
+type RebuildType<T, F extends Flag> =
+    FlagInclude<F, Flag.Array> extends true
+        ? FlagInclude<F, Flag.OptionalItem> extends true
+            ? RebuildType<Array<T | null>, FlagRemove<F, Flag.Array | Flag.OptionalItem>>
+            : RebuildType<T[], FlagRemove<F, Flag.Array>>
+        : FlagInclude<F, Flag.Optional> extends true
+          ? T | null
+          : T
+
+type FlagAsCommon<F> = Extract<F, AllCommonFlags>
+
+// TODO: more specify selection
+// TODO: build only one level at a time
+export type Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> = _Select<T, R, V, F, P>
+
+type _Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> =
+    IsAtomic<T> extends true ? AtomicSelect<T, R, V, F, P> : T extends SimpleType ? TypeSelect<T, R, V, F, P> : unknown
+
+type _AddFieldToResult<R extends Result, T extends SimpleType, K extends keyof T, V, F extends Flag> =
+    FlagInclude<F, Flag.AutoTn> extends true
+        ? _AddTypedFieldToResult<R, T, K, RebuildType<V, F>>
+        : _AddCommonFieldToResult<R, T, K, RebuildType<V, F>> & { F: F }
+
+type _AddTypedFieldToResult<R extends Result, T extends SimpleType, K extends keyof T, V> = R extends {
+    __typename: T["__typename"]
 }
+    ? ObjectSpread<[R, Record<K, V>]>
+    : ObjectSpread<[Record<"__typename", T["__typename"]>, Record<K, V>]>
 
-export type TypeSelect<
-    T extends GType,
-    P extends string[],
-    S extends SObject,
-    V extends Vars,
-    O extends SimpleType,
-    K extends string,
-    IsArray extends boolean
-> = <TS extends SObject, TV extends Vars>(
-    q: (q: SubSelect<O, [...P, K], V>) => Select<O, any, TS, TV>
-) => Select<T, P, S & Record<K, IsArray extends true ? TS[] : TS>, V & TV>
+type _AddCommonFieldToResult<R extends Result, T extends SimpleType, K extends keyof T, V> = R & { [k in K]: V }
 
-export type SimpleOperationSelect<
-    T extends GType,
-    P extends string[],
-    S extends SObject,
-    V extends Vars,
-    I extends Input,
-    O extends GType,
-    K extends string,
-    IsArray extends boolean
-> = <TS extends SObject, TV extends Vars, A extends Params<I>>(
-    params: A,
-    q?: (q: SubSelect<O, [...P, K], V>) => Select<O, any, TS, TV>
-) => Select<T, P, S & Record<K, IsArray extends true ? TS[] : TS>, V & TV & ToVars<I, [...P, K], A>>
+type _AddBuildable<T, R extends Result, V extends Vars, F extends Flag> =
+    FlagInclude<F, Flag.Buildable> extends true
+        ? T extends { $build: (...args: any[]) => any }
+            ? T
+            : T & Buildable<R, V>
+        : T
 
-export type OtherOperationSelect<
-    T extends GType,
-    P extends string[],
-    S extends SObject,
+type AtomicSelect<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> = _AddBuildable<
+    {},
+    RebuildType<T, F>,
+    V,
+    F
+>
+
+type TypeSelect<T extends SimpleType, R extends Result, V extends Vars, F extends Flag, P extends string[]> = Omit<
+    _AddBuildable<
+        {
+            readonly [K in keyof T]: K extends string ? Field<T, K, R, V, F, [...P, K]> : never
+        },
+        R,
+        V,
+        F
+    >,
+    FlagInclude<F, Flag.AutoTn> extends true ? keyof R | "__typename" : keyof R
+>
+
+type Field<
+    T extends SimpleType,
+    K extends keyof T,
+    R extends Result,
     V extends Vars,
-    I extends Input,
+    F extends Flag,
+    P extends string[]
+> = T[K] extends Function
+    ? never
+    : T[K] extends Operation<infer I, infer A>
+      ? _OperationField<T, K, R, V, F, P, BareType<A>, TypeFlags<A>, I>
+      : TypeField<T, K, R, V, F, P, BareType<T[K]>, TypeFlags<T[K]>>
+
+type TypeField<
+    T extends SimpleType,
+    K extends keyof T,
+    R extends Result,
+    V extends Vars,
+    F extends Flag,
+    P extends string[],
     O,
-    K extends string,
-    IsArray extends boolean
-> = <TV extends Vars, A extends Params<I>>(
-    params: A
-) => Select<T, P, S & Record<K, IsArray extends true ? O[] : O>, V & TV & ToVars<I, [...P, K], A>>
+    OF extends Flag
+> = O extends SimpleType ? TypeOperationField<T, K, R, V, F, P, O, OF> : AtomicField<T, K, R, V, F, P, O, OF>
 
-type Builder<S extends SObject, V extends Vars> = {
-    $build: () => TypedDocumentNode<S, V>
+type TypeOperationField<
+    T extends SimpleType,
+    K extends keyof T,
+    R extends Result,
+    V extends Vars,
+    F extends Flag,
+    P extends string[],
+    O extends SimpleType,
+    OF extends Flag
+> = <SR, SV extends Vars>(
+    select: (select: Select<O, {}, {}, FlagAsCommon<F>, P>) => Select<O, SR, SV, FlagAsCommon<F>, P>
+) => Select<T, _AddFieldToResult<R, T, K, SR, OF | FlagAsCommon<F>>, V & SV, F, RemoveLast<P>>
+
+type AtomicField<
+    T extends SimpleType,
+    K extends keyof T,
+    R extends Result,
+    V extends Vars,
+    F extends Flag,
+    P extends string[],
+    O,
+    OF extends Flag
+> = Select<T, _AddFieldToResult<R, T, K, O, OF | FlagAsCommon<F>>, V, F, RemoveLast<P>>
+
+type _OperationField<
+    T extends SimpleType,
+    K extends keyof T,
+    R extends Result,
+    V extends Vars,
+    F extends Flag,
+    P extends string[],
+    O,
+    OF extends Flag,
+    I extends Input
+> = O extends SimpleType ? OperationField<T, K, R, V, F, P, O, OF, I> : AtomicOperationField<T, K, R, V, F, P, O, OF, I>
+
+type OperationField<
+    T extends SimpleType,
+    K extends keyof T,
+    R extends Result,
+    V extends Vars,
+    F extends Flag,
+    P extends string[],
+    O,
+    OF extends Flag,
+    I extends Input
+> = <SR, SV extends Vars, A extends Arguments<I>>(
+    args: A,
+    select: (select: Select<O, {}, {}, FlagAsCommon<F>, P>) => Select<O, SR, SV, FlagAsCommon<F>, P>
+) => Select<T, _AddFieldToResult<R, T, K, SR, OF | FlagAsCommon<F>>, V & SV & ToVars<I, P, A>, F, RemoveLast<P>>
+
+type AtomicOperationField<
+    T extends SimpleType,
+    K extends keyof T,
+    R extends Result,
+    V extends Vars,
+    F extends Flag,
+    P extends string[],
+    O,
+    OF extends Flag,
+    I extends Input
+> = <A extends Arguments<I>>(
+    args: A
+) => Select<T, _AddFieldToResult<R, T, K, O, OF | FlagAsCommon<F>>, V & ToVars<I, P, A>, F, RemoveLast<P>>
+
+export type Buildable<R, V extends Vars> = {
+    $build: () => TypedDocumentNode<R, V>
     $gql: () => string
 }
 
-// type BuilderFn<S extends SObject, V extends Vars> =
-//     true extends HasRequiredVar<V>
-//         ? (vars: V) => TypedDocumentNode<S, V>
-//         : true extends IsEmptyObject<V>
-//           ? () => TypedDocumentNode<S, V>
-//           : (vars?: V) => TypedDocumentNode<S, V>
+// export interface Selection<R, V extends Vars> {
+//     [SELECTION]: [R, V]
+// }
 
-// type GqlFn<S extends SObject, V extends Vars> =
-//     true extends HasRequiredVar<V>
-//         ? (vars: V) => string
-//         : true extends IsEmptyObject<V>
-//           ? () => string
-//           : (vars?: V) => string
+type Last<P extends string[]> = P extends [...any, infer L] ? L : never
+type RemoveLast<P extends string[]> = P extends [...infer A, any] ? A : never

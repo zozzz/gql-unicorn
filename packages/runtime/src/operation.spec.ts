@@ -1,7 +1,7 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import { describe, test } from "bun:test"
 
-import { operations, type OpQuery, type Params, type ToVars } from "./operation"
+import { type Arguments, operations, type OpQuery, type ToVars } from "./operation"
 import { $, type Variable } from "./var"
 
 type Filter = {
@@ -26,11 +26,11 @@ const x9: ToVars<Nested, ["roles"], { filter: { is_active: Variable<"is_active">
 const x10: ToVars<Nested, ["roles"], { filter: { optional: Variable<undefined> } }> = {}
 // const vnp: ToVars<Filter, [], {a: {b: {c: VarToken}}}> = { a__b__c: true }
 
-const p1: Params<Filter> = { name: "", is_active: false }
-const p2: Params<Filter> = { name: "", is_active: false, optional: "" }
-const p3: Params<Filter> = { name: $, is_active: false, optional: "" }
-const p4: Params<Filter> = { name: $("name"), is_active: false, optional: "" }
-const p5: Params<Nested> = { filter: { name: $, is_active: $ } }
+const p1: Arguments<Filter> = { name: "", is_active: false }
+const p2: Arguments<Filter> = { name: "", is_active: false, optional: "" }
+const p3: Arguments<Filter> = { name: $, is_active: false, optional: "" }
+const p4: Arguments<Filter> = { name: $("name"), is_active: false, optional: "" }
+const p5: Arguments<Nested> = { filter: { name: $, is_active: $ } }
 
 type User = {
     __typename: "User"

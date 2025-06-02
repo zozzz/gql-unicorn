@@ -8,6 +8,7 @@ export const FRAGMENT = Symbol("FRAGMENT")
 export const UNION = Symbol("UNION")
 export const INTERFACE = Symbol("INTERFACE")
 export const CONTEXT = Symbol("CONTEXT")
+export const PHANTOM = Symbol("PHANTOM")
 
 export function checker<T>(sym: symbol) {
     return (val: any): val is T => val != null && Object.prototype.hasOwnProperty.call(val, sym)

@@ -1,6 +1,7 @@
-import type { INTERFACE, Is, UNION } from "./symbols"
+import type { INTERFACE, Is, OPERATION, UNION } from "./symbols"
 
 export type GType = SimpleType | SimpleType[] | AtomicType
+// TODO: null
 export type AtomicType = number | string | boolean | null
 export type SimpleType = Record<string, unknown> & { __typename: string }
 
@@ -10,7 +11,7 @@ export type SimpleType = Record<string, unknown> & { __typename: string }
  * }
  * ```
  */
-export type IsSimple<T extends GType> =
+export type IsSimple<T> =
     IsUnion<T> extends true ? false : IsInterface<T> extends true ? false : T extends SimpleType ? true : false
 
 /**
@@ -18,7 +19,7 @@ export type IsSimple<T extends GType> =
  * union User = UserA | UserB
  * ```
  */
-export type IsUnion<T extends GType> = Is<typeof UNION, T>
+export type IsUnion<T> = Is<typeof UNION, T>
 
 // type HasMultiTypename<T extends string> = { [K in T]: Exclude<T, K> extends never ? false : true }[T]
 
@@ -44,7 +45,7 @@ export type Union<T extends SimpleType> = T & { [UNION]: true }
  * type Tag implements IObject { id: ID!, tag: String }
  * ```
  */
-export type IsInterface<T extends GType> = Is<typeof INTERFACE, T>
+export type IsInterface<T> = Is<typeof INTERFACE, T>
 
 /**
  * ```graphql
@@ -66,13 +67,23 @@ export type Interface<I extends Record<string, unknown>, Impls extends SimpleTyp
     __typename: Impls["__typename"]
 }
 
-// maybe = Select<T>
-export type TypeBuilder<T> =
-    T extends Record<string, GType>
-        ? {
-              /* fragment | on type */
-          }
-        : never
+export type Input = Record<string, unknown>
+export type Operation<I extends Input, O extends GType> = O & {
+    [OPERATION]: [I, O]
+}
+
+export type IsOperation<T> = Is<typeof OPERATION, T>
+
+export type IsAtomic<T> =
+    IsOperation<T> extends true
+        ? false
+        : T extends Array<infer V>
+          ? V extends GType
+              ? IsAtomic<V>
+              : false
+          : T extends { __typename: string }
+            ? false
+            : true
 
 // type User = {
 //     __typename: "User"

@@ -5,10 +5,12 @@ type Query {
     articles(filter: ArticleFilter): [Article!]!
     location(id: ID!): Location
     currentUserId: ID
+    selfRecursive(id: ID!): SelfRecursive
+    afc: AFC!
 }
 
 type Mutation {
-    updateArticle(params: ArticleUpdate!): Article!
+    updateArticle(id: ID!, params: ArticleUpdate!): Article!
     doSomething(something: String): Int
 }
 
@@ -36,12 +38,11 @@ type Article implements Node {
 }
 
 input ArticleFilter {
-    name: String!
+    title: String!
 }
 
 input ArticleUpdate {
-    id: ID!
-    name: String!
+    title: String!
 }
 
 type Tag implements Node {
@@ -73,4 +74,22 @@ type Location {
     id: ID!
     name: String!
     distance(lat: Float!, lng: Float!, unit: DistanceUnit!): Float!
+}
+
+
+type SelfRecursive {
+    id: ID!
+    parent: SelfRecursive!
+}
+
+
+type AFC {
+    "ID of AFC"
+    id: ID!
+    parent: AFC
+    optional: String
+    distance(lat: Float!, lng: Float!, unit: DistanceUnit!): Float!
+    nearest(lat: Float!, lng: Float!): Location
+    hq: Location!
+    hqName: String!
 }

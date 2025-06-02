@@ -1,5 +1,4 @@
-import { OperationKind } from "@gql-unicorn/runtime"
-import { type OperationDefinitions } from "@gql-unicorn/runtime"
+import { type FieldDefinitions } from "@gql-unicorn/runtime"
 import {
     type GraphQLArgument,
     type GraphQLEnumType,
@@ -38,13 +37,6 @@ const AtomicScalars = {
     Boolean: "boolean"
 } satisfies ScalarMap
 
-const OperationKindMap = {
-    [OperationKind.Query]: "OpQuery",
-    [OperationKind.Mutation]: "OpMutation",
-    [OperationKind.Subscription]: "OpSubscription",
-    [OperationKind.Function]: "OpFunction"
-}
-
 const RuntimeLib = "@gql-unicorn/runtime"
 
 const Banner = ["/* eslint-disable */", "/* prettier-ignore */", "/* !!! GENERATED FILE DO NOT EDIT !!! */"]
@@ -60,7 +52,7 @@ class Transformer {
     readonly #indent = "    "
     readonly #imports: Record<string, Record<string, boolean>> = {}
     readonly #objects: Record<string, string> = {}
-    readonly #operationInfo: OperationDefinitions = {}
+    readonly #fieldDefs: FieldDefinitions = {}
 
     constructor(
         readonly schema: GraphQLSchema,
@@ -78,23 +70,23 @@ class Transformer {
 
         const query = this.schema.getQueryType()
         if (query != null) {
-            this.#parts.push(...this.#generateObject(query, "__Query", OperationKind.Query))
+            this.#parts.push(...this.#generateObject(query, "__Query"))
             this.#import(RuntimeLib, "queryBuilder", false)
-            builders.push(`export const Query = queryBuilder<__Query>(__OperationInfo)`)
+            builders.push(`export const Query = queryBuilder<__Query>(__FieldDefs)`)
         }
 
         const mutation = this.schema.getMutationType()
         if (mutation != null) {
-            this.#parts.push(...this.#generateObject(mutation, "__Mutation", OperationKind.Mutation))
+            this.#parts.push(...this.#generateObject(mutation, "__Mutation"))
             this.#import(RuntimeLib, "mutationBuilder", false)
-            builders.push(`export const Mutation = mutationBuilder<__Mutation>(__OperationInfo)`)
+            builders.push(`export const Mutation = mutationBuilder<__Mutation>(__FieldDefs)`)
         }
 
         const subscription = this.schema.getSubscriptionType()
         if (subscription != null) {
-            this.#parts.push(...this.#generateObject(subscription, "__Subscription", OperationKind.Subscription))
+            this.#parts.push(...this.#generateObject(subscription, "__Subscription"))
             this.#import(RuntimeLib, "subscriptionBuilder", false)
-            builders.push(`export const Subscription = subscriptionBuilder<__Subscription>(__OperationInfo)`)
+            builders.push(`export const Subscription = subscriptionBuilder<__Subscription>(__FieldDefs)`)
         }
 
         const typeMap = this.#generateTypeMap()
@@ -102,14 +94,14 @@ class Transformer {
             this.#parts.push(...typeMap)
             this.#import(RuntimeLib, "fragmentBuilder", false)
             this.#import(RuntimeLib, "typeBuilder", false)
-            builders.push(`export const Type = typeBuilder<__TypeMap>(__OperationInfo)`)
-            builders.push(`export const Fragment = fragmentBuilder<__TypeMap>(__OperationInfo)`)
+            builders.push(`export const Type = typeBuilder<__TypeMap>(__FieldDefs)`)
+            builders.push(`export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)`)
         }
 
         if (builders.length > 0) {
-            const info = JSON.stringify(this.#operationInfo, null, this.#indent)
-            this.#import(RuntimeLib, "OperationDefinitionsRo", true)
-            builders.unshift(`const __OperationInfo: OperationDefinitionsRo = ${info}`)
+            const info = JSON.stringify(this.#fieldDefs, null, this.#indent)
+            this.#import(RuntimeLib, "FieldDefinitions", true)
+            builders.unshift(`const __FieldDefs: FieldDefinitions = ${info}`)
         }
 
         const reexport = ["$"]
@@ -233,7 +225,7 @@ class Transformer {
         return result
     }
 
-    #generateObject(type: GraphQLObjectType, name: string, opKind: OperationKind = OperationKind.Function): string[] {
+    #generateObject(type: GraphQLObjectType, name: string): string[] {
         if (isObjectType(type) && type.name === name) {
             this.#objects[type.name] = name
         }
@@ -242,23 +234,23 @@ class Transformer {
             ...this.#comment(type.description),
             `export type ${name} = {`,
             type.name === name ? `${this.#indent}__typename: ${JSON.stringify(name)}` : null,
-            ...this.#generateObjectFields(type, type.getFields(), opKind),
+            ...this.#generateObjectFields(type, type.getFields()),
             `}`
         ].filter(Boolean) as string[]
     }
 
-    #generateObjectFields(context: GraphQLType, fields: GraphQLFieldMap<any, any>, opKind: OperationKind): string[] {
+    #generateObjectFields(context: GraphQLType, fields: GraphQLFieldMap<any, any>): string[] {
         const result: string[] = []
         for (const [name, { type, description, deprecationReason, args }] of Object.entries(fields)) {
             if (args.length > 0) {
                 result.push(
-                    ...this.#generateOperation(context, opKind, name, args, type, description, deprecationReason).map(
+                    ...this.#generateOperation(context, name, args, type, description, deprecationReason).map(
                         v => `${this.#indent}${v}`
                     )
                 )
             } else {
                 result.push(
-                    ...this.#generateField(name, type, description, deprecationReason, null).map(
+                    ...this.#generateField(context, name, type, description, deprecationReason, null).map(
                         v => `${this.#indent}${v}`
                     )
                 )
@@ -281,7 +273,7 @@ class Transformer {
         const result: string[] = []
         for (const [name, { type, description, deprecationReason, defaultValue }] of Object.entries(fields)) {
             result.push(
-                ...this.#generateField(name, type, description, deprecationReason, defaultValue).map(
+                ...this.#generateField(null, name, type, description, deprecationReason, defaultValue).map(
                     v => `${this.#indent}${v}`
                 )
             )
@@ -290,6 +282,7 @@ class Transformer {
     }
 
     #generateField(
+        context: GraphQLType | null,
         name: string,
         type: GraphQLType,
         description?: string | null,
@@ -305,12 +298,15 @@ class Transformer {
             result.push(`${name}: ${this.#typename(type)} | null`)
         }
 
+        if (context != null && !bareIsScalar(type)) {
+            this.addFieldDef(context, name, {}, this.#bareTypename(type))
+        }
+
         return result
     }
 
     #generateOperation(
         context: GraphQLType,
-        opKind: OperationKind,
         name: string,
         args: ReadonlyArray<GraphQLArgument>,
         type: GraphQLType,
@@ -321,9 +317,8 @@ class Transformer {
         const compiledArgs: string[] = []
         const paramsComment: string[] = []
 
-        const opType = OperationKindMap[opKind]
         const opArgInfo: Record<string, string> = {}
-        this.#import(RuntimeLib, opType, true)
+        this.#import(RuntimeLib, "Operation", true)
 
         // alma: OpFunction<{count: number}, Article[] | null>
         for (const arg of args) {
@@ -337,10 +332,10 @@ class Transformer {
 
         result.push(
             ...this.#comment(description, deprecationReason, null, paramsComment),
-            `${name}: ${opType}<{ ${compiledArgs.join(", ")} }, ${returnType}>`
+            `${name}: Operation<{ ${compiledArgs.join(", ")} }, ${returnType}>`
         )
 
-        this.#addOperationInfo(context, name, opArgInfo, this.#bareTypename(type))
+        this.addFieldDef(context, name, opArgInfo, this.#bareTypename(type))
 
         return result
     }
@@ -364,11 +359,15 @@ class Transformer {
         return [comment, result]
     }
 
-    #addOperationInfo(context: GraphQLType, name: string, args: Record<string, string>, returnType: string): void {
+    addFieldDef(context: GraphQLType, name: string, args: Record<string, string>, returnType: string): void {
         if (isObjectType(context)) {
             const contextName = context.name
-            const contextO = (this.#operationInfo[contextName] ??= {})
-            contextO[name] = [args, returnType]
+            const contextO = (this.#fieldDefs[contextName] ??= {})
+            if (Object.keys(args).length === 0) {
+                contextO[name] = returnType
+            } else {
+                contextO[name] = [args, returnType]
+            }
         }
     }
 
@@ -383,7 +382,7 @@ class Transformer {
         return [
             ...comment,
             `type __interface_${name} = {`,
-            ...this.#generateObjectFields(type, type.getFields(), OperationKind.Function),
+            ...this.#generateObjectFields(type, type.getFields()),
             `}`,
             ...comment,
             `export type ${name} = Interface<__interface_${name}, ${[...objects, ...interfaces].join(" | ")}>`
@@ -434,4 +433,23 @@ class Transformer {
 
         this.#imports[_from][what] = isType
     }
+}
+
+/**
+ * #bareTypename(type: GraphQLType): string {
+        if (isListType(type)) {
+            return this.#bareTypename(type.ofType)
+        } else if (isNonNullType(type)) {
+            return this.#bareTypename(type.ofType)
+        }
+        return type.name
+    }
+ */
+function bareIsScalar(type: GraphQLType) {
+    if (isListType(type)) {
+        return bareIsScalar(type.ofType)
+    } else if (isNonNullType(type)) {
+        return bareIsScalar(type.ofType)
+    }
+    return isScalarType(type)
 }
