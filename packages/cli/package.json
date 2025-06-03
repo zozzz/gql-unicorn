@@ -13,7 +13,7 @@
     "gql-unicorn": "./cli.js"
   },
   "dependencies": {
-    "@gql-unicorn/codegen": "workspace:*",
+    "@gql-unicorn/codegen": "file:../codegen",
     "yargs": "^18.0.0"
   }
 }

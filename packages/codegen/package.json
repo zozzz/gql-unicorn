@@ -11,10 +11,8 @@
   },
   "main": "./src/index.ts",
   "peerDependencies": {
-    "@gql-unicorn/runtime": "workspace:*",
+    "@gql-unicorn/runtime": "file:../runtime",
     "graphql": "^16.11.0",
-    "typescript": "^5.0.0",
-    "@graphql-codegen/plugin-helpers": "^5.1.0",
-    "@graphql-codegen/schema-ast": "^5.1.0"
+    "typescript": "^5.0.0"
   }
 }
