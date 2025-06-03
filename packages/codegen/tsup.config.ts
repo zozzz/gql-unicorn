@@ -14,5 +14,6 @@ export default defineConfig({
     tsconfig: path.join(__dirname, "..", "..", "tsconfig.build.json"),
     sourcemap: true,
     clean: true,
-    dts: true
+    dts: true,
+    platform: "node"
 })

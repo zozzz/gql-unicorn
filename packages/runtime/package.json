@@ -9,13 +9,8 @@
     "type": "git",
     "url": "https://github.com/zozzz/gql-unicorn"
   },
-  "readme": "../../README.md",
   "main": "./src/index.ts",
   "peerDependencies": {
     "graphql": "^16.11.0"
-  },
-  "publishConfig": {
-    "access": "public",
-    "directory": "../../dist/runtime/"
   }
 }

@@ -6,18 +6,18 @@
     "packages/*"
   ],
   "scripts": {
-    "release:major": "bun run release.pre && release-it -i major --ci",
-    "release:minor": "bun run release.pre && release-it -i minor --ci",
-    "release:patch": "bun run release.pre && release-it -i patch --ci",
+    "release:major": "bun run release.pre && dotenv release-it -i major --ci",
+    "release:minor": "bun run release.pre && dotenv release-it -i minor --ci",
+    "release:patch": "bun run release.pre && dotenv release-it -i patch --ci",
     "release.pre": "bun run build && bun test",
     "build": "bun build:cli && bun build:codegen && bun build:runtime",
-    "build:cli": "cd packages/cli && bun tsup",
-    "build:codegen": "cd packages/codegen && bun tsup",
-    "build:runtime": "cd packages/runtime && bun tsup",
+    "build:cli": "cd packages/cli && bun tsup && cp package.json ../../dist/cli/package.json && cp ../../README.md ../../dist/cli/README.md && cp ../../LICENSE ../../dist/cli/LICENSE",
+    "build:codegen": "cd packages/codegen && bun tsup && cp package.json ../../dist/codegen/package.json && cp ../../README.md ../../dist/codegen/README.md && cp ../../LICENSE ../../dist/codegen/LICENSE",
+    "build:runtime": "cd packages/runtime && bun tsup && cp package.json ../../dist/runtime/package.json && cp ../../README.md ../../dist/runtime/README.md && cp ../../LICENSE ../../dist/runtime/LICENSE",
     "publish": "bun publish:cli && bun publish:codegen && bun publish:runtime",
-    "publish:cli": "cd packages/cli && bun publish --frozen-lockfile",
-    "publish:codegen": "cd packages/codegen && bun publish --frozen-lockfile",
-    "publish:runtime": "cd packages/runtime && bun publish --frozen-lockfile"
+    "publish:cli": "cd dist/cli && bun publish",
+    "publish:codegen": "cd dist/codegen && bun publish",
+    "publish:runtime": "cd dist/runtime && bun publish"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",
@@ -29,6 +29,7 @@
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/bun": "latest",
     "@types/yargs": "^17.0.33",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-jsonc": "^2.20.1",
