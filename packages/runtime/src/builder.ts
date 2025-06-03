@@ -2,10 +2,11 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { parse as parseGql } from "graphql"
 
+import type { MergeUnion } from "./common"
 import type { Arguments, ToVars } from "./operation"
 import type { BareType, Flag, Select, TypeFlags } from "./select"
 import { CONTEXT } from "./symbols"
-import type { Input, Operation } from "./type"
+import type { Input, Operation, SimpleType } from "./type"
 import { isVariable, variableName } from "./var"
 
 /**
@@ -284,9 +285,20 @@ type OperationFn<I extends Input, O, R, F extends Flag, P extends string[]> = <A
     params: A
 ) => Select<BareType<O>, R, {} & ToVars<I, P, A>, F | TypeFlags<O>, P>
 
-type TypeBuilder<T extends TypeMap, F extends Flag> = {
+type FragmentBuilder<T extends TypeMap, F extends Flag> = {
     [K in keyof T]: Select<T[K], {}, {}, F, []>
 }
+
+type TypeBuilder<T extends TypeMap, F extends Flag> = {
+    [K in keyof T]: Select<T[K], {}, {}, F, []> & IsFunction<T[K]>
+}
+
+type IsFunction<T extends SimpleType> = {
+    // @ts-expect-error V is assignable to TypeVariant<V, T>, but TS is not liking it, but works
+    $is: <V extends SimpleType>(obj: V) => obj is TypeVariant<V, T>
+}
+
+type TypeVariant<V extends SimpleType, T extends SimpleType> = MergeUnion<{ __typename: T["__typename"] } & V>
 
 /**
  * @example
@@ -341,7 +353,9 @@ export function isSubscription(obj: any) {
  * ```
  */
 export function fragmentBuilder<T extends TypeMap>(opd: FieldDefinitions) {
-    return newTypeBuilder(new Context(opd, "Fragment", [])) as unknown as (name: string) => TypeBuilder<T, Flag.AutoTn>
+    return newTypeBuilder(new Context(opd, "Fragment", [])) as unknown as (
+        name: string
+    ) => FragmentBuilder<T, Flag.AutoTn>
 }
 
 export function isFragment(obj: any) {
@@ -508,6 +522,7 @@ function selectionBuilderCall(proxy: ProxyTarget, context: Context, args: any[])
         }
 
         const opName = context.fields.pop()!
+        const typename = context.path[0]
 
         // Handle $on(Fragment.User.id)
         if (opName === "$on") {
@@ -528,9 +543,13 @@ function selectionBuilderCall(proxy: ProxyTarget, context: Context, args: any[])
             cond.subBuilder.push(fragment)
 
             return proxy
+        } else if (opName === "$is") {
+            const [obj] = args
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            return obj == null ? false : obj["__typename"] === typename
         }
 
-        const def = context.fieldDefs[context.path[0]][opName]
+        const def = context.fieldDefs[typename][opName]
         if (def == null) {
             throw new Error(`This is not callable: ${opName}`)
         }

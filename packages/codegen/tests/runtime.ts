@@ -261,18 +261,30 @@ describe("runtime", () => {
                 )
             })
 
+            type NodeRes =
+                | { __typename: "User" | "Article" | "Tag"; id: string }
+                | { __typename: "User"; name: string }
+                | { __typename: "Article"; title: string }
+
             test("fragment 2", () => {
-                testQuery<
-                    | { __typename: "User" | "Article" | "Tag"; id: string }
-                    | { __typename: "User"; name: string }
-                    | { __typename: "Article"; title: string },
-                    { id: string }
-                >(
+                testQuery<NodeRes, { id: string }>(
                     G.Query.node(G.$)
                         .id.$on(G.Fragment("userFragment").User.name)
                         .$on(G.Fragment("articleFragment").Article.title),
                     `query($id:ID!){node(id:$id){__typename,id,...userFragment,...articleFragment}} fragment userFragment on User{name} fragment articleFragment on Article{title}`
                 )
+            })
+
+            test("$is", () => {
+                const article: NodeRes = { __typename: "Article", id: "id", title: "title" }
+                if (G.Type.Article.$is(article)) {
+                    const { __typename, id, title }: { __typename: "Article"; id: string; title: string } = article
+                    expect(__typename).toBe("Article")
+                    expect(id).toBe("id")
+                    expect(title).toBe("title")
+                } else {
+                    throw new Error("not article")
+                }
             })
         })
     })
