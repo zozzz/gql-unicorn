@@ -1,6 +1,6 @@
 {
   "name": "@gql-unicorn/codegen",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "peerDependencies": {
     "@gql-unicorn/runtime": "workspace:*",
     "graphql": "^16.11.0",
