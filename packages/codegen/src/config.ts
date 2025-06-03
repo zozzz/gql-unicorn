@@ -1,5 +1,4 @@
 export interface UnicornConfig {
-    output: string
     scalars?: ScalarMap
 }
 

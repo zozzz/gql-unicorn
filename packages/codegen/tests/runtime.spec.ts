@@ -27,7 +27,7 @@ describe("runtime", () => {
 
     beforeAll(async () => {
         const schemaContent = await Bun.file(path.join(__dirname, "runtime.graphql")).text()
-        const result = transform(buildSchema(schemaContent), { output: "" })
+        const result = transform(buildSchema(schemaContent))
         const outPath = path.join(__dirname, "__generated__", "runtime.ts")
         await mkdir(path.dirname(outPath), { recursive: true })
         await Bun.file(outPath).write(result)

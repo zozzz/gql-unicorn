@@ -7,5 +7,9 @@
     "typescript": "^5.0.0",
     "@graphql-codegen/plugin-helpers": "^5.1.0",
     "@graphql-codegen/schema-ast": "^5.1.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/codegen/"
   }
 }

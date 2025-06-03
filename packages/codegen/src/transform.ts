@@ -41,8 +41,8 @@ const RuntimeLib = "@gql-unicorn/runtime"
 
 const Banner = ["/* eslint-disable */", "/* prettier-ignore */", "/* !!! GENERATED FILE DO NOT EDIT !!! */"]
 
-export function transform(schema: GraphQLSchema, config: TransformConfig) {
-    return new Transformer(schema, config).transform()
+export function transform(schema: GraphQLSchema, config?: TransformConfig) {
+    return new Transformer(schema, config || {}).transform()
 }
 
 class Transformer {

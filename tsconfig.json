@@ -22,10 +22,14 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
     "paths": {
-      "@gql-unicorn/runtime": [
-        "./packages/runtime/src"
+      "@gql-unicorn/codegen": [
+        "./packages/codegen/src/index.ts"
       ],
+      "@gql-unicorn/runtime": [
+        "./packages/runtime/src/index.ts"
+      ]
     }
   }
 }

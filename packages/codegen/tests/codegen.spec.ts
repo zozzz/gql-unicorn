@@ -17,7 +17,7 @@ describe("codegen", () => {
                 name: String!
             }
         `)
-        expect(transform(schema, { output: "" })).toMatchSnapshot()
+        expect(transform(schema)).toMatchSnapshot()
     })
 
     test("query with parameters", () => {
@@ -32,7 +32,7 @@ describe("codegen", () => {
                 name: String!
             }
         `)
-        expect(transform(schema, { output: "" })).toMatchSnapshot()
+        expect(transform(schema)).toMatchSnapshot()
     })
 
     test("mutation without parameters", () => {
@@ -41,7 +41,7 @@ describe("codegen", () => {
                 someMutaionThing: String!
             }
         `)
-        expect(transform(schema, { output: "" })).toMatchSnapshot()
+        expect(transform(schema)).toMatchSnapshot()
     })
 
     test("mutation with parameters", () => {
@@ -56,7 +56,7 @@ describe("codegen", () => {
                 name: String!
             }
         `)
-        expect(transform(schema, { output: "" })).toMatchSnapshot()
+        expect(transform(schema)).toMatchSnapshot()
     })
 
     test("subscription without parameters", () => {
@@ -65,7 +65,7 @@ describe("codegen", () => {
                 onChangeSomething: String!
             }
         `)
-        expect(transform(schema, { output: "" })).toMatchSnapshot()
+        expect(transform(schema)).toMatchSnapshot()
     })
 
     test("subscription with parameters", () => {
@@ -78,6 +78,6 @@ describe("codegen", () => {
                 id: ID!
             }
         `)
-        expect(transform(schema, { output: "" })).toMatchSnapshot()
+        expect(transform(schema)).toMatchSnapshot()
     })
 })

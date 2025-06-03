@@ -311,7 +311,7 @@ export function queryBuilder<T extends TypeMap>(opd: FieldDefinitions) {
     return newRootBuilder(new Context(opd, "Query", [])) as unknown as OperationBuilder<T>
 }
 
-export function isQuery(obj: any) {
+function isQuery(obj: any) {
     return testContextType(obj, "Query")
 }
 
@@ -326,7 +326,7 @@ export function mutationBuilder<T extends TypeMap>(opd: FieldDefinitions) {
     return newRootBuilder(new Context(opd, "Mutation", [])) as unknown as OperationBuilder<T>
 }
 
-export function isMutation(obj: any) {
+function isMutation(obj: any) {
     return testContextType(obj, "Mutation")
 }
 
@@ -341,7 +341,7 @@ export function subscriptionBuilder<T extends TypeMap>(opd: FieldDefinitions) {
     return newRootBuilder(new Context(opd, "Subscription", [])) as unknown as OperationBuilder<T>
 }
 
-export function isSubscription(obj: any) {
+function isSubscription(obj: any) {
     return testContextType(obj, "Subscription")
 }
 
@@ -358,7 +358,7 @@ export function fragmentBuilder<T extends TypeMap>(opd: FieldDefinitions) {
     ) => FragmentBuilder<T, Flag.AutoTn>
 }
 
-export function isFragment(obj: any) {
+function isFragment(obj: any) {
     return testContextType(obj, "Fragment")
 }
 
@@ -373,7 +373,7 @@ export function typeBuilder<T extends TypeMap>(opd: FieldDefinitions) {
     return newTypeBuilder(new Context(opd, "Type", [])) as unknown as TypeBuilder<T, Flag.AutoTn>
 }
 
-export function isType(obj: any) {
+function isType(obj: any) {
     return testContextType(obj, "Type")
 }
 
