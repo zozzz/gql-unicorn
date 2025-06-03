@@ -4,9 +4,9 @@ import { parse as parseGql } from "graphql"
 
 import type { MergeUnion } from "./common"
 import type { Arguments, ToVars } from "./operation"
-import type { BareType, Flag, Select, TypeFlags } from "./select"
+import type { Flag, Select, TypeFlags } from "./select"
 import { CONTEXT } from "./symbols"
-import type { Input, Operation, SimpleType } from "./type"
+import type { BareType, Input, Operation, SimpleType } from "./type"
 import { isVariable, variableName } from "./var"
 
 /**

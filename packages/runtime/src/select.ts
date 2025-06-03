@@ -6,7 +6,7 @@ import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
 import type { FlagInclude, FlagRemove, ObjectSpread } from "./common"
 import type { Arguments, ToVars } from "./operation"
 import type { SELECTION } from "./symbols"
-import type { Input, Interface, IsAtomic, IsInterface, Operation, SimpleType } from "./type"
+import type { BareType, Input, Interface, IsAtomic, IsInterface, Operation, SimpleType } from "./type"
 import type { Vars } from "./var"
 
 type Result = any
@@ -22,8 +22,6 @@ export const enum Flag {
 
 type AllTypeFlags = Flag.Array | Flag.Optional | Flag.OptionalItem
 type AllCommonFlags = Flag.AutoTn
-
-export type BareType<T> = T extends null ? BareType<NonNullable<T>> : T extends Array<infer A> ? BareType<A> : T
 
 export type TypeFlags<T> =
     | (T extends null ? Flag.Optional : never)

@@ -3,6 +3,7 @@ import type { INTERFACE, Is, OPERATION, UNION } from "./symbols"
 export type GType = SimpleType | SimpleType[] | AtomicType
 export type AtomicType = number | string | boolean | null
 export type SimpleType = Record<string, unknown> & { __typename: string }
+export type BareType<T> = T extends null ? BareType<NonNullable<T>> : T extends Array<infer A> ? BareType<A> : T
 
 /**
  * ```graphql
