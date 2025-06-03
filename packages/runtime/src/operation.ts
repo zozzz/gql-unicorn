@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 import type { UnionToIntersection } from "utility-types"
 
 import type { Concat, MergeUnion } from "./common"
-import { type Select } from "./select"
-import type { GType, Input, Operation } from "./type"
-import type { Variable, Vars } from "./var"
+import type { Input } from "./type"
+import type { Variable } from "./var"
 
 export type Arguments<I extends Input> = _Arguments<I> | Variable<any>
 
@@ -53,18 +51,6 @@ export type HasRequiredVar<I> = I extends { [key: string]: any }
         ? false
         : { [k in keyof I]: undefined extends I[k] ? never : true }[keyof I]
     : never
-
-// TODO: maybe not export
-export type Operations = Record<string, Operation<any, any>>
-
-export type OperationBuilder<O extends Operations> = {
-    // [K in keyof O]: O[K] extends Operation<infer I, infer O> ? OperationFn<I, O, [], {}> : Select<O[K], [], WithTN, {}>
-    [K in keyof O]: O[K] extends Operation<infer I, infer O> ? OperationFn<I, O, [], {}> : Select<O[K], [], WithTN, {}>
-}
-
-type OperationFn<I extends Input, O extends GType, P extends string[], V extends Vars> = <A extends Arguments<I>>(
-    params: A
-) => Select<O, [], WithTN, V & ToVars<I, P, A>>
 
 type KeyIsRequired<T, K> = T extends object
     ? K extends keyof T

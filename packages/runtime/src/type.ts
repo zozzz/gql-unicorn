@@ -1,7 +1,6 @@
 import type { INTERFACE, Is, OPERATION, UNION } from "./symbols"
 
 export type GType = SimpleType | SimpleType[] | AtomicType
-// TODO: null
 export type AtomicType = number | string | boolean | null
 export type SimpleType = Record<string, unknown> & { __typename: string }
 
@@ -84,37 +83,3 @@ export type IsAtomic<T> =
           : T extends { __typename: string }
             ? false
             : true
-
-// type User = {
-//     __typename: "User"
-//     id: string
-//     username: string
-// }
-
-// type Role = {
-//     __typename: "Role"
-//     id: string
-//     rolename: string
-// }
-
-// type Object = {
-//     __typename: "Object"
-//     id: string
-// }
-
-// type UnionTest = Union< User | Role | Object>
-// type XXX = IsUnion<UnionTest>
-// type YYY = IsUnion<User>
-// type vvv = Extract<UnionTest["__typename"], "Users">
-// type vvv = UnionToIntersection<UnionTest>
-
-// type IsMultiTypename<T extends string> = { [K in T]: Exclude<T, K> }[T]
-
-// type X = Exclude<"hello" | "world", "hello">
-
-// type alma = IsMultiTypename<UnionTest["__typename"]>
-// type alma = IsMultiTypename<"hello">
-// type alma = IsMultiTypename<User["__typename"]>
-// type alma = UnionTest["__typename"] extends string ? "OK" : "NOT OK"
-// type alma = string extends UnionTest["__typename"] & undefined ? "OK" : "NOT OK"
-// type alma = string extends User["username"] ? "OK" : "NOT OK"
