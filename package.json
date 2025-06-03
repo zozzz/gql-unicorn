@@ -49,6 +49,9 @@
     "git": {
       "requireCleanWorkingDir": false
     },
+    "github": {
+      "release": true
+    },
     "plugins": {
       "@release-it/bumper": {
         "out": {
