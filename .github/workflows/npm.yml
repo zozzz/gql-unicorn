@@ -14,6 +14,7 @@ jobs:
 
       - run: bun install
       - run: bun run build
+      - run: cd dist && bun install
 
       - name: Publish
         run: bun run publish
