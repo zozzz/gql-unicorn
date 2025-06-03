@@ -35,8 +35,38 @@ describe("runtime", () => {
     })
 
     describe("query", () => {
+        describe("named quey", () => {
+            test("type select", () => {
+                testQuery<{ __typename: "AFC"; id: string }, {}>(
+                    G.Query("QueryName").afc.id,
+                    `query QueryName{afc{__typename,id}}`
+                )
+            })
+
+            test("scalar select", () => {
+                testQuery<string | null, {}>(
+                    G.Query("GetCurrentUserId").currentUserId,
+                    `query GetCurrentUserId{currentUserId}`
+                )
+            })
+
+            test("type select w vars", () => {
+                testQuery<{ __typename: string; id: string; name: string }, { id: string }>(
+                    G.Query("GetUser").user(G.$).id.name,
+                    `query GetUser($id:ID!){user(id:$id){__typename,id,name}}`
+                )
+            })
+
+            test("scalar select w vars", () => {
+                testQuery<string | null, { id: string }>(
+                    G.Query("Atomic").atomicArgsScalar(G.$),
+                    `query Atomic($id:ID){atomicArgsScalar(id:$id)}`
+                )
+            })
+        })
+
         test("variables", () => {
-            testQuery<{ __typename: string; id: string; name: string }, {}>(
+            testQuery<{ __typename: string; id: string; name: string | undefined }, {}>(
                 G.Query.user({ id: "1" }).id.name,
                 `query{user(id:"1"){__typename,id,name}}`
             )
@@ -117,14 +147,6 @@ describe("runtime", () => {
 
         test("articles", () => {
             type ArticleFilter = import("./__generated__/runtime").ArticleFilter
-
-            // Query.articles({count: 1}).id.name.$build()
-            // Query.currentUserId.$build()
-            // Query.articlesWithoutParams.id.name.$build()
-            // Query.atomicWithParam({id: 1}).$build()
-            // G.Query.currentUserId.$build()
-            // const x = G.Query.articles(G.$).id.title.tags(q => q.tag).$build()
-            // type Alma = typeof x extends TypedDocumentNode<infer X, any> ? X : never
 
             testQuery<
                 { __typename: string; id: string; tags: Array<{ __typename: string; tag: string }> | null },
@@ -214,8 +236,44 @@ describe("runtime", () => {
                 {}
             >(
                 G.Query.afc.id.hqName.parent(q => q.id.hqName.parent(q => q.id)),
-                `query{afc{__typename,id,hqName,parent{__typename,id,hqName}}}`
+                `query{afc{__typename,id,hqName,parent{__typename,id,hqName,parent{__typename,id}}}}`
             )
+        })
+
+        describe("$on", () => {
+            test("type", () => {
+                testQuery<
+                    { __typename: "User" | "Article" | "Tag"; id: string } | { __typename: "User"; name: string },
+                    { id: string }
+                >(
+                    G.Query.node(G.$).id.$on(G.Type.User.name),
+                    `query($id:ID!){node(id:$id){__typename,id,... on User{name}}}`
+                )
+            })
+
+            test("fragment 1", () => {
+                testQuery<
+                    { __typename: "User" | "Article" | "Tag"; id: string } | { __typename: "User"; name: string },
+                    { id: string }
+                >(
+                    G.Query.node(G.$).id.$on(G.Fragment("fragmentName").User.name),
+                    `query($id:ID!){node(id:$id){__typename,id,...fragmentName}} fragment fragmentName on User{name}`
+                )
+            })
+
+            test("fragment 2", () => {
+                testQuery<
+                    | { __typename: "User" | "Article" | "Tag"; id: string }
+                    | { __typename: "User"; name: string }
+                    | { __typename: "Article"; title: string },
+                    { id: string }
+                >(
+                    G.Query.node(G.$)
+                        .id.$on(G.Fragment("userFragment").User.name)
+                        .$on(G.Fragment("articleFragment").Article.title),
+                    `query($id:ID!){node(id:$id){__typename,id,...userFragment,...articleFragment}} fragment userFragment on User{name} fragment articleFragment on Article{title}`
+                )
+            })
         })
     })
 

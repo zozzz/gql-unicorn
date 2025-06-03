@@ -19,12 +19,13 @@ export type FieldDefinitions = Record<
     Record<string, [Record<string, string>, string] | Record<string, string> | string>
 >
 
-type ContextType = "Query" | "Mutation" | "Subscription" | "Fragment" | "Type" | "Operation"
+type ContextType = "Query" | "Mutation" | "Subscription" | "Fragment" | "Type" | "Operation" | "Conditional"
 
 class Context {
     readonly vars: Record<string, string>
     readonly fields: BField[] = []
     readonly subBuilder: Context[] = []
+    readonly fragments: Record<string, Context>
     #args?: Record<string, any>
     maybeMethod = false
     readonly #parent: Context | undefined
@@ -63,7 +64,7 @@ class Context {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         let c: Context | undefined = this
         while (c != null) {
-            if (c.type === "Operation" && c.level !== 0) {
+            if (c.type === "Operation" && c.level > 1) {
                 parts.push(c.name)
             }
             c = c.parent
@@ -80,6 +81,7 @@ class Context {
         // TODO: WeakRef maybe, or omit parent ref
         this.#parent = parent
         this.vars = parent ? parent.vars : {}
+        this.fragments = parent ? parent.fragments : {}
     }
 
     sub(type: ContextType, path: string[]) {
@@ -148,35 +150,43 @@ class Context {
     // TODO: cache
     $build = () => parseGql(this.$gql())
 
-    $gql = () => this.root.compile()
+    $gql = () => this.root.compile(false)
 
-    compile() {
+    compile(skipTyename: boolean) {
         const result: string[] = []
         const type = this.type
+
+        // debugContext(this)
 
         // console.log(this.type, this.path, this.#args)
 
         if (type === "Query" || type === "Mutation" || type === "Subscription" || type === "Operation") {
+            if (this.name) {
+                result.push(this.name)
+            } else if (type === "Operation") {
+                throw new Error("No name")
+            }
+
             if (type !== "Operation") {
                 if (this.level !== 0) {
                     throw new Error("Something went wrong")
                 }
 
-                result.push(type.toLowerCase())
+                const typePrefix = this.type.toLowerCase()
+                if (result.length > 0) {
+                    result.unshift(`${typePrefix} `)
+                } else {
+                    result.unshift(typePrefix)
+                }
 
-                // TODO: name
                 const vars = Object.entries(this.vars)
                     .map(([k, v]) => `${k}:${v}`)
                     .join(",")
+
                 if (vars.length > 0) {
                     result.push(`(${vars})`)
                 }
-
-                result.push("{")
-            }
-
-            result.push(this.path[0])
-            if (this.#args) {
+            } else if (this.#args) {
                 const args = Object.entries(this.#args)
                     .map(([k, v]) => `${k}:${v}`)
                     .join(",")
@@ -185,57 +195,74 @@ class Context {
                 }
             }
 
-            // const sub = [...this.fields, ...this.subBuilder.map(v => v.compile())]
-            // console.log(sub)
-            // if (sub.length > 0 && !this.fields.includes("__typename")) {
-            //     sub.unshift("__typename")
-            // }
-            // if (sub.length > 0) {
-            //     result.push(`{${sub.filter((v, i, a) => a.indexOf(v) === i).join(",")}}`)
-            // }
+            if (this.fields.length > 0) {
+                throw new Error("This type of context does not support fields")
+            }
 
-            if (this.subBuilder.length > 0) {
-                const subResult = this.subBuilder.map(v => v.compile()).join(",")
-                if (subResult.length > 0) {
-                    result.push(`{${subResult}}`)
+            const sub = this.subBuilder.map(v => v.compile(skipTyename)).filter(v => v.length > 0)
+            if (sub.length > 0) {
+                result.push(`{${sub.join(",")}}`)
+            }
+
+            if (this.level === 0) {
+                const fragments = Object.values(this.fragments)
+                    .map(v => v.compile(true))
+                    .filter(v => v.length > 0)
+                if (fragments.length > 0) {
+                    result.push(` ${fragments.join(" ")}`)
                 }
             }
 
-            if (type !== "Operation") {
-                result.push("}")
-            }
+            return result.join("")
         } else if (type === "Type") {
-            const sub = [...this.fields, ...this.subBuilder.map(v => v.compile())]
-            if (sub.length > 0 && !this.fields.includes("__typename")) {
+            const sub = [...this.fields, ...this.subBuilder.map(v => v.compile(skipTyename)).filter(v => v.length > 0)]
+            if (!skipTyename && sub.length > 0 && !this.fields.includes("__typename")) {
                 sub.unshift("__typename")
             }
             result.push(sub.filter((v, i, a) => a.indexOf(v) === i).join(","))
+        } else if (type === "Conditional") {
+            if (this.subBuilder.length !== 1) {
+                throw new Error("This type of context does not constructec with the expected number of subBuilder")
+            }
+            const sub = this.subBuilder[0]
+            if (isType(sub)) {
+                const compiled = sub.compile(true)
+                if (compiled.length === 0) {
+                    throw new Error("Empty type")
+                }
+                result.push(`... on ${sub.name}{${compiled}}`)
+            } else if (isFragment(sub)) {
+                result.push(`...${sub.name}`)
+            }
+        } else if (type === "Fragment") {
+            const sub = this.subBuilder[0]
+            if (!isType(sub)) {
+                throw new Error("Fragment subBuilder must be Type")
+            }
+
+            const compiled = sub.compile(skipTyename)
+            if (compiled.length === 0) {
+                throw new Error("Empty type")
+            }
+            result.push(`fragment ${this.name} on ${sub.name}{${compiled}}`)
         }
 
         return result.join("")
     }
 }
 
+// eslint-disable-next-line unused-imports/no-unused-vars
+function debugContext(context: Context, level = "") {
+    console.log(`${level} ${context.type} [name=${context.name}] ${JSON.stringify(context.vars)}`)
+    for (const f of context.fields) {
+        console.log(`${level}  ${f}`)
+    }
+    for (const f of context.subBuilder) {
+        debugContext(f, level + "  ")
+    }
+}
+
 const ContextSpecials: Array<string | symbol> = ["$build", "$gql"]
-
-// class OperationContext extends ContextBase {
-//     constructor(
-//         readonly kind: OperationKind,
-//         readonly params?: any
-//     ) {
-//         super()
-//     }
-// }
-
-// class FragmentContext extends ContextBase {
-//     constructor(readonly name: string) {
-//         super()
-//     }
-// }
-
-// class QueryContext extends ContextBase {}
-
-// type Context = OperationContext | FragmentContext
 
 interface ProxyTarget {
     [CONTEXT]: Context
@@ -245,6 +272,7 @@ type BField = string
 export type TypeMap = Record<string, any>
 
 type OperationBuilder<O extends TypeMap> = _OperationBuilder<O, Flag.Buildable | Flag.AutoTn>
+    & ((name: string) => _OperationBuilder<O, Flag.Buildable | Flag.AutoTn>)
 
 type _OperationBuilder<O extends TypeMap, F extends Flag> = {
     [K in keyof O]: O[K] extends Operation<infer I, infer O>
@@ -268,7 +296,7 @@ type TypeBuilder<T extends TypeMap, F extends Flag> = {
  * ```
  */
 export function queryBuilder<T extends TypeMap>(opd: FieldDefinitions) {
-    return newRootBuilder<T>(new Context(opd, "Query", [])) as unknown as OperationBuilder<T>
+    return newRootBuilder(new Context(opd, "Query", [])) as unknown as OperationBuilder<T>
 }
 
 export function isQuery(obj: any) {
@@ -283,7 +311,7 @@ export function isQuery(obj: any) {
  * ```
  */
 export function mutationBuilder<T extends TypeMap>(opd: FieldDefinitions) {
-    return newRootBuilder<T>(new Context(opd, "Mutation", [])) as unknown as OperationBuilder<T>
+    return newRootBuilder(new Context(opd, "Mutation", [])) as unknown as OperationBuilder<T>
 }
 
 export function isMutation(obj: any) {
@@ -298,7 +326,7 @@ export function isMutation(obj: any) {
  * ```
  */
 export function subscriptionBuilder<T extends TypeMap>(opd: FieldDefinitions) {
-    return newRootBuilder<T>(new Context(opd, "Subscription", [])) as unknown as OperationBuilder<T>
+    return newRootBuilder(new Context(opd, "Subscription", [])) as unknown as OperationBuilder<T>
 }
 
 export function isSubscription(obj: any) {
@@ -313,7 +341,7 @@ export function isSubscription(obj: any) {
  * ```
  */
 export function fragmentBuilder<T extends TypeMap>(opd: FieldDefinitions) {
-    return newTypeBuilder(new Context(opd, "Fragment", [])) as unknown as TypeBuilder<T, Flag.AutoTn>
+    return newTypeBuilder(new Context(opd, "Fragment", [])) as unknown as (name: string) => TypeBuilder<T, Flag.AutoTn>
 }
 
 export function isFragment(obj: any) {
@@ -336,8 +364,16 @@ export function isType(obj: any) {
 }
 
 function testContextType(obj: ProxyTarget | Context, type: ContextType): boolean {
-    const otype = CONTEXT in obj ? obj[CONTEXT].type : obj instanceof Context ? obj.type : undefined
-    return otype === type
+    return asContext(obj)?.type === type
+}
+
+function asContext(v: any): Context | undefined {
+    if (v instanceof Context) {
+        return v
+    } else if (v && CONTEXT in v) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        return v[CONTEXT]
+    }
 }
 
 /**
@@ -349,12 +385,12 @@ function testContextType(obj: ProxyTarget | Context, type: ContextType): boolean
  * Query.currentUserId
  * ```
  */
-function newRootBuilder<T extends TypeMap>(context: Context) {
+function newRootBuilder(context: Context) {
     return _newBuilder(context, rootBuilderCall, RootBuilderProxy)
 }
 
 const RootBuilderProxy = {
-    get(target: ProxyTarget, key: string | symbol, receiver: any): any {
+    get(target: ProxyTarget, key: string | symbol, _receiver: any): any {
         const context = target[CONTEXT]
         if (ContextSpecials.includes(key)) {
             return context[key as keyof typeof context]
@@ -365,19 +401,26 @@ const RootBuilderProxy = {
         }
 
         const def = context.fieldDefs[context.type][key]
+        const root = new Context(context.fieldDefs, context.type, context.path)
 
         if (def == null) {
             // Atomic type without args, eg: Query.currentUserId
-            return receiver
+            const operation = root.sub("Operation", [key])
+            return newSelectionBuilder(operation.sub("Type", []))
         } else if (typeof def === "string") {
             // Simple type without args, eg: Query.currentUser
-            return newTypeBuilder(context.sub("Type", [def]))
+            const operation = root.sub("Operation", [key])
+            return newSelectionBuilder(operation.sub("Type", [def]))
         } else if (Array.isArray(def)) {
             // Simple type with args, eg: Query.users({is_active: true}).id
-            return receiver
+            root.maybeMethod = true
+            root.fields.push(key)
+            return newRootBuilder(root)
         } else {
-            // Atomic type with args, eg, Query.,distance({lat: 1, lng: 2, from: ...})
-            return receiver
+            // Atomic type with args, eg, Query.distance({lat: 1, lng: 2, from: ...})
+            root.maybeMethod = true
+            root.fields.push(key)
+            return newRootBuilder(root)
         }
     }
 }
@@ -386,28 +429,53 @@ const RootBuilderProxy = {
  * @param context Context is must have type: Query | Mutation | Subscription
  */
 function rootBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
-    if (args.length === 1 && context.fields.length === 0) {
+    if (args.length === 1 && context.path.length === 0) {
         // Query("UserQuery")
         if (typeof args[0] === "string") {
-            return proxy
+            return newRootBuilder(new Context(context.fieldDefs, context.type, [args[0]]))
         }
-
-        throw new Error(`Invalid arguments: ${args[0]}, must be string`)
     }
-    return proxy
+
+    if (!context.maybeMethod) {
+        console.error(context.type, context.path.join("."))
+        throw new Error(`This is not callable`)
+    }
+    context.maybeMethod = false
+
+    const key = context.fields.pop()!
+    const def = context.fieldDefs[context.type][key]
+
+    const [argTypes, returnType] = Array.isArray(def)
+        ? def
+        : typeof def === "string"
+          ? [undefined, def]
+          : [def, undefined]
+
+    if (argTypes === undefined) {
+        throw new Error("Internal error")
+    }
+
+    const operation = context.sub("Operation", [key])
+    const builderFn = operation.handleArgs(args, argTypes)
+    if (builderFn != null) {
+        throw new Error(
+            `Function call in this type is not allow. Use '${context.type}.${key}({...}).field_name' instead`
+        )
+    }
+
+    return newSelectionBuilder(operation.sub("Type", returnType === undefined ? [] : [returnType]))
 }
 
-// Type, Fragment
-function newTypeBuilder(context: Context) {
-    return _newBuilder(context, typeBuilderCall, TypeBuilderProxy)
+function newSelectionBuilder(context: Context) {
+    return _newBuilder(context, selectionBuilderCall, SelectionBuilderProxy)
 }
 
-const TypeBuilderProxy = {
+const SelectionBuilderProxy = {
     get(target: ProxyTarget, key: string | symbol, receiver: any): any {
-        console.log("GET", key)
-
         const context = target[CONTEXT]
-        if (ContextSpecials.includes(key)) {
+        if (key === CONTEXT) {
+            return context
+        } else if (ContextSpecials.includes(key)) {
             return context[key as keyof typeof context]
         }
 
@@ -425,7 +493,7 @@ const TypeBuilderProxy = {
 /**
  * @param context Context is must NOT have type: Query | Mutation | Subscription
  */
-function typeBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
+function selectionBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
     if (!context.maybeMethod) {
         console.error(context.type, context.path.join("."))
         throw new Error(`This is not callable`)
@@ -434,91 +502,97 @@ function typeBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
 
     if (isQuery(context) || isMutation(context) || isSubscription(context)) {
         throw new Error("Not supported")
-        // Query.QueryName.users()
-        // Query("QueryName").users()
-        // Query.users() névtelen query
-        if (context.path.length !== 1) {
-            throw new Error(`This is not callable ${context.path.join(".")}`)
-        }
-        // Every root call creates a new builder: eg Query.users() -> create new root builder
-
-        console.log("context.type", context.type, context.path, context.fields)
-
-        const opName = context.path[0]
-        const def = context.fieldDefs[context.type][opName]
-        if (typeof def === "string") {
-            if (context.fields.length === 0) {
-                throw new Error("Not callable")
-            }
-
-            if (args.length === 0) {
-                throw new Error("Missing select function")
-            } else if (args.length > 1) {
-                throw new Error("Too many arguments")
-            }
-
-            const cb = args[0]
-            if (typeof cb !== "function") {
-                throw new Error("Invalid select function")
-            }
-
-            // Type select wothout arguments
-            const methName = context.fields.pop()!
-            let typeBuilder = newTypeBuilder(context.sub("Type", [def]))
-            while (context.fields.length > 0) {
-                const fname = context.fields.shift()!
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                typeBuilder = typeBuilder[fname as any]
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            typeBuilder[methName as any](...args)
-
-            return proxy
-        } else {
-            // any select with arguments
-            const [argTypes, returnType] = def
-            const builderFn = context.handleArgs(args, argTypes)
-
-            if (builderFn != null) {
-                throw new Error(
-                    `Function call in this type is not allow. Use '${context.type}.${opName}({...}).field_name' instead`
-                )
-            }
-
-            return newTypeBuilder(context.sub("Type", [returnType]))
-        }
     } else if (isType(context)) {
         if (context.path.length === 0) {
             throw new Error(`This is not callable`)
         }
 
         const opName = context.fields.pop()!
-        const [argTypes, returnType] = context.fieldDefs[context.path[0]][opName]
-        const operation = context.sub("Operation", [opName])
-        const builderFn = operation.handleArgs(args, argTypes)
 
-        const subContext = operation.sub("Type", [returnType])
-        const subBuilder = newTypeBuilder(subContext)
+        // Handle $on(Fragment.User.id)
+        if (opName === "$on") {
+            let fragment = asContext(args[0])
+            if (fragment == null) {
+                throw new Error("Missing fragment or type select")
+            }
+
+            if (isType(fragment) && isFragment(fragment.parent)) {
+                fragment = fragment.parent!
+                if (fragment.name in context.fragments) {
+                    throw new Error(`Fragment "${fragment.name}" already exists`)
+                }
+                context.fragments[fragment.name] = fragment
+            }
+
+            const cond = context.sub("Conditional", [])
+            cond.subBuilder.push(fragment)
+
+            return proxy
+        }
+
+        const def = context.fieldDefs[context.path[0]][opName]
+        if (def == null) {
+            throw new Error(`This is not callable: ${opName}`)
+        }
+
+        const [argTypes, returnType] = Array.isArray(def)
+            ? def
+            : typeof def === "string"
+              ? [undefined, def]
+              : [def, undefined]
+        const operation = context.sub("Operation", [opName])
+        const builderFn = argTypes === undefined ? (args[0] as () => any) : operation.handleArgs(args, argTypes)
+
+        const subContext = operation.sub("Type", returnType === undefined ? [] : [returnType])
+        const subBuilder = newSelectionBuilder(subContext)
         if (builderFn != null) {
             builderFn(subBuilder)
         }
 
         return proxy
     } else if (isFragment(context)) {
-        // Usage: Fragment.FragmentName.$on(Type.TypeName.id.name)
-        // Query.users().$on(Fragment.FragmentName.$on(Type.TypeName.id.name))
-        throw new Error("Fragment is not callable. Use 'Fragment.FragmentName.$on(Type.TypeName.id.name)' instead")
-        // if (context.fields.length === 0) {
-        //     throw new Error(`Missing type name. Use 'Fragment.TypeName("FragmentName").field_name' instead`)
-        // }
-
-        // if (args.length === 0 || typeof args[0] !== "string") {
-        //     throw new Error(`Missing fragment name. Use 'Fragment.TypeName("FragmentName").field_name' instead`)
-        // }
-
-        // return newBuilder(context.sub(context.fields, { name: args[0] }))
+        throw new Error(`Fragment is not callable. Use 'Fragment("fragmentName").TypeName.id.name' instead`)
     } else {
-        throw new Error("Something is wrong")
+        throw new Error(`Not supported: ${context.type}`)
+    }
+}
+
+function newTypeBuilder(context: Context) {
+    return _newBuilder(context, typeBuilderCall, TypeBuilderProxy)
+}
+
+const TypeBuilderProxy = {
+    get(target: ProxyTarget, key: string | symbol, _receiver: any): any {
+        const context = target[CONTEXT]
+        if (key === CONTEXT) {
+            return context
+        }
+        if (ContextSpecials.includes(key)) {
+            return context[key as keyof typeof context]
+        }
+
+        if (typeof key !== "string") {
+            throw new Error(`Invalid key: ${String(key)}`)
+        }
+
+        const root = new Context(context.fieldDefs, context.type, context.path)
+        return newSelectionBuilder(root.sub("Type", [key]))
+    }
+}
+
+/**
+ * @param context Context is must have type: Type | Fragment
+ */
+function typeBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
+    if (isFragment(context) && args.length === 1 && context.path.length === 0) {
+        // Fragment("fragmentName")
+        if (typeof args[0] === "string") {
+            return newTypeBuilder(new Context(context.fieldDefs, context.type, [args[0]]))
+        }
+
+        throw new Error("Invalid type of argument, must be sting")
+    } else {
+        throw new Error(`This is not callable`)
     }
 }
 
