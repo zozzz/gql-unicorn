@@ -23,7 +23,7 @@
   },
   "main": "./src/index.ts",
   "peerDependencies": {
-    "@gql-unicorn/runtime": "file:../runtime",
+    "@gql-unicorn/runtime": "workspace:*",
     "graphql": "^16.11.0",
     "typescript": "^5.0.0"
   }

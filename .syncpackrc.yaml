@@ -1,0 +1,16 @@
+versionGroups:
+  - dependencies: ["@gql-unicorn/**"]
+    dependencyTypes: ["!local"]
+    pinVersion: workspace:*
+    label: "@gql-unicorn packages should only be under peerDependencies with workspace:*"
+
+sortFirst:
+  - name
+  - version
+  - author
+  - license
+  - keywords
+  - repository
+  - description
+  - scripts
+  - main
