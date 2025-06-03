@@ -18,4 +18,4 @@ jobs:
       - name: Publish
         run: bun run publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
