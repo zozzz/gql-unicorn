@@ -12,13 +12,13 @@
     "release.pre": "bun sync-pack && bun run build && bun test",
     "sync-pack": "bun syncpack fix-mismatches",
     "build": "bun build:cli && bun build:codegen && bun build:runtime && cp package.json dist/package.json && cp bun.lockb dist/bun.lockb",
-    "build:cli": "cd packages/cli && bun tsup && cp package.json ../../dist/cli/package.json && cp ../../README.md ../../dist/cli/README.md && cp ../../LICENSE ../../dist/cli/LICENSE",
-    "build:codegen": "cd packages/codegen && bun tsup && cp package.json ../../dist/codegen/package.json && cp ../../README.md ../../dist/codegen/README.md && cp ../../LICENSE ../../dist/codegen/LICENSE",
-    "build:runtime": "cd packages/runtime && bun tsup && cp package.json ../../dist/runtime/package.json && cp ../../README.md ../../dist/runtime/README.md && cp ../../LICENSE ../../dist/runtime/LICENSE",
+    "build:cli": "cd packages/cli && bun tsup && cp package.json ../../dist/packages/cli/package.json && cp ../../README.md ../../dist/packages/cli/README.md && cp ../../LICENSE ../../dist/packages/cli/LICENSE",
+    "build:codegen": "cd packages/codegen && bun tsup && cp package.json ../../dist/packages/codegen/package.json && cp ../../README.md ../../dist/packages/codegen/README.md && cp ../../LICENSE ../../dist/packages/codegen/LICENSE",
+    "build:runtime": "cd packages/runtime && bun tsup && cp package.json ../../dist/packages/runtime/package.json && cp ../../README.md ../../dist/packages/runtime/README.md && cp ../../LICENSE ../../dist/packages/runtime/LICENSE",
     "publish": "bun publish:cli && bun publish:codegen && bun publish:runtime",
-    "publish:cli": "cd dist/cli && bun publish",
-    "publish:codegen": "cd dist/codegen && bun publish",
-    "publish:runtime": "cd dist/runtime && bun publish"
+    "publish:cli": "cd dist/packages/cli && bun publish",
+    "publish:codegen": "cd dist/packages/codegen && bun publish",
+    "publish:runtime": "cd dist/packages/runtime && bun publish"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",

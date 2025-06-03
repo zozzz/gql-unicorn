@@ -10,7 +10,7 @@ export default defineConfig({
     entry: ["src/cli.ts"],
     format: "esm",
     target: "esnext",
-    outDir: path.join(__dirname, "..", "..", "dist", "cli"),
+    outDir: path.join(__dirname, "..", "..", "dist", "packages", "cli"),
     tsconfig: path.join(__dirname, "..", "..", "tsconfig.build.json"),
     sourcemap: true,
     clean: true,
