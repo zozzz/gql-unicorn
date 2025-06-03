@@ -6,19 +6,18 @@
     "packages/*"
   ],
   "scripts": {
-    "release:major": "release-it -i major --ci",
-    "release:minor": "release-it -i minor --ci",
+    "release:major": "bun run release.pre && release-it -i major --ci",
+    "release:minor": "bun run release.pre && release-it -i minor --ci",
     "release:patch": "bun run release.pre && release-it -i patch --ci",
-    "release:dev": "release-it -i dev --ci",
     "release.pre": "bun run build && bun test",
     "build": "bun build:cli && bun build:codegen && bun build:runtime",
     "build:cli": "cd packages/cli && bun tsup",
     "build:codegen": "cd packages/codegen && bun tsup",
     "build:runtime": "cd packages/runtime && bun tsup",
     "publish": "bun publish:cli && bun publish:codegen && bun publish:runtime",
-    "publish:cli": "cd packages/cli && bun publish",
-    "publish:codegen": "cd packages/codegen && bun publish",
-    "publish:runtime": "cd packages/runtime && bun publish"
+    "publish:cli": "cd packages/cli && bun publish --frozen-lockfile",
+    "publish:codegen": "cd packages/codegen && bun publish --frozen-lockfile",
+    "publish:runtime": "cd packages/runtime && bun publish --frozen-lockfile"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",
