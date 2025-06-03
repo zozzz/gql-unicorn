@@ -21,7 +21,8 @@
     "type": "git",
     "url": "https://github.com/zozzz/gql-unicorn"
   },
-  "main": "./index.js",
+  "main": "./index.mjs",
+  "types": "./index.d.mts",
   "peerDependencies": {
     "@gql-unicorn/runtime": "workspace:*",
     "graphql": "^16.11.0",
