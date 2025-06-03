@@ -1,7 +1,7 @@
 {
-    "name": "@gql-unicorn/cli",
-    "version": "0.0.1",
-    "dependencies": {
-        "@gql-unicorn/codegen": "workspace:*"
-    }
+  "name": "@gql-unicorn/cli",
+  "version": "0.0.1",
+  "dependencies": {
+    "@gql-unicorn/codegen": "workspace:*"
+  }
 }

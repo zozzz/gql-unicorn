@@ -1,11 +1,11 @@
 {
-    "name": "@gql-unicorn/codegen",
-    "version": "0.0.1",
-    "peerDependencies": {
-        "@gql-unicorn/runtime": "workspace:*",
-        "graphql": "^16.11.0",
-        "typescript": "^5.0.0",
-        "@graphql-codegen/plugin-helpers": "^5.1.0",
-        "@graphql-codegen/schema-ast": "^5.1.0"
-    }
+  "name": "@gql-unicorn/codegen",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@gql-unicorn/runtime": "workspace:*",
+    "graphql": "^16.11.0",
+    "typescript": "^5.0.0",
+    "@graphql-codegen/plugin-helpers": "^5.1.0",
+    "@graphql-codegen/schema-ast": "^5.1.0"
+  }
 }

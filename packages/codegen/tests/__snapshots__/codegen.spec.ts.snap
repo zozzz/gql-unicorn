@@ -1,0 +1,170 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`codegen query without parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { queryBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+export type User = {
+    __typename: "User"
+    /**
+     * User id
+     */
+    id: string
+    name: string
+}
+export type __Query = {
+    /**
+     * Curent user
+     */
+    currentUser: User | null
+}
+type __TypeMap = {
+    User: User
+}
+const __FieldDefs: FieldDefinitions = {
+    "User": {},
+    "Query": {
+        "currentUser": "User"
+    }
+}
+export const Query = queryBuilder<__Query>(__FieldDefs)
+export const Type = typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
+export { $ }"
+`;
+
+exports[`codegen query with parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { type Operation, queryBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+export type User = {
+    __typename: "User"
+    /**
+     * User id
+     */
+    id: string
+    name: string
+}
+export type __Query = {
+    user: Operation<{ id: string }, User | null>
+}
+type __TypeMap = {
+    User: User
+}
+const __FieldDefs: FieldDefinitions = {
+    "User": {},
+    "Query": {
+        "user": [
+            {
+                "id": "ID!"
+            },
+            "User"
+        ]
+    }
+}
+export const Query = queryBuilder<__Query>(__FieldDefs)
+export const Type = typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
+export { $ }"
+`;
+
+exports[`codegen mutation without parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { mutationBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+export type __Mutation = {
+    someMutaionThing: string
+}
+const __FieldDefs: FieldDefinitions = {
+    "Mutation": {}
+}
+export const Mutation = mutationBuilder<__Mutation>(__FieldDefs)
+export { $ }"
+`;
+
+exports[`codegen mutation with parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { type Operation, queryBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+export type User = {
+    __typename: "User"
+    /**
+     * User id
+     */
+    id: string
+    name: string
+}
+export type __Query = {
+    updateUser: Operation<{ id: string, name: string }, User | null>
+}
+type __TypeMap = {
+    User: User
+}
+const __FieldDefs: FieldDefinitions = {
+    "User": {},
+    "Query": {
+        "updateUser": [
+            {
+                "id": "ID!",
+                "name": "String!"
+            },
+            "User"
+        ]
+    }
+}
+export const Query = queryBuilder<__Query>(__FieldDefs)
+export const Type = typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
+export { $ }"
+`;
+
+exports[`codegen subscription without parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { subscriptionBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+export type __Subscription = {
+    onChangeSomething: string
+}
+const __FieldDefs: FieldDefinitions = {
+    "Subscription": {}
+}
+export const Subscription = subscriptionBuilder<__Subscription>(__FieldDefs)
+export { $ }"
+`;
+
+exports[`codegen subscription with parameters 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import { type Operation, subscriptionBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+export type SomeEvent = {
+    __typename: "SomeEvent"
+    id: string
+}
+export type __Subscription = {
+    onChangeSomething: Operation<{ type: string }, SomeEvent>
+}
+type __TypeMap = {
+    SomeEvent: SomeEvent
+}
+const __FieldDefs: FieldDefinitions = {
+    "SomeEvent": {},
+    "Subscription": {
+        "onChangeSomething": [
+            {
+                "type": "String!"
+            },
+            "SomeEvent"
+        ]
+    }
+}
+export const Subscription = subscriptionBuilder<__Subscription>(__FieldDefs)
+export const Type = typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
+export { $ }"
+`;

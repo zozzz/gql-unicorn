@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import * as gq from "graphql"
 
 import { type UnicornConfig } from "./config"
@@ -39,5 +38,5 @@ function parse(schema: string) {
     return gq.buildSchema(schema, { noLocation: true })
 }
 
-const schmea = await introspectionQuery("http://localhost:8000/gql")
-console.log(schmea)
+// const schmea = await introspectionQuery("http://localhost:8000/gql")
+// console.log(schmea)

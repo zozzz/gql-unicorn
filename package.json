@@ -8,9 +8,10 @@
   "scripts": {
     "release:major": "release-it -i major --ci",
     "release:minor": "release-it -i minor --ci",
-    "release:patch": "release-it -i patch --ci",
+    "release:patch": "bun run release.pre && release-it -i patch --ci",
     "release:dev": "release-it -i dev --ci",
-    "build": "tsc -p tsconfig.json"
+    "release.pre": "bun run build && bun test",
+    "build": "tsc -p tsconfig.build.json"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.9",

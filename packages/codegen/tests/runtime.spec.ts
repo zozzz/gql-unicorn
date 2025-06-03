@@ -17,7 +17,7 @@ type Query<TD> = { $build(): TD; $gql(): string }
 
 function testQuery<O, V>(query: Query<TypedDocumentNode<O, V>>, x: string) {
     const gql = query.$gql()
-    console.log(gql)
+    // console.log(gql)
     expect(parse(gql)).toBeDefined()
     expect(gql).toBe(x)
 }
