@@ -5,6 +5,7 @@
     "name": "zozzz",
     "url": "https://github.com/zozzz"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/zozzz/gql-unicorn"
