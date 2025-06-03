@@ -3,10 +3,10 @@
 Name of this package is a combination of `GraphQl` + `unicorn` (beacuse this is a 🦄 )
 
 > [!IMPORTANT]
-> Generates types from GraphQL schema and a very minimal runtime information from schema for builder.
-
-> [!IMPORTANT]
 > Currently in development, this info is potentially wrong or incomplete.
+
+> [!NOTE]
+> Generates types from GraphQL schema and a very minimal runtime information from schema for builder.
 
 ## Install
 
