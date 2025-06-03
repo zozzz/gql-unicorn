@@ -1,6 +1,16 @@
 {
   "name": "@gql-unicorn/codegen",
   "version": "0.0.4",
+  "author": {
+    "name": "zozzz",
+    "url": "https://github.com/zozzz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zozzz/gql-unicorn"
+  },
+  "readme": "../../README.md",
+  "main": "./src/index.ts",
   "peerDependencies": {
     "@gql-unicorn/runtime": "workspace:*",
     "graphql": "^16.11.0",

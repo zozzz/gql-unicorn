@@ -1,6 +1,15 @@
 {
   "name": "@gql-unicorn/cli",
   "version": "0.0.4",
+  "author": {
+    "name": "zozzz",
+    "url": "https://github.com/zozzz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zozzz/gql-unicorn"
+  },
+  "readme": "../../README.md",
   "bin": {
     "gql-unicorn": "./cli.js"
   },
