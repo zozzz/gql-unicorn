@@ -1,4 +1,4 @@
-# GraphQL Unicorn
+# GraphQL Unicorn [![npm version](https://badgen.net/npm/v/@gql-unicorn/runtime)](https://npm.im/@gql-unicorn/runtime) [![npm downloads](https://badgen.net/npm/dm/@gql-unicorn/runtime)](https://npm.im/@gql-unicorn/runtime)
 
 Name of this package is a combination of `GraphQl` + `unicorn` (beacuse this is a 🦄 )
 
