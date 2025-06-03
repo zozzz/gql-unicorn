@@ -11,7 +11,7 @@
     "release:patch": "bun run release.pre && dotenv release-it -i patch --ci",
     "release.pre": "bun sync-pack && bun run build && bun test",
     "sync-pack": "bun syncpack fix-mismatches",
-    "build": "bun build:cli && bun build:codegen && bun build:runtime && cp package.json dist/package.json",
+    "build": "bun build:cli && bun build:codegen && bun build:runtime && cp package.json dist/package.json && cp bun.lockb dist/bun.lockb",
     "build:cli": "cd packages/cli && bun tsup && cp package.json ../../dist/cli/package.json && cp ../../README.md ../../dist/cli/README.md && cp ../../LICENSE ../../dist/cli/LICENSE",
     "build:codegen": "cd packages/codegen && bun tsup && cp package.json ../../dist/codegen/package.json && cp ../../README.md ../../dist/codegen/README.md && cp ../../LICENSE ../../dist/codegen/LICENSE",
     "build:runtime": "cd packages/runtime && bun tsup && cp package.json ../../dist/runtime/package.json && cp ../../README.md ../../dist/runtime/README.md && cp ../../LICENSE ../../dist/runtime/LICENSE",
