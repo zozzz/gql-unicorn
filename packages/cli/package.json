@@ -1,6 +1,6 @@
 {
   "name": "@gql-unicorn/cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "bin": {
     "gql-unicorn": "./cli.js"
   },
