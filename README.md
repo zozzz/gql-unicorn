@@ -17,12 +17,11 @@ npm install @gql-unicorn/runtime --save
 ### Query
 
 ```typescript
-import { Query, Type, $ } from "genrated-pacakge-name"
+import { Query, Type, Fragment, $ } from "genrated-pacakge-name"
 
-const fragment = Type.News.author(q => q.id.name)
-const on = Type.Blog.some_field
+const fragment = Fragment("fragmentName").News.author(q => q.id.name)
 
-Query.articles().id.name.tags({count: $.count}, q => q.id.name).another_field[fragment][on]
+Query.articles().id.name.tags({count: $.count}, q => q.id.name).another_field.$on(fragment).$on(Type.Blog.some_field)
 
 Query.articles().id.name.tags({count: $.count}, q => q.id.name).author(q => q.id.name)
 ```
@@ -37,36 +36,13 @@ type SUser = Selected<User, ["id", "name", {"articles": ["id", "name"]}]>
 // SUser = {id: string; name: string; articles: {id: string; name: string}[]}
 ```
 
-#### Nested args
-
-```typescript
-import { Query, $ } from "genrated-pacakge-name"
-
-const GetUser = Query.users({paging: {offset: $("offset"), limit: $("limit")}}).id.name
-const xxx = GetUser.$build({offset: 0, limit: 10})
-
-// alternatives
-const GetUser = Query.users({paging: $}).id.name
-const xxx = GetUser.$build({paging: {offset: 0, limit: 10}})
-
-// shothand 1
-const GetUser = Query.users($).id.name
-const xxx = GetUser.$build({paging: {offset: 0, limit: 10}})
-
-// shothand 2
-const GetUser = Query.users().id.name
-const xxx = GetUser.$build({paging: {offset: 0, limit: 10}})
-
-```
-
 
 ### Mutation
 
 ```typescript
 import { Mutation, $ } from "genrated-pacakge-name"
 
-const CreateUser = Mutation.createUser()("id", "name")
-const xxx = CreateUser({ /* ... */ })
+const CreateUser = Mutation.createUser({...}).id.name
 ```
 
 
@@ -92,15 +68,21 @@ type User = TypeOf<typeof GetUser>
 ### Variables
 
 ```typescript
-import { $, Query } from "genrated-pacakge-name"
+import { $, Query, UserFilter } from "genrated-pacakge-name"
 
-const q = Query.users({ filter: $("filter"), offset: $("offset"), count: $("count") }).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
+const q = Query.users({ filter: $("filterVar"), offset: $("offsetVar"), count: $("countVar") }).id.name
+type Variables = {filterVar: UserFilter, offsetVar: number, countVar: number}
+
 // or simplified version (this is the default, so it can simplify more to: Query.users()...)
-const q = Query.users($).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
+const q = Query.users($).id.name
+type Variables = {filter: UserFilter, offset: number, count: number}
+
 // or with shorthands
-const q = Query.users({ filter: $, offset: $, count: $ }).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
-// works with nested args too
-const q = Query.users({ filter: { is_active: true, name: $ }, offset: $, count: $ }).id.name.$build({filter: { name: "..." }, offset: 0, count: 10})
+const q = Query.users({ filter: $("filterVar"), offset: $, count: $ }).id.name.
+type Variables = {filterVar: UserFilter, offset: number, count: number}
+
+const q = Query.users($).id.articles({count: $}, q => id.title)
+type Variables = {filter: UserFilter, offset: number, count: number, articles__count: number}
 ```
 
 ## Compatibility
