@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.16](https://github.com/zozzz/gql-unicorn/compare/0.0.15...0.0.16) (2025-06-04)
+
+
+* constraint Select type max depth to 10 ([821a024](https://github.com/zozzz/gql-unicorn/commit/821a0246632614cab665dfb66dbdb72c633b50ea))
+* export symbols for typechecker ([bcf8ccf](https://github.com/zozzz/gql-unicorn/commit/bcf8ccf78994abeb833ec008010b4424f8a9a893))
+
 ## [0.0.15](https://github.com/zozzz/gql-unicorn/compare/0.0.14...0.0.15) (2025-06-03)
 
 ## [0.0.14](https://github.com/zozzz/gql-unicorn/compare/0.0.13...0.0.14) (2025-06-03)
