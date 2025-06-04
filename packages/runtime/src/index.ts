@@ -1,5 +1,6 @@
 export * from "./builder"
 export * from "./operation"
 export * from "./select"
+export * from "./symbols"
 export * from "./type"
 export { $ } from "./var"
