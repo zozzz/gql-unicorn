@@ -40,8 +40,11 @@ type FlagAsCommon<F> = Extract<F, AllCommonFlags>
 
 // TODO: more specify selection
 // TODO: build only one level at a time
-export type Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> =
-    IsInterface<T> extends true ? _Select<T, R, V, F, P> & OnType<T, R, V, F, P> : _Select<T, R, V, F, P>
+export type Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> = P["length"] extends 10
+    ? never
+    : IsInterface<T> extends true
+      ? _Select<T, R, V, F, P> & OnType<T, R, V, F, P>
+      : _Select<T, R, V, F, P>
 
 type _Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> =
     IsAtomic<T> extends true
