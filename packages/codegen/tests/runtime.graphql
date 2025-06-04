@@ -9,7 +9,7 @@ type Query {
     afc: AFC!
     atomicScalar: String!
     atomicArgsScalar(id: ID): String
-
+    search(text: String!): [SearchResult!]!
 }
 
 type Mutation {
@@ -96,3 +96,5 @@ type AFC {
     hq: Location!
     hqName: String!
 }
+
+union SearchResult = AFC | SelfRecursive

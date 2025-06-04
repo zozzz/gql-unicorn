@@ -4,7 +4,8 @@ exports[`codegen query without parameters 1`] = `
 "/* eslint-disable */
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
-import { queryBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+import * as __runtime from "@gql-unicorn/runtime"
+import { type FieldDefinitions } from "@gql-unicorn/runtime"
 export type User = {
     __typename: "User"
     /**
@@ -28,17 +29,18 @@ const __FieldDefs: FieldDefinitions = {
         "currentUser": "User"
     }
 }
-export const Query = queryBuilder<__Query>(__FieldDefs)
-export const Type = typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
-export { $ }"
+export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)
+export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+export const $ = __runtime.$"
 `;
 
 exports[`codegen query with parameters 1`] = `
 "/* eslint-disable */
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
-import { type Operation, queryBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+import * as __runtime from "@gql-unicorn/runtime"
+import { type Operation, type FieldDefinitions } from "@gql-unicorn/runtime"
 export type User = {
     __typename: "User"
     /**
@@ -64,32 +66,34 @@ const __FieldDefs: FieldDefinitions = {
         ]
     }
 }
-export const Query = queryBuilder<__Query>(__FieldDefs)
-export const Type = typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
-export { $ }"
+export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)
+export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+export const $ = __runtime.$"
 `;
 
 exports[`codegen mutation without parameters 1`] = `
 "/* eslint-disable */
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
-import { mutationBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+import * as __runtime from "@gql-unicorn/runtime"
+import { type FieldDefinitions } from "@gql-unicorn/runtime"
 export type __Mutation = {
     someMutaionThing: string
 }
 const __FieldDefs: FieldDefinitions = {
     "Mutation": {}
 }
-export const Mutation = mutationBuilder<__Mutation>(__FieldDefs)
-export { $ }"
+export const Mutation = __runtime.mutationBuilder<__Mutation>(__FieldDefs)
+export const $ = __runtime.$"
 `;
 
 exports[`codegen mutation with parameters 1`] = `
 "/* eslint-disable */
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
-import { type Operation, queryBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+import * as __runtime from "@gql-unicorn/runtime"
+import { type Operation, type FieldDefinitions } from "@gql-unicorn/runtime"
 export type User = {
     __typename: "User"
     /**
@@ -116,32 +120,34 @@ const __FieldDefs: FieldDefinitions = {
         ]
     }
 }
-export const Query = queryBuilder<__Query>(__FieldDefs)
-export const Type = typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
-export { $ }"
+export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)
+export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+export const $ = __runtime.$"
 `;
 
 exports[`codegen subscription without parameters 1`] = `
 "/* eslint-disable */
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
-import { subscriptionBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+import * as __runtime from "@gql-unicorn/runtime"
+import { type FieldDefinitions } from "@gql-unicorn/runtime"
 export type __Subscription = {
     onChangeSomething: string
 }
 const __FieldDefs: FieldDefinitions = {
     "Subscription": {}
 }
-export const Subscription = subscriptionBuilder<__Subscription>(__FieldDefs)
-export { $ }"
+export const Subscription = __runtime.subscriptionBuilder<__Subscription>(__FieldDefs)
+export const $ = __runtime.$"
 `;
 
 exports[`codegen subscription with parameters 1`] = `
 "/* eslint-disable */
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
-import { type Operation, subscriptionBuilder, fragmentBuilder, typeBuilder, type FieldDefinitions, $ } from "@gql-unicorn/runtime"
+import * as __runtime from "@gql-unicorn/runtime"
+import { type Operation, type FieldDefinitions } from "@gql-unicorn/runtime"
 export type SomeEvent = {
     __typename: "SomeEvent"
     id: string
@@ -163,8 +169,8 @@ const __FieldDefs: FieldDefinitions = {
         ]
     }
 }
-export const Subscription = subscriptionBuilder<__Subscription>(__FieldDefs)
-export const Type = typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)
-export { $ }"
+export const Subscription = __runtime.subscriptionBuilder<__Subscription>(__FieldDefs)
+export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
+export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+export const $ = __runtime.$"
 `;

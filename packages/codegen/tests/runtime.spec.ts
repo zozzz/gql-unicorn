@@ -121,6 +121,15 @@ describe("runtime", () => {
             )
         })
 
+        test("union", () => {
+            testQuery<{ __typename: "AFC"; id: string } | { __typename: "SelfRecursive"; parent: { id: string } }, {}>(
+                G.Query.search({ text: "search" })
+                    .$on(G.Type.AFC.id)
+                    .$on(G.Type.SelfRecursive.parent(q => q.id)),
+                'query{search(text:\"search\"){__typename,... on AFC{id},... on SelfRecursive{parent{id}}}}'
+            )
+        })
+
         test("scalar operation return", () => {
             testQuery<{ __typename: string; distance: number }, { id: string }>(
                 G.Query.location(G.$).distance({ lat: 1, lng: 2, unit: G.DistanceUnit.METRIC }),

@@ -3,10 +3,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
 
-import type { FlagInclude, FlagRemove, ObjectSpread } from "./common"
+import type { ExcludeEmpty, FlagInclude, FlagRemove, ObjectSpread } from "./common"
 import type { Arguments, ToVars } from "./operation"
 import type { SELECTION } from "./symbols"
-import type { BareType, Input, Interface, IsAtomic, IsInterface, Operation, SimpleType } from "./type"
+import type { BareType, Input, Interface, IsAtomic, IsInterface, Operation, SimpleType, Union } from "./type"
 import type { Vars } from "./var"
 
 type Result = any
@@ -49,9 +49,11 @@ export type Select<T, R extends Result, V extends Vars, F extends Flag, P extend
 type _Select<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> =
     IsAtomic<T> extends true
         ? AtomicSelect<T, R, V, F, P> & Selection<R, V>
-        : T extends SimpleType
-          ? TypeSelect<T, R, V, F, P> & Selection<R, V>
-          : unknown
+        : T extends Union<infer UT>
+          ? UnionSelect<T, UT, R, V, F, P> & Selection<R, V>
+          : T extends SimpleType
+            ? TypeSelect<T, R, V, F, P> & Selection<R, V>
+            : unknown
 
 type _AddFieldToResult<R extends Result, T extends SimpleType, K extends keyof T, V, F extends Flag> =
     FlagInclude<F, Flag.AutoTn> extends true
@@ -90,6 +92,22 @@ type TypeSelect<T extends SimpleType, R extends Result, V extends Vars, F extend
         F
     >,
     FlagInclude<F, Flag.AutoTn> extends true ? keyof R | "__typename" : keyof R
+>
+
+type UnionSelect<
+    T extends SimpleType,
+    UT,
+    R extends Result,
+    V extends Vars,
+    F extends Flag,
+    P extends string[]
+> = _AddBuildable<
+    {
+        $on: OnFn<T, R, V, F, P>
+    },
+    R,
+    V,
+    F
 >
 
 type Field<
@@ -193,19 +211,22 @@ type OnType<T, R extends Result, V extends Vars, F extends Flag, P extends strin
     T extends Interface<infer _, infer CT>
         ? CT extends SimpleType
             ? {
-                  [TN in CT["__typename"]]: CT extends { __typename: TN } ? { $on: OnFn<T, R, V, F, P, CT> } : never
+                  [TN in CT["__typename"]]: CT extends { __typename: TN } ? { $on: OnFn<T, R, V, F, P> } : never
               }[CT["__typename"]]
             : never
         : never
 
-type OnFn<T, R extends Result, V extends Vars, F extends Flag, P extends string[], O> = <OR, OV extends Vars>(
+type OnFn<T, R extends Result, V extends Vars, F extends Flag, P extends string[]> = <OR, OV extends Vars>(
     on: Selection<OR, OV>
 ) => Select<T, R | OR, V & OV, F, P>
 
 export type Buildable<R, V extends Vars> = {
-    $build: () => TypedDocumentNode<R, V>
+    $build: () => TypedDocumentNode<ExcludeEmpty<R>, V>
     $gql: () => string
 }
+
+export type TypeOf<T> = T extends TypedDocumentNode<infer R, any> ? R : unknown
+export type VarOf<T> = T extends TypedDocumentNode<any, infer V> ? V : unknown
 
 export interface Selection<R, V extends Vars> {
     [SELECTION]: [R, V]

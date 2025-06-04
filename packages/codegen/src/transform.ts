@@ -39,7 +39,12 @@ const AtomicScalars = {
 
 const RuntimeLib = "@gql-unicorn/runtime"
 
-const Banner = ["/* eslint-disable */", "/* prettier-ignore */", "/* !!! GENERATED FILE DO NOT EDIT !!! */"]
+const Banner = [
+    "/* eslint-disable */",
+    "/* prettier-ignore */",
+    "/* !!! GENERATED FILE DO NOT EDIT !!! */",
+    'import * as __runtime from "@gql-unicorn/runtime"'
+]
 
 export function transform(schema: GraphQLSchema, config?: TransformConfig) {
     return new Transformer(schema, config || {}).transform()
@@ -71,31 +76,31 @@ class Transformer {
         const query = this.schema.getQueryType()
         if (query != null) {
             this.#parts.push(...this.#generateObject(query, "__Query"))
-            this.#import(RuntimeLib, "queryBuilder", false)
-            builders.push(`export const Query = queryBuilder<__Query>(__FieldDefs)`)
+            // this.#import(RuntimeLib, "queryBuilder", false)
+            builders.push(`export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)`)
         }
 
         const mutation = this.schema.getMutationType()
         if (mutation != null) {
             this.#parts.push(...this.#generateObject(mutation, "__Mutation"))
-            this.#import(RuntimeLib, "mutationBuilder", false)
-            builders.push(`export const Mutation = mutationBuilder<__Mutation>(__FieldDefs)`)
+            // this.#import(RuntimeLib, "mutationBuilder", false)
+            builders.push(`export const Mutation = __runtime.mutationBuilder<__Mutation>(__FieldDefs)`)
         }
 
         const subscription = this.schema.getSubscriptionType()
         if (subscription != null) {
             this.#parts.push(...this.#generateObject(subscription, "__Subscription"))
-            this.#import(RuntimeLib, "subscriptionBuilder", false)
-            builders.push(`export const Subscription = subscriptionBuilder<__Subscription>(__FieldDefs)`)
+            // this.#import(RuntimeLib, "subscriptionBuilder", false)
+            builders.push(`export const Subscription = __runtime.subscriptionBuilder<__Subscription>(__FieldDefs)`)
         }
 
         const typeMap = this.#generateTypeMap()
         if (typeMap.length > 0) {
             this.#parts.push(...typeMap)
-            this.#import(RuntimeLib, "fragmentBuilder", false)
-            this.#import(RuntimeLib, "typeBuilder", false)
-            builders.push(`export const Type = typeBuilder<__TypeMap>(__FieldDefs)`)
-            builders.push(`export const Fragment = fragmentBuilder<__TypeMap>(__FieldDefs)`)
+            // this.#import(RuntimeLib, "fragmentBuilder", false)
+            // this.#import(RuntimeLib, "typeBuilder", false)
+            builders.push(`export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)`)
+            builders.push(`export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)`)
         }
 
         if (builders.length > 0) {
@@ -105,12 +110,9 @@ class Transformer {
         }
 
         const reexport = ["$"]
-        for (const n of reexport) {
-            this.#import(RuntimeLib, n, false)
-        }
 
         this.#parts.unshift(...Banner, ...this.#generateImports())
-        return [...this.#parts, ...builders, `export { ${reexport.join(", ")} }`].join("\n")
+        return [...this.#parts, ...builders, reexport.map(v => `export const ${v} = __runtime.${v}`)].join("\n")
     }
 
     #generateImports(): string[] {
