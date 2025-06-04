@@ -50,7 +50,8 @@
   },
   "release-it": {
     "git": {
-      "requireCleanWorkingDir": false
+      "requireCleanWorkingDir": true,
+      "commitMessage": "chore: release ${version}"
     },
     "github": {
       "release": true
