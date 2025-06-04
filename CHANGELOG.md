@@ -1,5 +1,11 @@
 # Changelog
 
+# [0.1.0](https://github.com/zozzz/gql-unicorn/compare/0.0.16...0.1.0) (2025-06-04)
+
+
+* export TypeOf, VarOf types from generated file ([17900d0](https://github.com/zozzz/gql-unicorn/commit/17900d0671e140db75cf8624073dcbc9b1887dc6))
+* handle union type in select ([62edd7d](https://github.com/zozzz/gql-unicorn/commit/62edd7dcd621246dda23093d12a531846f7d7326))
+
 ## [0.0.16](https://github.com/zozzz/gql-unicorn/compare/0.0.15...0.0.16) (2025-06-04)
 
 
