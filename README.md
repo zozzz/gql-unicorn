@@ -79,10 +79,11 @@ if (Type.Worker.$is(user)) {
 #### Special Types
 
 ```typescript
-import { Query, Type, TypeOf, $ } from "genrated-pacakge-name"
+import { Query, Type, TypeOf, VarOf, $ } from "genrated-pacakge-name"
 
 const GetUser = Query.users({id: $("userId")})("id", "name")
 type User = TypeOf<typeof GetUser>
+type UserVars = VarOf<typeof GetUser>
 ```
 
 ### Variables

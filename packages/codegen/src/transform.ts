@@ -110,9 +110,16 @@ class Transformer {
         }
 
         const reexport = ["$"]
+        this.#import(RuntimeLib, "TypeOf", true)
+        this.#import(RuntimeLib, "VarOf", true)
 
         this.#parts.unshift(...Banner, ...this.#generateImports())
-        return [...this.#parts, ...builders, reexport.map(v => `export const ${v} = __runtime.${v}`)].join("\n")
+        return [
+            ...this.#parts,
+            ...builders,
+            reexport.map(v => `export const ${v} = __runtime.${v}`),
+            "export type { TypeOf, VarOf }"
+        ].join("\n")
     }
 
     #generateImports(): string[] {
