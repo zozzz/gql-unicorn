@@ -1,5 +1,6 @@
 type Query {
-    nodes: Node
+    "Get all nodes"
+    nodes: [Node!]!
     node(id: ID!): Node
     user(id: ID!): User
     articles(filter: ArticleFilter): [Article!]!
@@ -10,10 +11,16 @@ type Query {
     atomicScalar: String!
     atomicArgsScalar(id: ID): String
     search(text: String!): [SearchResult!]!
+    search2(text: String!): [SearchResult!]
+    search3(text: String!): [SearchResult]
 }
 
 type Mutation {
-    updateArticle(id: ID!, params: ArticleUpdate!): Article!
+    updateArticle(
+        "Article id"
+        id: ID!,
+        "Fields to update"
+        params: ArticleUpdate!): Article!
     doSomething(something: String): Int
 }
 
@@ -29,14 +36,20 @@ interface Node {
 }
 
 type User implements Node {
+    "ID of USer"
     id: ID!
+    "Name of user"
     name: String!
+    "Articles created by user"
     articles(count: Int!): [Article!]!
 }
 
 type Article implements Node {
+    " Id of Article "
     id: ID!
+    "Title of Article"
     title: String!
+    "Tags of Article"
     tags: [Tag!]
 }
 
@@ -64,7 +77,9 @@ type UserChangeEvent implements Event {
 }
 
 type ArticleChangeEvent implements Event {
+    "Previous values of Article"
     prev: Article!
+    "Current values of Article"
     curr: Article!
 }
 

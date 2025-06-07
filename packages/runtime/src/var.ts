@@ -1,8 +1,7 @@
 import { checker, VARIABLE } from "./symbols"
 
-export type Variable<N extends string | undefined> = N extends undefined ? VarToken : VarRef<N>
+export type Variable<N extends string> = VarRef<"$"> | VarRef<N>
 
-type VarToken = (<K extends string>(k: K) => Variable<K>) & { [VARIABLE]: undefined }
 type VarRef<N> = { [VARIABLE]: N }
 
 export const isVariable = checker<Variable<any>>(VARIABLE)
@@ -23,7 +22,8 @@ export function variableName(obj: Variable<any>): string | undefined {
  * Query.user({id: $("userId")})
  * ```
  */
-export const $ = ((name: string) => ({ [VARIABLE]: name })) as Variable<undefined>
-$[VARIABLE] = undefined
+export const $ = <N extends string>(name: N) => ({ [VARIABLE]: name }) as VarRef<N>
+
+export const $$ = { [VARIABLE]: "$" } satisfies VarRef<"$">
 
 export type Vars = Record<string, any>

@@ -1,12 +1,11 @@
 # GraphQL Unicorn [![npm version](https://badgen.net/npm/v/@gql-unicorn/runtime)](https://npm.im/@gql-unicorn/runtime) [![npm downloads](https://badgen.net/npm/dm/@gql-unicorn/runtime)](https://npm.im/@gql-unicorn/runtime)
 
+Generates types from GraphQL schema and a very minimal tree shakeable runtime information from schema for builder.
+
 Name of this package is a combination of `GraphQl` + `unicorn` (beacuse this is a 🦄 )
 
 > [!IMPORTANT]
 > Currently in development, this info is potentially wrong or incomplete.
-
-> [!NOTE]
-> Generates types from GraphQL schema and a very minimal runtime information from schema for builder.
 
 ## Install
 
@@ -17,61 +16,70 @@ npm install @gql-unicorn/runtime --save
 
 ## Usage
 
+> [!IMPORTANT]
+> Don't rebind any function, this lib uses `Proxy` and if you rebind a function it will break.
+
 ### Query
 
 ```typescript
-import { Query, Type, Fragment, $ } from "genrated-pacakge-name"
+import { queryArticles, Blog, News $ } from "genrated-pacakge-name"
 
-const fragment = Fragment("fragmentName").News.author(q => q.id.name)
+const fragment = News.$fragment("fragmentName", q => q.author(q => q.id.name))
 
-Query.articles()
-    .id
+const articlesQuery = queryArticles({filter: ...}, q => q.id
     .name
-    .tags({count: $.count}, q => q.id.name)
+    .tags({count: $("count")}, q => q.id.name)
     .another_field
     .$on(fragment)
-    .$on(Type.Blog.some_field)
-    .$build()
+    .$on(Blog(q => q.some_field.author(q => q.id.name)))
+)
 
-Query.articles()
-    .id
-    .name
-    .tags({count: $.count}, q => q.id.name)
-    .author(q => q.id.name)
-    .$build()
+async function doSomething() {
+    const result = await someLibThatExecGql(articlesQuery)
+    for (const article of result) {
+        doSomethingWithArticle(article)
+    }
+}
+
+function doSomethingWithArticle(article: TypeOf<typeof articlesQuery>[number]) {}
+
+function doSomethingWithFragment(fragment: TypeOf<typeof fragment>) {}
+
 ```
 
-#### TODO Selected
+#### Selected type
 
 ```typescript
-import { Query, $ } from "genrated-pacakge-name"
+import { queryUsers, $, type TypeOf } from "genrated-pacakge-name"
 
-const GetUser = Query.users({id: $("userId")})
-    .id
+const GetUser = queryUsers({id: $("userId")}, q => q.id
     .name
     .articles(q => q.id.name)
-    .$build()
+)
 
-type SUser = Selected<User, ["id", "name", {"articles": ["id", "name"]}]>
-// SUser = {id: string; name: string; articles: {id: string; name: string}[]}
+type SUser = Selected<User, ["id", "name", { articles: ["id", "name"] }]>
+type SUserInfer = TypeOf<typeof GetUser> // === SUser
+
+// TODO: currently not working
+type SUserWithAlias = Selected<User, [{ id: "userId" }, "name", { articles: ["id", "name"] }]>
 ```
 
 
 ### Mutation
 
 ```typescript
-import { Mutation, $ } from "genrated-pacakge-name"
+import { mutationCreateUser } from "genrated-pacakge-name"
 
-const CreateUser = Mutation.createUser({...}).id.name
+const CreateUser = mutationCreateUser({...}).id.name
 ```
 
 
 ### Type Check
 
 ```typescript
-import { Type } from "genrated-pacakge-name"
+import { Worker } from "genrated-pacakge-name"
 
-if (Type.Worker.$is(user)) {
+if (Worker.$is(user)) {
     // ...
 }
 ```
@@ -127,3 +135,21 @@ type Variables = {filter: UserFilter, offset: number, count: number, articles__c
 * Compatible with every packages that handle GraphQL queries in string format
 
     To create GraphQL string use `$gql` function
+
+## TODO
+
+* nested variables:
+    ```ts
+    queryUsers({filter: { id: $("userId"), name: $ /*filter__id*/ }})
+    ```
+    ```gql
+    query (userId: ID!, $filter__id: String) {
+        users(filter: { id: $userId, name: $filter__id })
+    }
+    ```
+
+* find a way to replace `$$` with `$`, or something more intuitive than `$$`
+* find a way to use `$.varName` instead `$("varName")`
+* redesign select result, to not building an object on the fly, instead use `Pick<User, "__typename", "id", "name">`
+  when subselect is happened: `Pick<User, "__typename", "id", "name"> & Record<"articles", Array<Pick<Article, "__typename", "id", "title">>>`
+* handle aliases: `queryUsers(q => q.id("userId").parent("userParent", q => q.id))`

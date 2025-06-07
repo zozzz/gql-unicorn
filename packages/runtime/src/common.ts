@@ -44,6 +44,8 @@ export type FlagRemove<V extends number, F extends number> = Exclude<V, F>
 
 export type FlagAdd<V extends number, F extends number> = V | F
 
+export type WhenFlag<V extends number, F extends number, OK, NO> = FlagInclude<V, F> extends true ? OK : NO
+
 type OptionalPropertyNames<T> = { [K in keyof T]-?: {} extends { [P in K]: T[K] } ? K : never }[keyof T]
 
 type SpreadProperties<L, R, K extends keyof L & keyof R> = { [P in K]: L[P] | Exclude<R[P], undefined> }
@@ -64,3 +66,19 @@ export type ObjectSpread<A extends readonly [...any]> = A extends [infer L, ...i
 type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U]
 
 export type ExcludeEmpty<T> = T extends AtLeastOne<T> ? T : never
+
+export type UniqueArray<T> = T extends readonly [infer X, ...infer Rest]
+    ? InArray<Rest, X> extends true
+        ? Rest
+        : readonly [X, ...UniqueArray<Rest>]
+    : T
+
+// eslint-disable-next-line unused-imports/no-unused-vars
+type InArray<T, X> = T extends readonly [X, ...infer _Rest]
+    ? true
+    : T extends readonly [X]
+      ? true
+      : // eslint-disable-next-line unused-imports/no-unused-vars
+        T extends readonly [infer _, ...infer Rest]
+        ? InArray<Rest, X>
+        : false

@@ -1,4 +1,5 @@
-import { type FieldDefinitions } from "@gql-unicorn/runtime"
+/* eslint-disable @stylistic/js/max-len */
+import { pascalCase } from "es-toolkit"
 import {
     type GraphQLArgument,
     type GraphQLEnumType,
@@ -50,14 +51,17 @@ export function transform(schema: GraphQLSchema, config?: TransformConfig) {
     return new Transformer(schema, config || {}).transform()
 }
 
+const SelectTypeArgs = `R extends SelectionDef, V extends Vars, P extends string[]`
+
 class Transformer {
     readonly #scalarMap: Record<string, string>
     readonly #typeMap: Record<string, string> = {}
     readonly #parts: string[] = []
     readonly #indent = "    "
     readonly #imports: Record<string, Record<string, boolean>> = {}
-    readonly #objects: Record<string, string> = {}
-    readonly #fieldDefs: FieldDefinitions = {}
+    readonly #argumentTypes: Record<string, string> = {}
+    readonly #argumentInfosName: Record<string, string> = {}
+    readonly #argumentInfos: string[] = []
 
     constructor(
         readonly schema: GraphQLSchema,
@@ -75,50 +79,31 @@ class Transformer {
 
         const query = this.schema.getQueryType()
         if (query != null) {
-            this.#parts.push(...this.#generateObject(query, "__Query"))
-            // this.#import(RuntimeLib, "queryBuilder", false)
-            builders.push(`export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)`)
+            builders.push(...this.#rootBuilder(query, "query", "queryBuilder"))
         }
 
         const mutation = this.schema.getMutationType()
         if (mutation != null) {
-            this.#parts.push(...this.#generateObject(mutation, "__Mutation"))
-            // this.#import(RuntimeLib, "mutationBuilder", false)
-            builders.push(`export const Mutation = __runtime.mutationBuilder<__Mutation>(__FieldDefs)`)
+            builders.push(...this.#rootBuilder(mutation, "mutate", "mutationBuilder"))
         }
 
         const subscription = this.schema.getSubscriptionType()
         if (subscription != null) {
-            this.#parts.push(...this.#generateObject(subscription, "__Subscription"))
-            // this.#import(RuntimeLib, "subscriptionBuilder", false)
-            builders.push(`export const Subscription = __runtime.subscriptionBuilder<__Subscription>(__FieldDefs)`)
+            builders.push(...this.#rootBuilder(subscription, "subscribe", "subscriptionBuilder"))
         }
 
-        const typeMap = this.#generateTypeMap()
-        if (typeMap.length > 0) {
-            this.#parts.push(...typeMap)
-            // this.#import(RuntimeLib, "fragmentBuilder", false)
-            // this.#import(RuntimeLib, "typeBuilder", false)
-            builders.push(`export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)`)
-            builders.push(`export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)`)
-        }
-
-        if (builders.length > 0) {
-            const info = JSON.stringify(this.#fieldDefs, null, this.#indent)
-            this.#import(RuntimeLib, "FieldDefinitions", true)
-            builders.unshift(`const __FieldDefs: FieldDefinitions = ${info}`)
-        }
-
-        const reexport = ["$"]
+        const reexport = ["$", "$$"]
         this.#import(RuntimeLib, "TypeOf", true)
         this.#import(RuntimeLib, "VarOf", true)
+        this.#import(RuntimeLib, "Selected", true)
 
-        this.#parts.unshift(...Banner, ...this.#generateImports())
+        this.#parts.unshift(...Banner, ...this.#generateImports(), ...this.#argumentInfos)
         return [
             ...this.#parts,
+            ...Object.values(this.#argumentTypes),
             ...builders,
-            reexport.map(v => `export const ${v} = __runtime.${v}`),
-            "export type { TypeOf, VarOf }"
+            ...reexport.map(v => `export const ${v} = __runtime.${v}`),
+            "export type { TypeOf, VarOf, Selected }"
         ].join("\n")
     }
 
@@ -129,18 +114,6 @@ class Transformer {
                     .map(([name, isType]) => `${isType ? "type " : ""}${name}`)
                     .join(", ")} } from "${name}"`
         )
-    }
-
-    #generateTypeMap(): string[] {
-        if (Object.keys(this.#objects).length === 0) {
-            return []
-        }
-
-        return [
-            "type __TypeMap = {",
-            ...Object.entries(this.#objects).map(([name, type]) => `${this.#indent}${name}: ${type}`),
-            "}"
-        ]
     }
 
     #addType(type: GraphQLNamedType): string {
@@ -157,7 +130,7 @@ class Transformer {
             this.#parts.push(...this.#generateScalar(type, name))
             return name
         } else {
-            const name = type.name
+            const name = this.#bareType(type).name
             this.#typeMap[type.name] = name
             if (isEnumType(type)) {
                 this.#parts.push(...this.#generateEnum(type, name))
@@ -165,47 +138,51 @@ class Transformer {
                 this.#parts.push(...this.#generateInput(type, name))
             } else if (isInterfaceType(type)) {
                 this.#parts.push(...this.#generateInterface(type, name))
+                this.#parts.push(...this.#select(type))
             } else if (isUnionType(type)) {
                 this.#parts.push(...this.#generateUnion(type, name))
+                this.#parts.push(...this.#select(type))
             } else if (isObjectType(type)) {
                 this.#parts.push(...this.#generateObject(type, name))
+                this.#parts.push(...this.#select(type))
             }
             return name
         }
-        // if (isEnumType(type)) {
-        //     this.#parts.push(...this.#generateEnum(type, name))
-        // } else if (isInputObjectType(type)) {
-        //     this.#parts.push(...this.#generateInput(type, name))
-        // } else {
-
-        // }
     }
 
-    #typename(type: GraphQLType): string {
+    #typename(type: GraphQLType, nullable: boolean = true): string {
         if (isListType(type)) {
-            return this.#typenameOfList(type)
+            return this.#typenameOfList(type, nullable)
         } else if (isNonNullType(type)) {
             return this.#typenameOfNonNull(type)
         }
-        // XXX maybe recursive: `type User { creator: User }`
-        return this.#addType(type)
+
+        return `${this.#addType(type)}${nullable ? " | null" : ""}`
     }
 
     #bareTypename(type: GraphQLType): string {
-        if (isListType(type)) {
-            return this.#bareTypename(type.ofType)
-        } else if (isNonNullType(type)) {
-            return this.#bareTypename(type.ofType)
-        }
-        return type.name
+        return this.#addType(this.#bareType(type))
     }
 
-    #typenameOfList(type: GraphQLList<GraphQLType>): string {
-        return `Array<${this.#typename(type.ofType)}>`
+    #selectName(type: GraphQLType): string {
+        return `${this.#addType(this.#bareType(type))}Select`
+    }
+
+    #bareType(type: GraphQLType): GraphQLNamedType {
+        if (isListType(type)) {
+            return this.#bareType(type.ofType)
+        } else if (isNonNullType(type)) {
+            return this.#bareType(type.ofType)
+        }
+        return type
+    }
+
+    #typenameOfList(type: GraphQLList<GraphQLType>, nullable: boolean): string {
+        return `Array<${this.#typename(type.ofType, nullable)}>`
     }
 
     #typenameOfNonNull(type: GraphQLNonNull<GraphQLType>): string {
-        return this.#typename(type.ofType)
+        return this.#typename(type.ofType, false)
     }
 
     #generateScalar(_type: GraphQLScalarType, _name: string): string[] {
@@ -235,44 +212,61 @@ class Transformer {
     }
 
     #generateObject(type: GraphQLObjectType, name: string): string[] {
-        if (isObjectType(type) && type.name === name) {
-            this.#objects[type.name] = name
-        }
-
         return [
             ...this.#comment(type.description),
             `export type ${name} = {`,
-            type.name === name ? `${this.#indent}__typename: ${JSON.stringify(name)}` : null,
+            `${this.#indent}__typename: ${JSON.stringify(this.#bareType(type).name)}`,
             ...this.#generateObjectFields(type, type.getFields()),
-            `}`
-        ].filter(Boolean) as string[]
+            `}`,
+            ...this.#generateTypeBuilder(type)
+        ].filter(Boolean)
     }
 
     #generateObjectFields(context: GraphQLType, fields: GraphQLFieldMap<any, any>): string[] {
         const result: string[] = []
-        for (const [name, { type, description, deprecationReason, args }] of Object.entries(fields)) {
-            if (args.length > 0) {
-                result.push(
-                    ...this.#generateOperation(context, name, args, type, description, deprecationReason).map(
-                        v => `${this.#indent}${v}`
-                    )
+        for (const [name, { type, description, deprecationReason }] of Object.entries(fields)) {
+            result.push(
+                ...this.#generateField(context, name, type, description, deprecationReason, null).map(
+                    v => `${this.#indent}${v}`
                 )
-            } else {
-                result.push(
-                    ...this.#generateField(context, name, type, description, deprecationReason, null).map(
-                        v => `${this.#indent}${v}`
-                    )
-                )
-            }
+            )
         }
         return result
+    }
+
+    #generateTypeBuilder(context: GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType): string[] {
+        const info: string[] = []
+
+        if (!isUnionType(context)) {
+            for (const { name, type, args } of Object.values(context.getFields())) {
+                if (args.length > 0) {
+                    const [_, ai] = this.#argumentsType(`${context.name}${pascalCase(name)}`, args)
+
+                    if (bareIsScalar(type)) {
+                        info.push(`${name}: ${ai}`)
+                    } else {
+                        info.push(`${name}: [${ai}, ${this.#bareTypename(type)}]`)
+                    }
+                } else {
+                    if (!bareIsScalar(type)) {
+                        info.push(`${name}: ${this.#bareTypename(type)}`)
+                    }
+                }
+            }
+        }
+
+        const infoStr = info.length > 0 ? `, (() => ({ ${info.join(", ")} })) as () => __runtime.BuilderInfo` : ""
+        const T = this.#selectType(this.#selectName(context), `["__typename"]`, "{}", "[]")
+        const TN = JSON.stringify(context.name)
+        return [
+            `export const ${this.#bareTypename(context)} = __runtime.typeBuilder<${T}, ${TN}>("${context.name}"${infoStr})`
+        ]
     }
 
     #generateInput(type: GraphQLInputObjectType, name: string): string[] {
         return [
             ...this.#comment(type.description),
             `export type ${name} = {`,
-            // `${this.#indent}__typename: ${JSON.stringify(name)}`,
             ...this.#generateInputFields(type.getFields()),
             `}`
         ]
@@ -307,118 +301,299 @@ class Transformer {
             result.push(`${name}: ${this.#typename(type)} | null`)
         }
 
-        if (context != null) {
-            if (bareIsScalar(type)) {
-                this.#addFieldDef(context, name, {}, undefined)
-            } else {
-                this.#addFieldDef(context, name, {}, this.#bareTypename(type))
-            }
-        }
-
         return result
-    }
-
-    #generateOperation(
-        context: GraphQLType,
-        name: string,
-        args: ReadonlyArray<GraphQLArgument>,
-        type: GraphQLType,
-        description?: string | null,
-        deprecationReason?: string | null
-    ): string[] {
-        const result: string[] = []
-        const compiledArgs: string[] = []
-        const paramsComment: string[] = []
-
-        const opArgInfo: Record<string, string> = {}
-        this.#import(RuntimeLib, "Operation", true)
-
-        // alma: OpFunction<{count: number}, Article[] | null>
-        for (const arg of args) {
-            const [c, a] = this.#generateArg(arg)
-            compiledArgs.push(a)
-            paramsComment.push(...c)
-            opArgInfo[arg.name] = arg.type.toString()
-        }
-
-        const returnType = isNonNullType(type) ? this.#typename(type) : `${this.#typename(type)} | null`
-
-        result.push(
-            ...this.#comment(description, deprecationReason, null, paramsComment),
-            `${name}: Operation<{ ${compiledArgs.join(", ")} }, ${returnType}>`
-        )
-
-        this.#addFieldDef(context, name, opArgInfo, bareIsScalar(type) ? undefined : this.#bareTypename(type))
-
-        return result
-    }
-
-    #generateArg(arg: GraphQLArgument): [string[], string] {
-        const comment: string[] = []
-        const argDoc = arg.defaultValue ? ` [${arg.name}=${JSON.stringify(arg.defaultValue)}]` : ` [${arg.name}]`
-        const deprectaed = arg.deprecationReason ? `(DEPRECATED: ${arg.deprecationReason}) ` : ""
-
-        if (arg.description != null) {
-            comment.push(
-                ...arg.description
-                    .split(/\r?\n/g)
-                    .map((line, i) => ` * ${i > 0 ? this.#indent : `@param${argDoc}`} ${deprectaed}${line.trim()}`)
-            )
-        }
-
-        const sep = isNonNullType(arg.type) ? ":" : "?:"
-        const result: string = `${arg.name}${sep} ${this.#typename(arg.type)}`
-
-        return [comment, result]
-    }
-
-    #addFieldDef(
-        context: GraphQLType,
-        name: string,
-        args: Record<string, string>,
-        returnType: string | undefined
-    ): void {
-        if (isObjectType(context)) {
-            const contextName = context.name
-            const contextO = (this.#fieldDefs[contextName] ??= {})
-            if (Object.keys(args).length === 0) {
-                if (typeof returnType === "string") {
-                    contextO[name] = returnType
-                }
-            } else {
-                if (returnType == null) {
-                    contextO[name] = args
-                } else {
-                    contextO[name] = [args, returnType]
-                }
-            }
-        }
     }
 
     #generateInterface(type: GraphQLInterfaceType, name: string): string[] {
-        this.#import(RuntimeLib, "Interface", true)
-
-        const impls = this.schema.getImplementations(type)
-        const objects = impls.objects.map(o => this.#typename(o))
-        const interfaces = impls.interfaces.map(o => this.#typename(o))
-
+        const types = this.#__typenames(type)
         const comment = this.#comment(type.description)
-        return [
-            ...comment,
-            `type __interface_${name} = {`,
-            ...this.#generateObjectFields(type, type.getFields()),
-            `}`,
-            ...comment,
-            `export type ${name} = Interface<__interface_${name}, ${[...objects, ...interfaces].join(" | ")}>`
-        ]
+        return [...comment, `export type ${name} = ${types.join(" | ")}`, ...this.#generateTypeBuilder(type)]
     }
 
     #generateUnion(type: GraphQLUnionType, name: string): string[] {
-        this.#import(RuntimeLib, "Union", true)
+        const types = this.#__typenames(type)
 
-        const types = type.getTypes().map(t => this.#typename(t))
+        return [
+            ...this.#comment(type.description),
+            `export type ${name} = ${types.join(" | ")}`,
+            ...this.#generateTypeBuilder(type)
+        ]
+    }
 
-        return [...this.#comment(type.description), `export type ${name} = Union<${types.join(" | ")}>`]
+    #rootBuilder(context: GraphQLObjectType, prefix: string, builder: string): string[] {
+        const result: string[] = []
+
+        for (const { name, args, type, description, deprecationReason } of Object.values(context.getFields())) {
+            const varName = `${prefix}${pascalCase(name)}`
+            const varType = `${pascalCase(prefix)}${pascalCase(name)}`
+            let argType: string = "undefined"
+            let argInfo: string | undefined
+            let typeValue: string = "any"
+            let builderT: string = "any"
+
+            this.#import(RuntimeLib, "BuildReturn", true)
+
+            if (args.length > 0) {
+                ;[argType, argInfo] = this.#argumentsType(varType, args)
+                if (bareIsScalar(type)) {
+                    typeValue = this.#typename(type)
+                    // <AA extends Arguments<A>>(...args: [string, AA] | [AA]): BuildReturn<T, {} & ToVars<A, [], AA>>
+                    builderT =
+                        `<AA extends Arguments<${argType}>>(...args: [string, AA] | [AA]) `
+                        + `=> BuildReturn<${typeValue}, never, {} & ToVars<${argType}, [], AA>>`
+                } else {
+                    this.#import(RuntimeLib, "SelectionDef", true)
+
+                    const R = this.#selectR(type)
+                    typeValue = this.#selectType(this.#selectName(type), R, "{}", "[]")
+                    argInfo = `[${argInfo}, ${this.#bareTypename(type)}]`
+                    const sfn = `(select: ${typeValue}) => Selection<any, SS, SV>`
+                    builderT =
+                        `<SS extends SelectionDef, SV extends Vars, AA extends Arguments<${argType}>>`
+                        + `(...args: [string, AA, ${sfn}] | [AA, ${sfn}]) `
+                        + `=> BuildReturn<${this.#typename(type)}, SS, SV & ToVars<${argType}, [], AA>>`
+                }
+            } else {
+                if (bareIsScalar(type)) {
+                    typeValue = this.#typename(type)
+                    builderT = `(name?: string) => BuildReturn<${typeValue}, never, never>`
+                } else {
+                    this.#import(RuntimeLib, "SelectionDef", true)
+
+                    // const R = this.#rootBuilderResult(type)
+                    const R = this.#selectR(type)
+                    typeValue = this.#selectType(this.#selectName(type), R, "{}", "[]")
+                    argInfo = this.#bareTypename(type)
+                    const sfn = `(select: ${typeValue}) => Selection<any, SS, SV>`
+                    builderT =
+                        `<SS extends SelectionDef, SV extends Vars, >`
+                        + `(...args: [string, ${sfn}] | [${sfn}])`
+                        + `=> BuildReturn<${this.#typename(type)}, SS, SV>`
+                }
+            }
+
+            const argInfoRes = argInfo ? `, ${argInfo}` : ""
+            result.push(
+                ...this.#comment(description, deprecationReason),
+                `export const ${varName} = __runtime.${builder}("${name}"${argInfoRes}) as ${builderT}`
+            )
+        }
+
+        return result
+    }
+
+    #select(type: GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType): string[] {
+        const result: string[] = []
+
+        this.#import(RuntimeLib, "Vars", true)
+        this.#import(RuntimeLib, "Selection", true)
+
+        const fields = isUnionType(type) ? [] : this.#selectFields(type, type.getFields())
+
+        fields.push(...this.#onFns(type))
+
+        // const R = isObjectType(type) ? `[...R, "__typename"]` : "R"
+        result.push(
+            ...this.#comment(type.description),
+            `export interface ${this.#selectName(type)}<${SelectTypeArgs}> `
+                + `extends Selection<${this.#bareTypename(type)}, R, V> {`,
+            ...fields.map(v => `${this.#indent}${v}`),
+            `}`
+        )
+
+        return result
+    }
+
+    #selectFields(context: GraphQLType, fields: GraphQLFieldMap<any, any>): string[] {
+        const result: string[] = []
+        for (const { name, args, type, description, deprecationReason } of Object.values(fields)) {
+            const extraComment = bareIsScalar(type)
+                ? ` * @type ${this.#typename(type)}`
+                : ` * @type {${this.#typename(type)}}`
+            result.push(
+                ...this.#comment(description, deprecationReason, undefined, [extraComment]),
+                ...this.#selectField(context, name, args, type)
+            )
+        }
+        return result
+    }
+
+    #selectField(
+        context: GraphQLType,
+        name: string,
+        args: ReadonlyArray<GraphQLArgument>,
+        type: GraphQLType
+    ): string[] {
+        const contextName = this.#selectName(context)
+        const result: string[] = []
+
+        this.#import(RuntimeLib, "ExtendSelected", true)
+        if (args.length > 0) {
+            this.#import(RuntimeLib, "Arguments", true)
+            this.#import(RuntimeLib, "ToVars", true)
+            const [argumentType, _] = this.#argumentsType(contextName, args)
+            const VP = `[...P, ${JSON.stringify(name)}]`
+
+            if (bareIsScalar(type)) {
+                const R = `ExtendSelected<R, [${JSON.stringify(name)}]>`
+                const V = `V & ToVars<${argumentType}, ${VP}, A>`
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                result.push(`${name}<A extends Arguments<${argumentType}>>(args: A): ${returnType}`)
+            } else {
+                const R = `ExtendSelected<R, [Record<${JSON.stringify(name)}, SR>]>`
+                const V = `V & SV & ToVars<${argumentType}, ${VP}, A>`
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
+                const subf = `(select: ${subs}) => Selection<ST, SR, SV>`
+                result.push(
+                    `${name}<A extends Arguments<${argumentType}>, ST, SR extends SelectionDef, SV extends Vars>(args: A, select: ${subf}): ${returnType}`
+                )
+            }
+        } else {
+            if (bareIsScalar(type)) {
+                const R = `ExtendSelected<R, [${JSON.stringify(name)}]>`
+                const V = `V`
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                result.push(`${name}: ${returnType}`)
+            } else {
+                const R = `ExtendSelected<R, [Record<${JSON.stringify(name)}, SR>]>`
+                const V = `V & SV`
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
+                const subf = `(select: ${subs}) => Selection<ST, SR, SV>`
+                result.push(`${name}<ST, SR extends SelectionDef, SV extends Vars>(select: ${subf}): ${returnType}`)
+            }
+        }
+        return result
+    }
+
+    #onFns(type: GraphQLType): string[] {
+        // this.#import(RuntimeLib, "OnFnResult", true)
+        const selfT = this.#selectType(this.#selectName(type), "[...R, ...SR]", "V & SV", "P")
+        const onSelf = `$on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<${this.#bareTypename(type)}, SR, SV>): ${selfT}`
+        const result: string[] = [onSelf]
+
+        // TODO: maybe once upon a time
+        // const otherSelfT = this.#selectType(this.#selectName(type), "R | SR", "V & SV", "P")
+        // const fragmentTypes: string[] = []
+
+        // if (isUnionType(type)) {
+        //     for (const entry of this.#expandTypes(type)) {
+        //         const entryAny = this.#selectType(this.#selectName(entry), "any", "any", "any")
+        //         result.push(`$on<SR, SV extends Vars>(fragment: ${entryAny}): ${otherSelfT}`)
+        //         fragmentTypes.push(entryAny)
+        //     }
+        // } else if (isInterfaceType(type)) {
+        //     for (const entry of this.#expandTypes(type)) {
+        //         const entryAny = this.#selectType(this.#selectName(entry), "any", "any", "any")
+        //         result.push(`$on<SR, SV extends Vars>(fragment: ${entryAny}): ${otherSelfT}`)
+        //         fragmentTypes.push(entryAny)
+        //     }
+        // }
+
+        // if (fragmentTypes.length > 0) {
+        //     result.push(`$on<SR, SV extends Vars>(fragments: ${fragmentTypes.join(" | ")}): ${selfT} | ${otherSelfT}`)
+        // }
+
+        return result
+    }
+
+    #__typenames(type: GraphQLType): string[] {
+        return this.#expandTypes(type).map(v => this.#bareTypename(v))
+    }
+
+    #expandTypes(type: GraphQLType): GraphQLType[] {
+        if (isUnionType(type)) {
+            return Array.from(type.getTypes())
+        } else if (isInterfaceType(type)) {
+            const result: GraphQLType[] = []
+            const impls = this.schema.getImplementations(type)
+            for (const t of impls.interfaces) {
+                result.push(...this.#expandTypes(t))
+            }
+            for (const t of impls.objects) {
+                result.push(...this.#expandTypes(t))
+            }
+            return result
+        } else if (isListType(type)) {
+            return this.#expandTypes(type.ofType)
+        } else if (isNonNullType(type)) {
+            return this.#expandTypes(type.ofType)
+        } else {
+            return [type]
+        }
+    }
+
+    #selectType(name: string, R: string, V: string, P: string): string {
+        return `${name}<${R}, ${V}, ${P}>`
+    }
+
+    #selectR(type: GraphQLType): string {
+        const bare = this.#bareType(type)
+        if (isUnionType(bare)) {
+            return "[]"
+        } else if (isInterfaceType(bare)) {
+            return "[]"
+        } else {
+            return `["__typename"]`
+        }
+    }
+
+    #subSelectType(name: string, R: string, V: string, P: string): string {
+        return this.#selectType(name, R, V, P)
+    }
+
+    #argumentsType(prefix: string, args: ReadonlyArray<GraphQLArgument>): [string, string] {
+        const argName = `${prefix}Args`
+        let argInfoName: string
+
+        const result: string[] = [`export type ${argName} = {`]
+        const info: Record<string, string> = {}
+
+        for (const { name, type, description, deprecationReason, defaultValue } of args) {
+            result.push(
+                ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`),
+                `${this.#indent}${name}: ${this.#typename(type)}`
+            )
+            info[name] = type.toString()
+        }
+
+        result.push("}")
+
+        const infoKey = Object.entries(info)
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(v => v.join(":"))
+            .join(",")
+        if (!(infoKey in this.#argumentInfosName)) {
+            argInfoName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
+            this.#argumentInfosName[infoKey] = argInfoName
+            this.#argumentInfos.push(`const ${argInfoName} = ${JSON.stringify(info)}`)
+        } else {
+            argInfoName = this.#argumentInfosName[infoKey]
+        }
+
+        this.#argumentTypes[argName] = result.join("\n")
+        return [argName, argInfoName] as const
+    }
+
+    #omit(t: string, field: string): string {
+        return `Omit<${t}, keyof R | "${field}">`
+        // return `Omit<${t}, keyof R | "${field}" | "$build" | "$gql">`
+    }
+
+    // Array<Alma>
+    // Array<Alma> | null
+    // Array<Alma | null> | null
+    #resultType(type: GraphQLType, name: string, nullable: boolean = true): string {
+        if (isListType(type)) {
+            return `Array<${this.#resultType(type.ofType, name, true)}>${nullable ? " | null" : ""}`
+        } else if (isNonNullType(type)) {
+            return this.#resultType(type.ofType, name, false)
+        } else if (nullable) {
+            return `${name} | null`
+        } else {
+            return name
+        }
     }
 
     #comment(
@@ -428,9 +603,6 @@ class Transformer {
         extra?: string[]
     ): string[] {
         const result: string[] = []
-        if (text == null && deprecationReason == null) {
-            return result
-        }
 
         result.push(`/**`)
         if (text != null) {
@@ -447,7 +619,7 @@ class Transformer {
         }
         result.push(" */")
 
-        return result
+        return result.length === 2 ? [] : result
     }
 
     #import(_from: string, what: string, isType: boolean) {

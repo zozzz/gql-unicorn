@@ -26,6 +26,7 @@
   "peerDependencies": {
     "@gql-unicorn/runtime": "workspace:*",
     "graphql": "^16.11.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "es-toolkit": "^1.38.0"
   }
 }

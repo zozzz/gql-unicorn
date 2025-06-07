@@ -12,30 +12,27 @@ type _Arguments<I extends Input> = {
 
 // TODO: optimalize
 export type ToVars<I, P extends string[], Arg> =
-    Arg extends Variable<undefined>
-        ? MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [...P, K]> : never }[keyof I]>
-        : Arg extends Variable<infer N>
-          ? N extends string
-              ? MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [N, K]> : never }[keyof I]>
-              : never
-          : Extract<I, P, Arg>
+    Arg extends Variable<infer N>
+        ? N extends "$"
+            ? MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [...P, K]> : never }[keyof I]>
+            : MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [N, K]> : never }[keyof I]>
+        : Extract<I, P, Arg>
 
 type MaybePrefixed<I, P extends string[]> = P["length"] extends 0 ? I : { [K in Concat<"__", P>]: I }
+// type MaybePrefixed<I, P extends string[]> = P
 
 type Extract<I, P extends string[], Arg> = Arg extends object ? UnionToIntersection<_Extract<P, I, Arg>> : never
 
-type _Extract<P extends string[], I, A> = {
+type _Extract<P extends string[], I, A extends Record<string, any>> = {
     [K in keyof A]: A[K] extends Variable<infer N>
         ? K extends keyof I
-            ? N extends string
-                ? { [k in N]: I[K] }
-                : N extends undefined
-                  ? K extends string
-                      ? true extends KeyIsRequired<I, K>
-                          ? { [k in Concat<"__", [...P, K]>]-?: I[K] }
-                          : { [k in Concat<"__", [...P, K]>]?: I[K] }
-                      : never
-                  : never
+            ? N extends "$"
+                ? K extends string
+                    ? true extends KeyIsRequired<I, K>
+                        ? { [k in Concat<"__", [...P, K]>]-?: I[K] }
+                        : { [k in Concat<"__", [...P, K]>]?: I[K] }
+                    : never
+                : { [k in N]: I[K] }
             : never
         : A[K] extends object
           ? K extends keyof I
