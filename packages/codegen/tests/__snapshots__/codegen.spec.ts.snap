@@ -5,7 +5,7 @@ exports[`codegen query without parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { type FieldDefinitions, type TypeOf, type VarOf } from "@gql-unicorn/runtime"
+import { type BuildReturn, type SelectionDef, type Vars, type Selection, type ExtendSelected, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
 export type User = {
     __typename: "User"
     /**
@@ -14,26 +14,26 @@ export type User = {
     id: string
     name: string
 }
-export type __Query = {
+export const User = __runtime.typeBuilder<UserSelect<["__typename"], {}, []>, "User">("User")
+export interface UserSelect<R extends SelectionDef, V extends Vars, P extends string[]> extends Selection<User, R, V> {
     /**
-     * Curent user
+     * User id
+     * @type string
      */
-    currentUser: User | null
+    id: Omit<UserSelect<ExtendSelected<R, ["id"]>, V, P>, keyof R | "id">
+    /**
+     * @type string
+     */
+    name: Omit<UserSelect<ExtendSelected<R, ["name"]>, V, P>, keyof R | "name">
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<User, SR, SV>): UserSelect<[...R, ...SR], V & SV, P>
 }
-type __TypeMap = {
-    User: User
-}
-const __FieldDefs: FieldDefinitions = {
-    "User": {},
-    "Query": {
-        "currentUser": "User"
-    }
-}
-export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)
-export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+/**
+ * Curent user
+ */
+export const queryCurrentUser = __runtime.queryBuilder("currentUser", User) as <SS extends SelectionDef, SV extends Vars, >(...args: [string, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>])=> BuildReturn<User | null, SS, SV>
 export const $ = __runtime.$
-export type { TypeOf, VarOf }"
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
 `;
 
 exports[`codegen query with parameters 1`] = `
@@ -41,7 +41,8 @@ exports[`codegen query with parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { type Operation, type FieldDefinitions, type TypeOf, type VarOf } from "@gql-unicorn/runtime"
+import { type BuildReturn, type SelectionDef, type Vars, type Selection, type ExtendSelected, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
+const __ArgumentInfo0 = {"id":"ID!"}
 export type User = {
     __typename: "User"
     /**
@@ -50,28 +51,26 @@ export type User = {
     id: string
     name: string
 }
-export type __Query = {
-    user: Operation<{ id: string }, User | null>
+export const User = __runtime.typeBuilder<UserSelect<["__typename"], {}, []>, "User">("User")
+export interface UserSelect<R extends SelectionDef, V extends Vars, P extends string[]> extends Selection<User, R, V> {
+    /**
+     * User id
+     * @type string
+     */
+    id: Omit<UserSelect<ExtendSelected<R, ["id"]>, V, P>, keyof R | "id">
+    /**
+     * @type string
+     */
+    name: Omit<UserSelect<ExtendSelected<R, ["name"]>, V, P>, keyof R | "name">
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<User, SR, SV>): UserSelect<[...R, ...SR], V & SV, P>
 }
-type __TypeMap = {
-    User: User
+export type QueryUserArgs = {
+    id: string
 }
-const __FieldDefs: FieldDefinitions = {
-    "User": {},
-    "Query": {
-        "user": [
-            {
-                "id": "ID!"
-            },
-            "User"
-        ]
-    }
-}
-export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)
-export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+export const queryUser = __runtime.queryBuilder("user", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUserArgs>>(...args: [string, AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<QueryUserArgs, [], AA>>
 export const $ = __runtime.$
-export type { TypeOf, VarOf }"
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
 `;
 
 exports[`codegen mutation without parameters 1`] = `
@@ -79,16 +78,11 @@ exports[`codegen mutation without parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { type FieldDefinitions, type TypeOf, type VarOf } from "@gql-unicorn/runtime"
-export type __Mutation = {
-    someMutaionThing: string
-}
-const __FieldDefs: FieldDefinitions = {
-    "Mutation": {}
-}
-export const Mutation = __runtime.mutationBuilder<__Mutation>(__FieldDefs)
+import { type BuildReturn, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
+export const mutateSomeMutaionThing = __runtime.mutationBuilder("someMutaionThing") as (name?: string) => BuildReturn<string, never, never>
 export const $ = __runtime.$
-export type { TypeOf, VarOf }"
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
 `;
 
 exports[`codegen mutation with parameters 1`] = `
@@ -96,7 +90,8 @@ exports[`codegen mutation with parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { type Operation, type FieldDefinitions, type TypeOf, type VarOf } from "@gql-unicorn/runtime"
+import { type BuildReturn, type SelectionDef, type Vars, type Selection, type ExtendSelected, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
+const __ArgumentInfo0 = {"id":"ID!","name":"String!"}
 export type User = {
     __typename: "User"
     /**
@@ -105,29 +100,27 @@ export type User = {
     id: string
     name: string
 }
-export type __Query = {
-    updateUser: Operation<{ id: string, name: string }, User | null>
+export const User = __runtime.typeBuilder<UserSelect<["__typename"], {}, []>, "User">("User")
+export interface UserSelect<R extends SelectionDef, V extends Vars, P extends string[]> extends Selection<User, R, V> {
+    /**
+     * User id
+     * @type string
+     */
+    id: Omit<UserSelect<ExtendSelected<R, ["id"]>, V, P>, keyof R | "id">
+    /**
+     * @type string
+     */
+    name: Omit<UserSelect<ExtendSelected<R, ["name"]>, V, P>, keyof R | "name">
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<User, SR, SV>): UserSelect<[...R, ...SR], V & SV, P>
 }
-type __TypeMap = {
-    User: User
+export type QueryUpdateUserArgs = {
+    id: string
+    name: string
 }
-const __FieldDefs: FieldDefinitions = {
-    "User": {},
-    "Query": {
-        "updateUser": [
-            {
-                "id": "ID!",
-                "name": "String!"
-            },
-            "User"
-        ]
-    }
-}
-export const Query = __runtime.queryBuilder<__Query>(__FieldDefs)
-export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+export const queryUpdateUser = __runtime.queryBuilder("updateUser", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUpdateUserArgs>>(...args: [string, AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<QueryUpdateUserArgs, [], AA>>
 export const $ = __runtime.$
-export type { TypeOf, VarOf }"
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
 `;
 
 exports[`codegen subscription without parameters 1`] = `
@@ -135,16 +128,11 @@ exports[`codegen subscription without parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { type FieldDefinitions, type TypeOf, type VarOf } from "@gql-unicorn/runtime"
-export type __Subscription = {
-    onChangeSomething: string
-}
-const __FieldDefs: FieldDefinitions = {
-    "Subscription": {}
-}
-export const Subscription = __runtime.subscriptionBuilder<__Subscription>(__FieldDefs)
+import { type BuildReturn, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
+export const subscribeOnChangeSomething = __runtime.subscriptionBuilder("onChangeSomething") as (name?: string) => BuildReturn<string, never, never>
 export const $ = __runtime.$
-export type { TypeOf, VarOf }"
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
 `;
 
 exports[`codegen subscription with parameters 1`] = `
@@ -152,31 +140,25 @@ exports[`codegen subscription with parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { type Operation, type FieldDefinitions, type TypeOf, type VarOf } from "@gql-unicorn/runtime"
+import { type BuildReturn, type SelectionDef, type Vars, type Selection, type ExtendSelected, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
+const __ArgumentInfo0 = {"type":"String!"}
 export type SomeEvent = {
     __typename: "SomeEvent"
     id: string
 }
-export type __Subscription = {
-    onChangeSomething: Operation<{ type: string }, SomeEvent>
+export const SomeEvent = __runtime.typeBuilder<SomeEventSelect<["__typename"], {}, []>, "SomeEvent">("SomeEvent")
+export interface SomeEventSelect<R extends SelectionDef, V extends Vars, P extends string[]> extends Selection<SomeEvent, R, V> {
+    /**
+     * @type string
+     */
+    id: Omit<SomeEventSelect<ExtendSelected<R, ["id"]>, V, P>, keyof R | "id">
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<SomeEvent, SR, SV>): SomeEventSelect<[...R, ...SR], V & SV, P>
 }
-type __TypeMap = {
-    SomeEvent: SomeEvent
+export type SubscribeOnChangeSomethingArgs = {
+    type: string
 }
-const __FieldDefs: FieldDefinitions = {
-    "SomeEvent": {},
-    "Subscription": {
-        "onChangeSomething": [
-            {
-                "type": "String!"
-            },
-            "SomeEvent"
-        ]
-    }
-}
-export const Subscription = __runtime.subscriptionBuilder<__Subscription>(__FieldDefs)
-export const Type = __runtime.typeBuilder<__TypeMap>(__FieldDefs)
-export const Fragment = __runtime.fragmentBuilder<__TypeMap>(__FieldDefs)
+export const subscribeOnChangeSomething = __runtime.subscriptionBuilder("onChangeSomething", [__ArgumentInfo0, SomeEvent]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<SubscribeOnChangeSomethingArgs>>(...args: [string, AA, (select: SomeEventSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: SomeEventSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<SomeEvent, SS, SV & ToVars<SubscribeOnChangeSomethingArgs, [], AA>>
 export const $ = __runtime.$
-export type { TypeOf, VarOf }"
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
 `;
