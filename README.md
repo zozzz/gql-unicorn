@@ -26,7 +26,7 @@ import { queryArticles, Blog, News $ } from "genrated-pacakge-name"
 
 const fragment = News.$fragment("fragmentName", q => q.author(q => q.id.name))
 
-const articlesQuery = queryArticles({filter: ...}, q => q.id
+const articlesQuery = queryArticles({filter: { title "..." }}, q => q.id
     .name
     .tags({count: $("count")}, q => q.id.name)
     .another_field
@@ -50,7 +50,7 @@ function doSomethingWithFragment(fragment: TypeOf<typeof fragment>) {}
 #### Selected type
 
 ```typescript
-import { queryUsers, $, type TypeOf } from "genrated-pacakge-name"
+import { queryUsers, $, type TypeOf, type Selected } from "genrated-pacakge-name"
 
 const GetUser = queryUsers({id: $("userId")}, q => q.id
     .name
@@ -70,7 +70,7 @@ type SUserWithAlias = Selected<User, [{ id: "userId" }, "name", { articles: ["id
 ```typescript
 import { mutationCreateUser } from "genrated-pacakge-name"
 
-const CreateUser = mutationCreateUser({...}).id.name
+const CreateUser = mutationCreateUser({ name: "Some User Name" }, q => q.id.name)
 ```
 
 
@@ -80,50 +80,49 @@ const CreateUser = mutationCreateUser({...}).id.name
 import { Worker } from "genrated-pacakge-name"
 
 if (Worker.$is(user)) {
-    // ...
+    // only usable fields is selected worker fields
 }
 ```
 
 #### Special Types
 
 ```typescript
-import { Query, Type, TypeOf, VarOf, $ } from "genrated-pacakge-name"
+import { queryUsers, type TypeOf,  type VarOf, $ } from "genrated-pacakge-name"
 
-const GetUser = Query.users({id: $("userId")})("id", "name")
-type User = TypeOf<typeof GetUser>
-type UserVars = VarOf<typeof GetUser>
+const GetUser = queryUsers({id: $("userId")}, q => q.id.name)
+type User = TypeOf<typeof GetUser> // Selected<User, ["id", "name"]>
+type UserVars = VarOf<typeof GetUser> // { userId: string }
 ```
 
 ### Variables
 
 ```typescript
-import { $, Query, UserFilter } from "genrated-pacakge-name"
+import { $, $$, queryUsers, UserFilter } from "genrated-pacakge-name"
 
-const q = Query.users({ filter: $("filterVar"), offset: $("offsetVar"), count: $("countVar") })
-    .id
-    .name
-    .$build()
-type Variables = {filterVar: UserFilter, offsetVar: number, countVar: number}
+const q = queryUsers(
+    { filter: $("filterVar"), offset: $("offsetVar"), count: $("countVar") }
+    q => q.id.name
+)
+type _User = TypeOf<typeof q> // Selected<User, ["id", "name"]>
+type _UserVars = VarOf<typeof q> // {filterVar: string, offsetVar: number, countVar: number}
 
-// or simplified version (this is the default, so it can simplify more to: Query.users()...)
-const q = Query.users($)
-    .id
-    .name
-    .$build()
-type Variables = {filter: UserFilter, offset: number, count: number}
+// or simplified version, $$ extends to something similar:
+// { filter: $("filter"), offset: $("offset"), count: $("count") }
+const q = queryUsers($$, q => q.id.name)
 
 // or with shorthands
-const q = Query.users({ filter: $("filterVar"), offset: $, count: $ })
-    .id
-    .name
-    .$build()
-type Variables = {filterVar: UserFilter, offset: number, count: number}
+const q = queryUsers(
+    { filter: $("filterVar"), offset: $$, count: $$ },
+    q => q.id.name
+)
+type _UserVars = VarOf<typeof q> // {filterVar: string, offset: number, count: number}
 
-const q = Query.users($)
-    .id
-    .articles({count: $}, q => id.title)
-    .$build()
-type Variables = {filter: UserFilter, offset: number, count: number, articles__count: number}
+const q = queryUsers(
+    $$,
+    q => q.id.articles({ count: $$ }, q => q.id.title)
+)
+// { filter: $("filter"), offset: $("offset"), count: $("count"), articles__count: $("articles__count") }
+type _UserVars = VarOf<typeof q>
 ```
 
 ## Compatibility
@@ -150,6 +149,4 @@ type Variables = {filter: UserFilter, offset: number, count: number, articles__c
 
 * find a way to replace `$$` with `$`, or something more intuitive than `$$`
 * find a way to use `$.varName` instead `$("varName")`
-* redesign select result, to not building an object on the fly, instead use `Pick<User, "__typename", "id", "name">`
-  when subselect is happened: `Pick<User, "__typename", "id", "name"> & Record<"articles", Array<Pick<Article, "__typename", "id", "title">>>`
 * handle aliases: `queryUsers(q => q.id("userId").parent("userParent", q => q.id))`
