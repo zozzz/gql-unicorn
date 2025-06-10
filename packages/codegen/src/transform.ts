@@ -235,6 +235,7 @@ class Transformer {
     }
 
     #generateTypeBuilder(context: GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType): string[] {
+        this.#import(RuntimeLib, "TypeBuilder", true)
         const info: string[] = []
 
         if (!isUnionType(context)) {
@@ -259,7 +260,7 @@ class Transformer {
         const T = this.#selectType(this.#selectName(context), `["__typename"]`, "{}", "[]")
         const TN = JSON.stringify(context.name)
         return [
-            `export const ${this.#bareTypename(context)} = __runtime.typeBuilder<${T}, ${TN}>("${context.name}"${infoStr})`
+            `export const ${this.#bareTypename(context)} = __runtime.typeBuilder("${context.name}"${infoStr}) as TypeBuilder<${T}, ${TN}>`
         ]
     }
 

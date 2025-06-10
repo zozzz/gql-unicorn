@@ -148,12 +148,12 @@ class Context {
         return this.args
     }
 
-    $is(this: ProxyTarget, obj: Record<string, any> | null | undefined): boolean {
+    is(this: ProxyTarget, obj: Record<string, any> | null | undefined): boolean {
         const self = this[CONTEXT]
         return obj != null && obj.__typename === self.path[0]
     }
 
-    $fragment(this: ProxyTarget, name: string, select: (select: any) => any): boolean {
+    fragment(this: ProxyTarget, name: string, select: (select: any) => any): boolean {
         const self = this[CONTEXT]
         const fragment = new Context("Fragment", [name])
         const sub = newSelectionBuilder(self.clone(fragment))
@@ -328,10 +328,10 @@ interface ProxyTarget {
 
 type BField = string
 
-interface TypeBuilder<T, TN extends string> {
-    $fragment<S extends Selection<any, any, any>>(name: string, select: (select: T) => S): S
+export interface TypeBuilder<T, TN extends string> {
+    fragment<S extends Selection<any, any, any>>(name: string, select: (select: T) => S): S
     // @ts-expect-error V is assignable to TypeVariant<V, TN>, but TS is not liking it, but works
-    $is<V extends SimpleType | null | undefined>(obj: V): obj is TypeVariant<V, TN> & NonNullable<V>
+    is<V extends SimpleType | null | undefined>(obj: V): obj is TypeVariant<V, TN> & NonNullable<V>
     <ST, SS extends SelectionDef, SV extends Vars>(
         ...args: [string, (select: T) => Selection<ST, SS, SV>] | [(select: T) => Selection<ST, SS, SV>]
     ): Selection<ST, SS, SV>
@@ -408,8 +408,8 @@ function isFragment(obj: any) {
  * Query.users().$on(Type.Manager.manager_field.roles(q => q.name))
  * ```
  */
-export function typeBuilder<T, TN extends string>(name: TN, info?: () => BuilderInfo) {
-    return newTypeBuilder(new Context("Type", [name], info)) as unknown as TypeBuilder<T, TN>
+export function typeBuilder(name: string, info?: () => BuilderInfo) {
+    return newTypeBuilder(new Context("Type", [name], info))
 }
 
 function isType(obj: any): boolean {
@@ -559,7 +559,7 @@ function newTypeBuilder(context: Context) {
     return _newBuilder(context, typeBuilderCall, TypeBuilderProxy)
 }
 
-const TypeBuilderSpecials: Array<string | symbol> = ["$is", "$fragment", ...ContextSpecials]
+const TypeBuilderSpecials: Array<string | symbol> = ["is", "fragment", ...ContextSpecials]
 
 const TypeBuilderProxy = {
     get(target: ProxyTarget, key: string | symbol, _receiver: any): any {

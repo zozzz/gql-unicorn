@@ -187,7 +187,7 @@ describe("runtime", () => {
                 'query{search(text:\"search\"){__typename,... on AFC{id},... on SelfRecursive{id,parent{id}}}}'
             )
 
-            const fragment = G.SelfRecursive.$fragment("someName", q => q.id.parent(q => q.id))
+            const fragment = G.SelfRecursive.fragment("someName", q => q.id.parent(q => q.id))
 
             testQuery<
                 Array<{ __typename: "AFC"; id: string } | { __typename: "SelfRecursive"; parent: { id: string } }>,
@@ -380,9 +380,9 @@ describe("runtime", () => {
                 )
             })
 
-            test("$is", () => {
+            test("is", () => {
                 const article: NodeRes = { __typename: "Article", id: "id", title: "title" }
-                if (G.Article.$is(article)) {
+                if (G.Article.is(article)) {
                     const { __typename, id, title }: { __typename: "Article"; id: string; title: string } = article
                     expect(__typename).toBe("Article")
                     expect(id).toBe("id")
