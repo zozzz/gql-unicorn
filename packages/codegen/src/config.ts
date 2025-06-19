@@ -1,5 +1,6 @@
 export interface UnicornConfig {
     scalars?: ScalarMap
+    headers?: Record<string, string>
 }
 
 export type ScalarFromPackage = {
