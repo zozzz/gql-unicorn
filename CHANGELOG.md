@@ -1,5 +1,10 @@
 # Changelog
 
+# [0.2.0](https://github.com/zozzz/gql-unicorn/compare/0.1.2...0.2.0) (2025-06-19)
+
+
+* add headers config ([585ff58](https://github.com/zozzz/gql-unicorn/commit/585ff5866860cc6a055d77619a3e7a6ba9cf5efc))
+
 ## [0.1.2](https://github.com/zozzz/gql-unicorn/compare/0.1.1...0.1.2) (2025-06-10)
 
 ## [0.1.1](https://github.com/zozzz/gql-unicorn/compare/0.1.0...0.1.1) (2025-06-07)
