@@ -80,4 +80,21 @@ describe("codegen", () => {
         `)
         expect(transform(schema)).toMatchSnapshot()
     })
+
+    test("Optional array", () => {
+        const schema = buildSchema(/* GraphQL */ `
+            type Query {
+                users(filter: UserFilter): [User!]!
+            }
+
+            type User {
+                id: ID!
+            }
+
+            type UserFilter {
+                ids: [ID!]
+            }
+        `)
+        expect(transform(schema)).toMatchSnapshot()
+    })
 })

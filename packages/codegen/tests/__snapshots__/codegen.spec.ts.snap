@@ -162,3 +162,43 @@ export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
 `;
+
+exports[`codegen Optional array 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import * as __runtime from "@gql-unicorn/runtime"
+import { type BuildReturn, type TypeBuilder, type Vars, type Selection, type ExtendSelected, type SelectionDef, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
+const __ArgumentInfo0 = {"filter":"UserFilter"}
+export type UserFilter = {
+    __typename: "UserFilter"
+    ids?: Array<string> | null
+}
+export const UserFilter = __runtime.typeBuilder("UserFilter") as TypeBuilder<UserFilterSelect<["__typename"], {}, []>, "UserFilter">
+export interface UserFilterSelect<R extends SelectionDef, V extends Vars, P extends string[]> extends Selection<UserFilter, R, V> {
+    /**
+     * @type Array<string> | null
+     */
+    ids: Omit<UserFilterSelect<ExtendSelected<R, ["ids"]>, V, P>, keyof R | "ids">
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<UserFilter, SR, SV>): UserFilterSelect<[...R, ...SR], V & SV, P>
+}
+export type User = {
+    __typename: "User"
+    id: string
+}
+export const User = __runtime.typeBuilder("User") as TypeBuilder<UserSelect<["__typename"], {}, []>, "User">
+export interface UserSelect<R extends SelectionDef, V extends Vars, P extends string[]> extends Selection<User, R, V> {
+    /**
+     * @type string
+     */
+    id: Omit<UserSelect<ExtendSelected<R, ["id"]>, V, P>, keyof R | "id">
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<User, SR, SV>): UserSelect<[...R, ...SR], V & SV, P>
+}
+export type QueryUsersArgs = {
+    filter?: UserFilter
+}
+export const queryUsers = __runtime.queryBuilder("users", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUsersArgs>>(...args: [string, AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<Array<User>, SS, SV & ToVars<QueryUsersArgs, [], AA>>
+export const $ = __runtime.$
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
+`;

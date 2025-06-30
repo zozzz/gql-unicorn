@@ -30,6 +30,8 @@ type TypeOfKey<T, TK extends AllKeys<T>> = T extends { [K in TK]?: any } ? T[TK]
 // export type MergeUnion<T> = Eval<{ [K in AllKeys<T>]: TypeOfKey<T, K> }>
 export type MergeUnion<T> = Eval<{ [K in AllKeys<T>]: TypeOfKey<T, K> }>
 
+// export type MergeUnion<T> = Eval<{ [K in keyof T]: TypeOfKey<T, K> }[keyof T]>
+
 export type Eval<T> = T[][number]
 
 /**

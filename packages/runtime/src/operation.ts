@@ -1,6 +1,6 @@
 import type { UnionToIntersection } from "utility-types"
 
-import type { Concat, MergeUnion } from "./common"
+import type { Concat, Eval } from "./common"
 import type { Input } from "./type"
 import type { Variable } from "./var"
 
@@ -11,15 +11,22 @@ type _Arguments<I extends Input> = {
 }
 
 // TODO: optimalize
-export type ToVars<I, P extends string[], Arg> =
-    Arg extends Variable<infer N>
-        ? N extends "$"
-            ? MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [...P, K]> : never }[keyof I]>
-            : MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [N, K]> : never }[keyof I]>
-        : Extract<I, P, Arg>
+// export type ToVars<I, P extends string[], Arg> =
+//     Arg extends Variable<infer N>
+//         ? N extends "$"
+//             ? MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [...P, K]> : never }[keyof I]>
+//             : MergeUnion<{ [K in keyof I]: K extends string ? MaybePrefixed<I[K], [N, K]> : never }[keyof I]>
+//         : Extract<I, P, Arg>
 
-type MaybePrefixed<I, P extends string[]> = P["length"] extends 0 ? I : { [K in Concat<"__", P>]: I }
-// type MaybePrefixed<I, P extends string[]> = P
+export type ToVars<I, P extends string[], Arg> = Eval<
+    Arg extends Variable<infer N> ? (N extends "$" ? _ToVars<I, P> : _ToVars<I, [N]>) : Extract<I, P, Arg>
+>
+
+type _ToVars<I, P extends string[]> = { [K in keyof I]: K extends string ? Prefixed<I[K], [...P, K]> : never }[keyof I]
+
+type Prefixed<I, P extends string[]> = undefined extends I
+    ? { [K in Concat<"__", P>]?: I }
+    : { [K in Concat<"__", P>]-?: I }
 
 type Extract<I, P extends string[], Arg> = Arg extends object ? UnionToIntersection<_Extract<P, I, Arg>> : never
 

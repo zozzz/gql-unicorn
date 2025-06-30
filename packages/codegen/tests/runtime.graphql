@@ -3,6 +3,8 @@ type Query {
     nodes: [Node!]!
     node(id: ID!): Node
     user(id: ID!): User
+    users(filter: UserFilter!): [User!]!
+    usersOptionalFilter(filter: UserFilter): [User!]!
     articles(filter: ArticleFilter): [Article!]!
     location(id: ID!): Location
     currentUserId: ID
@@ -42,6 +44,14 @@ type User implements Node {
     name: String!
     "Articles created by user"
     articles(count: Int!): [Article!]!
+}
+
+input UserFilter {
+    and: [UserFilter!]
+    or: [UserFilter!]
+    not: [UserFilter!]
+    id: ID
+    name: String
 }
 
 type Article implements Node {

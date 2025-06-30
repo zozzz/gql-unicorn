@@ -41,7 +41,7 @@ describe("runtime", () => {
             })
 
             test("type + arg", () => {
-                testQuery<{ __typename: "Location"; id: string } | null, { id: string }>(
+                testQuery<{ __typename: "Location"; id: string } | null | undefined, { id: string }>(
                     G.queryLocation({ id: G.$$ }, q => q.id),
                     `query($id:ID!){location(id:$id){__typename,id}}`
                 )
@@ -55,18 +55,18 @@ describe("runtime", () => {
             })
 
             test("type + name + arg", () => {
-                testQuery<{ __typename: "Location"; id: string } | null, { id: string }>(
+                testQuery<{ __typename: "Location"; id: string } | null | undefined, { id: string }>(
                     G.queryLocation("LocName", { id: G.$$ }, q => q.id),
                     `query LocName($id:ID!){location(id:$id){__typename,id}}`
                 )
             })
 
             test("scalar", () => {
-                testQuery<string | null, never>(G.queryCurrentUserId(), `query{currentUserId}`)
+                testQuery<string | null | undefined, never>(G.queryCurrentUserId(), `query{currentUserId}`)
             })
 
             test("scalar + arg", () => {
-                testQuery<string | null, { id: string }>(
+                testQuery<string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar({ id: G.$$ }),
                     `query($id:ID){atomicArgsScalar(id:$id)}`
                 )
@@ -74,7 +74,7 @@ describe("runtime", () => {
 
             test("scalar + name", () => {
                 test("scalar", () => {
-                    testQuery<string | null, never>(
+                    testQuery<string | null | undefined, never>(
                         G.queryCurrentUserId("GetCurrentUserId"),
                         `query GetCurrentUserId{currentUserId}`
                     )
@@ -82,35 +82,35 @@ describe("runtime", () => {
             })
 
             test("scalar + name + arg", () => {
-                testQuery<string | null, { id: string }>(
+                testQuery<string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar("XYZ", { id: G.$$ }),
                     `query XYZ($id:ID){atomicArgsScalar(id:$id)}`
                 )
             })
 
             test("queryAtomicArgsScalar 1", () => {
-                testQuery<string | null, never>(
+                testQuery<string | null | undefined, never>(
                     G.queryAtomicArgsScalar("Atomic", { id: "1" }),
                     `query Atomic{atomicArgsScalar(id:"1")}`
                 )
             })
 
             test("queryAtomicArgsScalar $", () => {
-                testQuery<string | null, { id: string }>(
+                testQuery<string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar("Atomic", G.$$),
                     `query Atomic($id:ID){atomicArgsScalar(id:$id)}`
                 )
             })
 
             test("queryAtomicArgsScalar {id:$}", () => {
-                testQuery<string | null, { id: string }>(
+                testQuery<string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar("Atomic", { id: G.$$ }),
                     `query Atomic($id:ID){atomicArgsScalar(id:$id)}`
                 )
             })
 
             test("queryAtomicArgsScalar {id:$} - name", () => {
-                testQuery<string | null, { id: string }>(
+                testQuery<string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar({ id: G.$$ }),
                     `query($id:ID){atomicArgsScalar(id:$id)}`
                 )
@@ -118,33 +118,33 @@ describe("runtime", () => {
         })
 
         test("variables", () => {
-            testQuery<{ __typename: string; id: string; name: string | undefined } | null, never>(
+            testQuery<{ __typename: string; id: string; name: string | undefined } | null | undefined, never>(
                 G.queryUser({ id: "1" }, q => q.id.name),
                 `query{user(id:"1"){__typename,id,name}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null, { id: string }>(
+            testQuery<{ __typename: string; id: string } | null | undefined, { id: string }>(
                 G.queryUser({ id: G.$$ }, q => q.id),
                 `query($id:ID!){user(id:$id){__typename,id}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null, { id: string }>(
+            testQuery<{ __typename: string; id: string } | null | undefined, { id: string }>(
                 G.queryUser(G.$$, q => q.id),
                 `query($id:ID!){user(id:$id){__typename,id}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null, { prefix__id: string }>(
+            testQuery<{ __typename: string; id: string } | null | undefined, { prefix__id: string }>(
                 G.queryUser(G.$("prefix"), q => q.id),
                 `query($prefix__id:ID!){user(id:$prefix__id){__typename,id}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null, { userId: string }>(
+            testQuery<{ __typename: string; id: string } | null | undefined, { userId: string }>(
                 G.queryUser({ id: G.$("userId") }, q => q.id),
                 `query($userId:ID!){user(id:$userId){__typename,id}}`
             )
 
             testQuery<
-                { __typename: string; articles: Array<{ __typename: string; id: string }> } | null,
+                { __typename: string; articles: Array<{ __typename: string; id: string }> } | null | undefined,
                 { id: string }
             >(
                 G.queryUser(G.$$, q => q.articles({ count: 1 }, q => q.id)),
@@ -152,7 +152,7 @@ describe("runtime", () => {
             )
 
             testQuery<
-                { __typename: string; articles: Array<{ __typename: string }> } | null,
+                { __typename: string; articles: Array<{ __typename: string }> } | null | undefined,
                 { id: string; articles__count: number }
             >(
                 G.queryUser(G.$$, q => q.articles({ count: G.$$ }, q => q.id)),
@@ -160,7 +160,7 @@ describe("runtime", () => {
             )
 
             testQuery<
-                { __typename: string; articles: Array<{ __typename: string }> } | null,
+                { __typename: string; articles: Array<{ __typename: string }> } | null | undefined,
                 { id: string; articles__count: number }
             >(
                 G.queryUser(G.$$, q => q.articles(G.$$, q => q.id)),
@@ -168,11 +168,22 @@ describe("runtime", () => {
             )
 
             testQuery<
-                { __typename: string; articles: Array<{ __typename: "Article"; id: string }> } | null,
+                { __typename: string; articles: Array<{ __typename: "Article"; id: string }> } | null | undefined,
                 { id: string; articleCount: number }
             >(
                 G.queryUser(G.$$, q => q.articles({ count: G.$("articleCount") }, q => q.id)),
                 `query($id:ID!,$articleCount:Int!){user(id:$id){__typename,articles(count:$articleCount){__typename,id}}}`
+            )
+
+            testQuery<Array<{ __typename: string; id: string; name: string | undefined }>, never>(
+                G.queryUsers({ filter: {} }, q => q.id.name),
+                `query{users(filter:{}){__typename,id,name}}`
+            )
+
+            // TODO: optionlly allow paramters
+            testQuery<Array<{ __typename: string; id: string; name: string | undefined }>, never>(
+                G.queryUsersOptionalFilter({}, q => q.id.name),
+                `query{usersOptionalFilter{__typename,id,name}}`
             )
         })
 
@@ -212,24 +223,27 @@ describe("runtime", () => {
         })
 
         test("scalar operation return", () => {
-            testQuery<{ __typename: string; distance: number } | null, { id: string }>(
+            testQuery<{ __typename: string; distance: number } | null | undefined, { id: string }>(
                 G.queryLocation(G.$$, q => q.distance({ lat: 1, lng: 2, unit: G.DistanceUnit.METRIC })),
                 'query($id:ID!){location(id:$id){__typename,distance(lat:1,lng:2,unit:"METRIC")}}'
             )
 
             type DistanceUnit = import("./__generated__/runtime").DistanceUnit
-            testQuery<{ __typename: string; distance: number } | null, { id: string; distance__unit: DistanceUnit }>(
+            testQuery<
+                { __typename: string; distance: number } | null | undefined,
+                { id: string; distance__unit: DistanceUnit }
+            >(
                 G.queryLocation(G.$$, q => q.distance({ lat: 1, lng: 2, unit: G.$$ })),
                 "query($id:ID!,$distance__unit:DistanceUnit!){location(id:$id){__typename,distance(lat:1,lng:2,unit:$distance__unit)}}"
             )
         })
 
         test("query scalar opertaion return w/o parameters", () => {
-            testQuery<string | null, never>(G.queryCurrentUserId(), `query{currentUserId}`)
+            testQuery<string | null | undefined, never>(G.queryCurrentUserId(), `query{currentUserId}`)
         })
 
         test("some fields", () => {
-            testQuery<{ __typename: string; id: string; name: string } | null, { id: string }>(
+            testQuery<{ __typename: string; id: string; name: string } | null | undefined, { id: string }>(
                 G.queryUser(G.$$, q => q.id.name),
                 `query($id:ID!){user(id:$id){__typename,id,name}}`
             )
@@ -239,7 +253,11 @@ describe("runtime", () => {
             type ArticleFilter = import("./__generated__/runtime").ArticleFilter
 
             testQuery<
-                Array<{ __typename: "Article"; id: string; tags: Array<{ __typename: string; tag: string }> | null }>,
+                Array<{
+                    __typename: "Article"
+                    id: string
+                    tags?: Array<{ __typename: string; tag: string }> | null
+                }>,
                 { id: string; filter: ArticleFilter }
             >(
                 G.queryArticles(G.$$, q => q.id.tags(q => q.tag)),
@@ -271,7 +289,7 @@ describe("runtime", () => {
                     __typename: "AFC"
                     id: string
                     hqName: string
-                    parent: { __typename: "AFC"; id: string; hqName: string } | null
+                    parent?: { __typename: "AFC"; id: string; hqName: string } | null
                 },
                 never
             >(
@@ -286,7 +304,7 @@ describe("runtime", () => {
                     __typename: string
                     id: string
                     hqName: string
-                    parent: { __typename: string; id: string; hqName: string } | null
+                    parent?: { __typename: string; id: string; hqName: string } | null
                 },
                 never
             >(
@@ -301,7 +319,7 @@ describe("runtime", () => {
                     __typename: "AFC"
                     id: string
                     hqName: string
-                    parent: { __typename: "AFC"; id: string; hqName: string } | null
+                    parent?: { __typename: "AFC"; id: string; hqName: string } | null
                 },
                 never
             >(
@@ -316,11 +334,11 @@ describe("runtime", () => {
                     __typename: string
                     id: string
                     hqName: string
-                    parent: {
+                    parent?: {
                         __typename: string
                         id: string
                         hqName: string
-                        parent: { __typename: string; id: string } | null
+                        parent?: { __typename: string; id: string } | null
                     } | null
                 },
                 never
@@ -335,7 +353,8 @@ describe("runtime", () => {
                 testQuery<
                     | { __typename: "User" | "Article" | "Tag"; id: string }
                     | { __typename: "User"; name: string }
-                    | null,
+                    | null
+                    | undefined,
                     { id: string }
                 >(
                     G.queryNode(G.$$, q => q.id.$on(G.User(q => q.name))),
@@ -347,7 +366,8 @@ describe("runtime", () => {
                 testQuery<
                     | { __typename: "User" | "Article" | "Tag"; id: string }
                     | { __typename: "User"; name: string }
-                    | null,
+                    | null
+                    | undefined,
                     { id: string }
                 >(
                     G.queryNode(G.$$, q => q.id.$on(G.User("fragmentName", q => q.name))),
@@ -361,6 +381,7 @@ describe("runtime", () => {
                 | { __typename: "User"; name: string }
                 | { __typename: "Article"; title: string; tags: Array<{ id: string; tag: string }> | null }
                 | null
+                | undefined
 
             test("fragment 2", () => {
                 testQuery<NodeRes, { id: string }>(
@@ -402,7 +423,7 @@ describe("runtime", () => {
                     q.distance({ lat: G.$("lat"), lng: G.$("lng"), unit: G.$$ })
                 )
                 testQuery<
-                    { __typename: "Location"; id: string; distance: number } | null,
+                    { __typename: "Location"; id: string; distance: number } | null | undefined,
                     { lat: number; lng: number; distance__unit: DistanceUnit }
                 >(
                     G.queryLocation({ id: "1" }, s => s.$on(distance).id),
@@ -414,7 +435,7 @@ describe("runtime", () => {
                 const distance = G.Location("fragmentName", q =>
                     q.distance({ lat: 1, lng: 2, unit: "METRIC" as DistanceUnit })
                 )
-                testQuery<{ __typename: "Location"; id: string; distance: number } | null, never>(
+                testQuery<{ __typename: "Location"; id: string; distance: number } | null | undefined, never>(
                     G.queryLocation({ id: "1" }, s => s.$on(distance).id),
                     'query{location(id:"1"){__typename,id,...fragmentName}} fragment fragmentName on Location{distance(lat:1,lng:2,unit:"METRIC")}'
                 )
@@ -422,7 +443,7 @@ describe("runtime", () => {
 
             test("on type variable", () => {
                 testQuery<
-                    { __typename: "Location"; id: string; distance: number } | null,
+                    { __typename: "Location"; id: string; distance: number } | null | undefined,
                     { lat: number; lng: number; distance__unit: DistanceUnit }
                 >(
                     G.queryLocation(
@@ -435,7 +456,7 @@ describe("runtime", () => {
 
             test("type variable", () => {
                 testQuery<
-                    { __typename: "Location"; id: string; distance: number } | null,
+                    { __typename: "Location"; id: string; distance: number } | null | undefined,
                     { lat: number; lng: number; distance__unit: DistanceUnit }
                 >(
                     G.queryLocation({ id: "1" }, s => s.distance({ lat: G.$("lat"), lng: G.$("lng"), unit: G.$$ }).id),
@@ -447,7 +468,7 @@ describe("runtime", () => {
 
     describe("mutation", () => {
         test("scalar opertaion return w parameters", () => {
-            testQuery<number | null, { something: string | null }>(
+            testQuery<number | null, { something?: string }>(
                 G.mutateDoSomething(G.$$),
                 `mutation($something:String){doSomething(something:$something)}`
             )

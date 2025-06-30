@@ -8,7 +8,6 @@ import {
     type GraphQLInputFieldMap,
     type GraphQLInputObjectType,
     type GraphQLInterfaceType,
-    type GraphQLList,
     type GraphQLNamedType,
     type GraphQLNonNull,
     type GraphQLObjectType,
@@ -152,12 +151,12 @@ class Transformer {
 
     #typename(type: GraphQLType, nullable: boolean = true): string {
         if (isListType(type)) {
-            return this.#typenameOfList(type, nullable)
+            return maybeNullable(`Array<${this.#typename(type.ofType)}>`, nullable)
         } else if (isNonNullType(type)) {
             return this.#typenameOfNonNull(type)
         }
 
-        return `${this.#addType(type)}${nullable ? " | null" : ""}`
+        return maybeNullable(this.#addType(type), nullable)
     }
 
     #bareTypename(type: GraphQLType): string {
@@ -175,10 +174,6 @@ class Transformer {
             return this.#bareType(type.ofType)
         }
         return type
-    }
-
-    #typenameOfList(type: GraphQLList<GraphQLType>, nullable: boolean): string {
-        return `Array<${this.#typename(type.ofType, nullable)}>`
     }
 
     #typenameOfNonNull(type: GraphQLNonNull<GraphQLType>): string {
@@ -276,6 +271,9 @@ class Transformer {
     #generateInputFields(fields: GraphQLInputFieldMap): string[] {
         const result: string[] = []
         for (const [name, { type, description, deprecationReason, defaultValue }] of Object.entries(fields)) {
+            if (name === "__typename") {
+                continue
+            }
             result.push(
                 ...this.#generateField(null, name, type, description, deprecationReason, defaultValue).map(
                     v => `${this.#indent}${v}`
@@ -295,7 +293,10 @@ class Transformer {
     ): string[] {
         const result: string[] = []
         result.push(...this.#comment(description, deprecationReason, defaultValue))
-        result.push(`${name}: ${this.#typename(type)}`)
+        const ft = isNonNullType(type)
+            ? `: ${this.#typename(type.ofType, false)}`
+            : `?: ${this.#typename(type, false)} | null`
+        result.push(`${name}${ft}`)
         return result
     }
 
@@ -546,9 +547,12 @@ class Transformer {
         const info: Record<string, string> = {}
 
         for (const { name, type, description, deprecationReason, defaultValue } of args) {
+            const ft = isNonNullType(type)
+                ? `: ${this.#typename(type.ofType, false)}`
+                : `?: ${this.#typename(type, false)}`
             result.push(
                 ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`),
-                `${this.#indent}${name}: ${this.#typename(type)}`
+                `${this.#indent}${name}${ft}`
             )
             info[name] = type.toString()
         }
@@ -574,21 +578,6 @@ class Transformer {
     #omit(t: string, field: string): string {
         return `Omit<${t}, keyof R | "${field}">`
         // return `Omit<${t}, keyof R | "${field}" | "$build" | "$gql">`
-    }
-
-    // Array<Alma>
-    // Array<Alma> | null
-    // Array<Alma | null> | null
-    #resultType(type: GraphQLType, name: string, nullable: boolean = true): string {
-        if (isListType(type)) {
-            return `Array<${this.#resultType(type.ofType, name, true)}>${nullable ? " | null" : ""}`
-        } else if (isNonNullType(type)) {
-            return this.#resultType(type.ofType, name, false)
-        } else if (nullable) {
-            return `${name} | null`
-        } else {
-            return name
-        }
     }
 
     #comment(
@@ -633,4 +622,8 @@ function bareIsScalar(type: GraphQLType) {
         return bareIsScalar(type.ofType)
     }
     return isScalarType(type) || isEnumType(type)
+}
+
+function maybeNullable(t: string, nullable: boolean) {
+    return nullable ? `${t} | null` : t
 }
