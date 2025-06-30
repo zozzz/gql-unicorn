@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1](https://github.com/zozzz/gql-unicorn/compare/0.2.0...0.2.1) (2025-06-30)
+
+
+* handle enum type in fields ([ad652f2](https://github.com/zozzz/gql-unicorn/commit/ad652f264eec71c4a6bae527f68544d58cae0db6))
+
 # [0.2.0](https://github.com/zozzz/gql-unicorn/compare/0.1.2...0.2.0) (2025-06-19)
 
 
