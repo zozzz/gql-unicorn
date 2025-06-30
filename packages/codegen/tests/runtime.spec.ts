@@ -177,14 +177,18 @@ describe("runtime", () => {
         })
 
         test("union", () => {
+            type AFCKind = import("./__generated__/runtime").AFCKind
             testQuery<
-                Array<{ __typename: "AFC"; id: string } | { __typename: "SelfRecursive"; parent: { id: string } }>,
+                Array<
+                    | { __typename: "AFC"; id: string; kind: AFCKind }
+                    | { __typename: "SelfRecursive"; parent: { id: string } }
+                >,
                 never
             >(
                 G.querySearch({ text: "search" }, q =>
-                    q.$on(G.AFC(q => q.id)).$on(G.SelfRecursive(q => q.id.parent(q => q.id)))
+                    q.$on(G.AFC(q => q.id.kind)).$on(G.SelfRecursive(q => q.id.parent(q => q.id)))
                 ),
-                'query{search(text:\"search\"){__typename,... on AFC{id},... on SelfRecursive{id,parent{id}}}}'
+                'query{search(text:\"search\"){__typename,... on AFC{id,kind},... on SelfRecursive{id,parent{id}}}}'
             )
 
             const fragment = G.SelfRecursive.fragment("someName", q => q.id.parent(q => q.id))

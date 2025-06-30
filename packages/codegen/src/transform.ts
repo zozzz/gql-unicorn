@@ -295,13 +295,7 @@ class Transformer {
     ): string[] {
         const result: string[] = []
         result.push(...this.#comment(description, deprecationReason, defaultValue))
-
-        if (isNonNullType(type)) {
-            result.push(`${name}: ${this.#typename(type)}`)
-        } else {
-            result.push(`${name}: ${this.#typename(type)} | null`)
-        }
-
+        result.push(`${name}: ${this.#typename(type)}`)
         return result
     }
 
@@ -638,5 +632,5 @@ function bareIsScalar(type: GraphQLType) {
     } else if (isNonNullType(type)) {
         return bareIsScalar(type.ofType)
     }
-    return isScalarType(type)
+    return isScalarType(type) || isEnumType(type)
 }
