@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.2](https://github.com/zozzz/gql-unicorn/compare/0.2.1...0.2.2) (2025-06-30)
+
+
+* undefined input as optional key ([edb88df](https://github.com/zozzz/gql-unicorn/commit/edb88dff639929a44b1ef0e9a654b11c90d4ca01))
+
 ## [0.2.1](https://github.com/zozzz/gql-unicorn/compare/0.2.0...0.2.1) (2025-06-30)
 
 
