@@ -1,5 +1,10 @@
 # Changelog
 
+# [0.3.0](https://github.com/zozzz/gql-unicorn/compare/0.2.3...0.3.0) (2025-07-01)
+
+
+* deeply nested arguments & variables ([a1d1c8a](https://github.com/zozzz/gql-unicorn/commit/a1d1c8a9b88449deeb172255b0bf8a22580e3cc2))
+
 ## [0.2.3](https://github.com/zozzz/gql-unicorn/compare/0.2.2...0.2.3) (2025-07-01)
 
 
