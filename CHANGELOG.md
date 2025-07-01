@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.3](https://github.com/zozzz/gql-unicorn/compare/0.2.2...0.2.3) (2025-07-01)
+
+
+* fix const enum generation ([2d40dcd](https://github.com/zozzz/gql-unicorn/commit/2d40dcda6008efce256fddb4e3cacf72e4197737))
+
 ## [0.2.2](https://github.com/zozzz/gql-unicorn/compare/0.2.1...0.2.2) (2025-06-30)
 
 
