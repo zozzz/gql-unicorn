@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1](https://github.com/zozzz/gql-unicorn/compare/0.3.0...0.3.1) (2025-07-01)
+
+
+* eliminate duplicate argument infos & unused infos ([5be9731](https://github.com/zozzz/gql-unicorn/commit/5be973198263949c8f624433b8a91f086546133d))
+
 # [0.3.0](https://github.com/zozzz/gql-unicorn/compare/0.2.3...0.3.0) (2025-07-01)
 
 
