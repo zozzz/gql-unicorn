@@ -187,9 +187,10 @@ class Transformer {
     #generateEnum(type: GraphQLEnumType, name: string): string[] {
         return [
             ...this.#comment(type.description),
-            `export const enum ${name} {`,
+            `export const ${name} = {`,
             ...this.#generateEnumValues(type.getValues()),
-            "}"
+            "} as const",
+            `export type ${name} = typeof ${name}[keyof typeof ${name}]`
         ]
     }
 
@@ -199,7 +200,7 @@ class Transformer {
         let i = 0
         for (const { name, value, description, deprecationReason } of values) {
             result.push(...this.#comment(description, deprecationReason).map(v => `${this.#indent}${v}`))
-            result.push(`${this.#indent}${name} = ${JSON.stringify(value)}${i < vl - 1 ? "," : ""}`)
+            result.push(`${this.#indent}${JSON.stringify(name)}: ${JSON.stringify(value)}${i < vl - 1 ? "," : ""}`)
             ++i
         }
 
