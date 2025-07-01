@@ -100,7 +100,6 @@ class Transformer {
         this.#parts.unshift(...Banner, ...this.#generateImports(), ...this.#argumentInfos)
         return [
             ...this.#parts,
-            ...Object.values(this.#argumentTypes),
             ...builders,
             ...reexport.map(v => `export const ${v} = __runtime.${v}`),
             "export type { TypeOf, VarOf, Selected }"
@@ -238,7 +237,7 @@ class Transformer {
         if (!isUnionType(context)) {
             for (const { name, type, args } of Object.values(context.getFields())) {
                 if (args.length > 0) {
-                    const [_, ai] = this.#argumentsType(`${context.name}${pascalCase(name)}`, args)
+                    const [_, ai] = this.#argumentsType(args)
 
                     if (bareIsScalar(type)) {
                         info.push(`${name}: ${ai}`)
@@ -323,7 +322,6 @@ class Transformer {
 
         for (const { name, args, type, description, deprecationReason } of Object.values(context.getFields())) {
             const varName = `${prefix}${pascalCase(name)}`
-            const varType = `${pascalCase(prefix)}${pascalCase(name)}`
             let argType: string = "undefined"
             let argInfo: string | undefined
             let typeValue: string = "any"
@@ -333,7 +331,7 @@ class Transformer {
             this.#import(RuntimeLib, "BuildReturn", true)
 
             if (args.length > 0) {
-                ;[argType, argInfo] = this.#argumentsType(varType, args)
+                ;[argType, argInfo] = this.#argumentsType(args)
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
                     const args = `ArgsParam<${argType}, AA>`
@@ -439,7 +437,7 @@ class Transformer {
             this.#import(RuntimeLib, "Arguments", true)
             this.#import(RuntimeLib, "ArgsParam", true)
             this.#import(RuntimeLib, "ToVars", true)
-            const [argumentType, _] = this.#argumentsType(`${contextName}_${name}`, args)
+            const [argumentType, _] = this.#argumentsType(args)
             const VP = `[...P, ${JSON.stringify(name)}]`
 
             if (bareIsScalar(type)) {
@@ -553,30 +551,39 @@ class Transformer {
         return this.#selectType(name, R, V, P)
     }
 
-    #argumentsType(prefix: string, args: ReadonlyArray<GraphQLArgument>): [string, string] {
-        const argName = pascalCase(`${prefix}_args`)
-        const argInfoName = this.#argsInfo(prefix, args)
+    #argumentsType(args: ReadonlyArray<GraphQLArgument>): [string, string] {
+        const argKey = args
+            .toSorted((a, b) => a.name.localeCompare(b.name))
+            .map(v => `${v.name}:${v.type.toString()}`)
+            .join(",")
 
-        const result: string[] = [`export type ${argName} = {`]
+        if (!(argKey in this.#argumentTypes)) {
+            const argName = `Arguments${Object.values(this.#argumentTypes).length}`
+            this.#argumentTypes[argKey] = argName
 
-        for (const { name, type, description, deprecationReason, defaultValue } of args) {
-            const ft = isNonNullType(type)
-                ? `: ${this.#typename(type.ofType, false)}`
-                : `?: ${this.#typename(type, false)}`
-            result.push(
-                ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`),
-                `${this.#indent}${name}${ft}`
-            )
+            const result: string[] = [`export type ${argName} = {`]
+
+            for (const { name, type, description, deprecationReason, defaultValue } of args) {
+                const ft = isNonNullType(type)
+                    ? `: ${this.#typename(type.ofType, false)}`
+                    : `?: ${this.#typename(type, false)}`
+                result.push(
+                    ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`),
+                    `${this.#indent}${name}${ft}`
+                )
+            }
+
+            result.push("}")
+
+            this.#argumentInfos.push(result.join("\n"))
         }
 
-        result.push("}")
-
-        this.#argumentTypes[argName] = result.join("\n")
-        return [argName, argInfoName] as const
+        const argInfoName = this.#argsInfo(argKey, args)
+        return [this.#argumentTypes[argKey], argInfoName] as const
     }
 
     #argsInfo(key: string, type: ReadonlyArray<GraphQLArgument>): string {
-        // const key = prefix
+        // const key = type.map(v => `${v.name}:${v.type.toString()}`).join(",")
         if (this.#argumentInfosName[key]) {
             return this.#argumentInfosName[key]
         }
