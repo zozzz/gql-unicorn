@@ -583,4 +583,19 @@ describe("runtime", () => {
             )
         })
     })
+
+    // TODO: implement builder()
+    // describe("builder", () => {
+    //     test("basic", () => {
+    //         const builder = G.queryUser.builder({ id: G.$$ }).id.name
+    //     })
+
+    //     test("with name", () => {
+    //         const builder = G.queryUser.builder("QueryName", { id: G.$$ }).id.name
+    //     })
+
+    //     test("with articles", () => {
+    //         const builder = G.queryUser.builder({ id: G.$$ }).id.name.articles({ count: 10 }, q => q.id)
+    //     })
+    // })
 })

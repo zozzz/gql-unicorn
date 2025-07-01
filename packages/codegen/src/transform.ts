@@ -328,6 +328,7 @@ class Transformer {
             let argInfo: string | undefined
             let typeValue: string = "any"
             let builderT: string = "any"
+            let builderFn: string = "(...args: never[]) => never"
 
             this.#import(RuntimeLib, "BuildReturn", true)
 
@@ -352,6 +353,9 @@ class Transformer {
                         `<SS extends SelectionDef, SV extends Vars, AA extends Arguments<${argType}>>`
                         + `(...args: [string, ${args}, ${sfn}] | [${args}, ${sfn}]) `
                         + `=> BuildReturn<${this.#typename(type)}, SS, SV & ToVars<${argType}, [], AA>>`
+
+                    const builderFnRet = this.#selectType(this.#selectName(type), R, "AA", "[]")
+                    builderFn = `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]) => ${builderFnRet}`
                 }
             } else {
                 if (bareIsScalar(type)) {
@@ -373,9 +377,12 @@ class Transformer {
             }
 
             const argInfoRes = argInfo ? `, ${argInfo}` : ""
+            // eslint-disable-next-line unused-imports/no-unused-vars
+            const _builderFn = `{ builder: ${builderFn} }`
             result.push(
                 ...this.#comment(description, deprecationReason),
-                `export const ${varName} = __runtime.${builder}("${name}"${argInfoRes}) as ${builderT}`
+                // `export const ${varName} = __runtime.${builder}("${name}"${argInfoRes}) as (${builderT}) & ${_builderFn}`
+                `export const ${varName} = __runtime.${builder}("${name}"${argInfoRes}) as (${builderT})`
             )
         }
 
@@ -432,7 +439,7 @@ class Transformer {
             this.#import(RuntimeLib, "Arguments", true)
             this.#import(RuntimeLib, "ArgsParam", true)
             this.#import(RuntimeLib, "ToVars", true)
-            const [argumentType, _] = this.#argumentsType(contextName, args)
+            const [argumentType, _] = this.#argumentsType(`${contextName}_${name}`, args)
             const VP = `[...P, ${JSON.stringify(name)}]`
 
             if (bareIsScalar(type)) {
@@ -547,8 +554,8 @@ class Transformer {
     }
 
     #argumentsType(prefix: string, args: ReadonlyArray<GraphQLArgument>): [string, string] {
-        const argName = `${prefix}Args`
-        const argInfoName = this.#argsInfo(args)
+        const argName = pascalCase(`${prefix}_args`)
+        const argInfoName = this.#argsInfo(prefix, args)
 
         const result: string[] = [`export type ${argName} = {`]
 
@@ -568,8 +575,8 @@ class Transformer {
         return [argName, argInfoName] as const
     }
 
-    #argsInfo(type: ReadonlyArray<GraphQLArgument>): string {
-        const key = type.map(v => `${v.name}:${v.type.toString()}`).join(",")
+    #argsInfo(key: string, type: ReadonlyArray<GraphQLArgument>): string {
+        // const key = prefix
         if (this.#argumentInfosName[key]) {
             return this.#argumentInfosName[key]
         }

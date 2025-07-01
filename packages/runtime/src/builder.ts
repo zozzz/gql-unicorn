@@ -218,6 +218,22 @@ class Context {
         return this
     }
 
+    // TODO: implement
+    builder(this: ProxyTarget, ...args: any[]) {
+        throw new Error("Not implemented")
+        // const self = this[CONTEXT]
+
+        // let name: string | undefined
+        // if (args.length > 1 && typeof args[0] === "string") {
+        //     name = args[0]
+        //     args = args.slice(1)
+        // }
+
+        // const opName = self.path[0]
+        // const info = self.info?.[opName]
+        // const root = new Context(self.type, name ? [name] : [], self.info)
+    }
+
     // TODO: some option to switch betwwen parser
     // TODO: cache
     $build(this: ProxyTarget) {
@@ -480,13 +496,15 @@ function newRootBuilder(context: Context) {
     return _newBuilder(context, rootBuilderCall, RootBuilderProxy)
 }
 
+const RootBuilderSpecials = ["builder", ...ContextSpecials]
+
 const RootBuilderProxy = {
     get(target: ProxyTarget, key: string | symbol, _receiver: any): any {
         const context = target[CONTEXT]
         if (key === CONTEXT) {
             return context
         }
-        if (ContextSpecials.includes(key)) {
+        if (RootBuilderSpecials.includes(key)) {
             return context[key as keyof typeof context]
         }
 
