@@ -23,7 +23,9 @@ export type FieldDefinitions = Record<
 type ContextType = "Query" | "Mutation" | "Subscription" | "Fragment" | "Type" | "Operation" | "Conditional"
 
 export type BuilderInfo = Record<string, BuilderInfoEntry>
-type BuilderInfoEntry = [Record<string, string>, TypeBuilder<any, any>] | TypeBuilder<any, any> | Record<string, string>
+type ArgsType = Record<string, ArgType>
+type ArgType = { tn: string; fields?: () => ArgsType; items?: () => ArgType }
+type BuilderInfoEntry = [ArgsType, TypeBuilder<any, any>] | TypeBuilder<any, any> | ArgsType
 
 class Context {
     readonly fields: BField[] = []
@@ -119,8 +121,8 @@ class Context {
         return res
     }
 
-    handleArgs(input: Record<string, any>, argTypes: Record<string, string>): Record<string, any> | undefined {
-        const prefix = this.varPrefix
+    handleArgs(input: Record<string, any>, argTypes: ArgsType, path: string[] = []): Record<string, any> | undefined {
+        const prefix = [this.varPrefix, ...path].join("__")
         const result: Record<string, any> = {}
 
         if (isVariable(input)) {
@@ -128,25 +130,60 @@ class Context {
             const vp = fixName === "$" ? prefix : fixName
             for (const [k, v] of Object.entries(argTypes)) {
                 const name = `$${vp ? `${vp}__${k}` : k}`
-                this.vars[name] = v
+                this.vars[name] = v["tn"]
                 result[k] = name
             }
-        } else {
+        } else if (isPlainObject(input)) {
             for (const [k, v] of Object.entries(input)) {
-                if (isVariable(v)) {
-                    const fixName = variableName(v)
-                    const name = `$${fixName !== "$" ? fixName : prefix ? `${prefix}__${k}` : k}`
-                    this.vars[name] = argTypes[k]
-                    result[k] = name
-                } else {
-                    result[k] = JSON.stringify(v)
-                }
+                result[k] = this._handleArg(v, argTypes[k], [...path, k])
+                // if (isVariable(v)) {
+                //     const fixName = variableName(v)
+                //     const name = `$${fixName !== "$" ? fixName : prefix ? `${prefix}__${k}` : k}`
+                //     this.vars[name] = argTypes[k]["tn"]
+                //     result[k] = name
+                // } else if (Array.isArray(v)) {
+                //     result[k] = JSON.stringify(v)
+                // }
             }
+        } else {
+            throw new Error("Unexpected input type")
         }
 
         this.args = Object.keys(result).length === 0 ? undefined : result
         return this.args
     }
+
+    _handleArg(input: any, argType: ArgType, path: string[]): string {
+        const varName = (this.varPrefix ? [this.varPrefix, ...path] : path).join("__")
+
+        if (Array.isArray(input)) {
+            const items = input.map(value => this._handleArg(value, argType.items!(), path))
+            return `[${items.join(",")}]`
+        } else if (isVariable(input)) {
+            const fixName = variableName(input)
+            const name = `$${fixName !== "$" ? fixName : varName}`
+            this.vars[name] = argType["tn"]
+            return name
+        } else if (isPlainObject(input)) {
+            const fields = Object.entries(input)
+                .map(([k, v]) => `${k}:${this._handleArg(v, argType.fields!()[k], [...path, k])}`)
+                .join(",")
+            return `{${fields}}`
+        }
+        return JSON.stringify(input)
+    }
+
+    // _stringifyArgs(input: any): string {
+    //     if (Array.isArray(input)) {
+    //         return `[${input.map(v => this._stringifyArgs(v)).join(",")}]`
+    //     } else if (isPlainObject(input)) {
+    //         const fields = Object.entries(input)
+    //             .map(([k, v]) => `${k}:${this._stringifyArgs(v)}`)
+    //             .join(",")
+    //         return `{${fields}}`
+    //     }
+    //     return JSON.stringify(input)
+    // }
 
     is(this: ProxyTarget, obj: Record<string, any> | null | undefined): boolean {
         const self = this[CONTEXT]
@@ -294,6 +331,7 @@ const GQL = Symbol("GQL")
 
 function typedDocumentNode(context: Context) {
     const gql = context.compile(false)
+    // console.log(gql)
     const td = parseGql(gql) as unknown as TypedDocumentNode & { [GQL]: string }
     td[GQL] = gql
     Object.setPrototypeOf(td, TDPrototype)
@@ -549,7 +587,7 @@ function handleMethodCall(
         return sub as ProxyTarget
     } else if (isPlainObject(info)) {
         const operation = context.sub("Operation", [opName])
-        operation.handleArgs(args[0], info as Record<string, string>)
+        operation.handleArgs(args[0], info as ArgsType)
         return newSelectionBuilder(operation.sub("Type", [])) as ProxyTarget
     }
     throw new Error("Invalid type of argument")

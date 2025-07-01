@@ -10,6 +10,7 @@ type Query {
     currentUserId: ID
     selfRecursive(id: ID!): SelfRecursive
     afc: AFC!
+    filterAfc(filter: AFCFilter, order: AFCOrder, offset: Int, limit: Int): [AFC!]!
     atomicScalar: String!
     atomicArgsScalar(id: ID): String
     search(text: String!): [SearchResult!]!
@@ -129,3 +130,21 @@ type AFC {
 }
 
 union SearchResult = AFC | SelfRecursive
+
+enum OrderDirection {
+    ASC,
+    DESC
+}
+
+input AFCFilter {
+    and: [AFCFilter!]
+    or: [AFCFilter!]
+    not: [AFCFilter!]
+    id: ID
+    kind: AFCKind
+}
+
+input AFCOrder {
+    id: OrderDirection
+    kind: OrderDirection
+}

@@ -42,7 +42,8 @@ exports[`codegen query with parameters 1`] = `
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
 import { type BuildReturn, type SelectionDef, type TypeBuilder, type Vars, type Selection, type ExtendSelected, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
-const __ArgumentInfo0 = {"id":"ID!"}
+const __ArgumentInfo1 = { tn: "ID!" }
+const __ArgumentInfo0 = { id: __ArgumentInfo1, }
 export type User = {
     __typename: "User"
     /**
@@ -67,7 +68,7 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
 export type QueryUserArgs = {
     id: string
 }
-export const queryUser = __runtime.queryBuilder("user", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUserArgs>>(...args: [string, AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<QueryUserArgs, [], AA>>
+export const queryUser = __runtime.queryBuilder("user", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUserArgs>>(...args: [string, ArgsParam<QueryUserArgs, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [ArgsParam<QueryUserArgs, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<QueryUserArgs, [], AA>>
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -91,7 +92,9 @@ exports[`codegen mutation with parameters 1`] = `
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
 import { type BuildReturn, type SelectionDef, type TypeBuilder, type Vars, type Selection, type ExtendSelected, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
-const __ArgumentInfo0 = {"id":"ID!","name":"String!"}
+const __ArgumentInfo1 = { tn: "ID!" }
+const __ArgumentInfo2 = { tn: "String!" }
+const __ArgumentInfo0 = { id: __ArgumentInfo1,name: __ArgumentInfo2, }
 export type User = {
     __typename: "User"
     /**
@@ -117,7 +120,7 @@ export type QueryUpdateUserArgs = {
     id: string
     name: string
 }
-export const queryUpdateUser = __runtime.queryBuilder("updateUser", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUpdateUserArgs>>(...args: [string, AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<QueryUpdateUserArgs, [], AA>>
+export const queryUpdateUser = __runtime.queryBuilder("updateUser", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUpdateUserArgs>>(...args: [string, ArgsParam<QueryUpdateUserArgs, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [ArgsParam<QueryUpdateUserArgs, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<QueryUpdateUserArgs, [], AA>>
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -141,7 +144,8 @@ exports[`codegen subscription with parameters 1`] = `
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
 import { type BuildReturn, type SelectionDef, type TypeBuilder, type Vars, type Selection, type ExtendSelected, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
-const __ArgumentInfo0 = {"type":"String!"}
+const __ArgumentInfo1 = { tn: "String!" }
+const __ArgumentInfo0 = { type: __ArgumentInfo1, }
 export type SomeEvent = {
     __typename: "SomeEvent"
     id: string
@@ -157,7 +161,7 @@ export interface SomeEventSelect<R extends SelectionDef, V extends Vars, P exten
 export type SubscribeOnChangeSomethingArgs = {
     type: string
 }
-export const subscribeOnChangeSomething = __runtime.subscriptionBuilder("onChangeSomething", [__ArgumentInfo0, SomeEvent]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<SubscribeOnChangeSomethingArgs>>(...args: [string, AA, (select: SomeEventSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: SomeEventSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<SomeEvent, SS, SV & ToVars<SubscribeOnChangeSomethingArgs, [], AA>>
+export const subscribeOnChangeSomething = __runtime.subscriptionBuilder("onChangeSomething", [__ArgumentInfo0, SomeEvent]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<SubscribeOnChangeSomethingArgs>>(...args: [string, ArgsParam<SubscribeOnChangeSomethingArgs, AA>, (select: SomeEventSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [ArgsParam<SubscribeOnChangeSomethingArgs, AA>, (select: SomeEventSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<SomeEvent, SS, SV & ToVars<SubscribeOnChangeSomethingArgs, [], AA>>
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -169,7 +173,8 @@ exports[`codegen Optional array 1`] = `
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
 import { type BuildReturn, type TypeBuilder, type Vars, type Selection, type ExtendSelected, type SelectionDef, type TypeOf, type VarOf, type Selected } from "@gql-unicorn/runtime"
-const __ArgumentInfo0 = {"filter":"UserFilter"}
+const __ArgumentInfo1 = { tn: "UserFilter" }
+const __ArgumentInfo0 = { filter: __ArgumentInfo1, }
 export type UserFilter = {
     __typename: "UserFilter"
     ids?: Array<string> | null
@@ -197,7 +202,7 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
 export type QueryUsersArgs = {
     filter?: UserFilter
 }
-export const queryUsers = __runtime.queryBuilder("users", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUsersArgs>>(...args: [string, AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [AA, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<Array<User>, SS, SV & ToVars<QueryUsersArgs, [], AA>>
+export const queryUsers = __runtime.queryBuilder("users", [__ArgumentInfo0, User]) as <SS extends SelectionDef, SV extends Vars, AA extends Arguments<QueryUsersArgs>>(...args: [string, ArgsParam<QueryUsersArgs, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [ArgsParam<QueryUsersArgs, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<Array<User>, SS, SV & ToVars<QueryUsersArgs, [], AA>>
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"

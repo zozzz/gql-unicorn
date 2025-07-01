@@ -7,6 +7,7 @@ import {
     type GraphQLFieldMap,
     type GraphQLInputFieldMap,
     type GraphQLInputObjectType,
+    type GraphQLInputType,
     type GraphQLInterfaceType,
     type GraphQLNamedType,
     type GraphQLNonNull,
@@ -334,9 +335,10 @@ class Transformer {
                 ;[argType, argInfo] = this.#argumentsType(varType, args)
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
+                    const args = `ArgsParam<${argType}, AA>`
                     // <AA extends Arguments<A>>(...args: [string, AA] | [AA]): BuildReturn<T, {} & ToVars<A, [], AA>>
                     builderT =
-                        `<AA extends Arguments<${argType}>>(...args: [string, AA] | [AA]) `
+                        `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]) `
                         + `=> BuildReturn<${typeValue}, never, {} & ToVars<${argType}, [], AA>>`
                 } else {
                     this.#import(RuntimeLib, "SelectionDef", true)
@@ -345,9 +347,10 @@ class Transformer {
                     typeValue = this.#selectType(this.#selectName(type), R, "{}", "[]")
                     argInfo = `[${argInfo}, ${this.#bareTypename(type)}]`
                     const sfn = `(select: ${typeValue}) => Selection<any, SS, SV>`
+                    const args = `ArgsParam<${argType}, AA>`
                     builderT =
                         `<SS extends SelectionDef, SV extends Vars, AA extends Arguments<${argType}>>`
-                        + `(...args: [string, AA, ${sfn}] | [AA, ${sfn}]) `
+                        + `(...args: [string, ${args}, ${sfn}] | [${args}, ${sfn}]) `
                         + `=> BuildReturn<${this.#typename(type)}, SS, SV & ToVars<${argType}, [], AA>>`
                 }
             } else {
@@ -427,6 +430,7 @@ class Transformer {
         this.#import(RuntimeLib, "ExtendSelected", true)
         if (args.length > 0) {
             this.#import(RuntimeLib, "Arguments", true)
+            this.#import(RuntimeLib, "ArgsParam", true)
             this.#import(RuntimeLib, "ToVars", true)
             const [argumentType, _] = this.#argumentsType(contextName, args)
             const VP = `[...P, ${JSON.stringify(name)}]`
@@ -435,15 +439,17 @@ class Transformer {
                 const R = `ExtendSelected<R, [${JSON.stringify(name)}]>`
                 const V = `V & ToVars<${argumentType}, ${VP}, A>`
                 const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
-                result.push(`${name}<A extends Arguments<${argumentType}>>(args: A): ${returnType}`)
+                const args = `ArgsParam<${argumentType}, A>`
+                result.push(`${name}<A extends Arguments<${argumentType}>>(args: ${args}): ${returnType}`)
             } else {
                 const R = `ExtendSelected<R, [Record<${JSON.stringify(name)}, SR>]>`
                 const V = `V & SV & ToVars<${argumentType}, ${VP}, A>`
                 const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SR, SV>`
+                const args = `ArgsParam<${argumentType}, A>`
                 result.push(
-                    `${name}<A extends Arguments<${argumentType}>, ST, SR extends SelectionDef, SV extends Vars>(args: A, select: ${subf}): ${returnType}`
+                    `${name}<A extends Arguments<${argumentType}>, ST, SR extends SelectionDef, SV extends Vars>(args: ${args}, select: ${subf}): ${returnType}`
                 )
             }
         } else {
@@ -542,10 +548,9 @@ class Transformer {
 
     #argumentsType(prefix: string, args: ReadonlyArray<GraphQLArgument>): [string, string] {
         const argName = `${prefix}Args`
-        let argInfoName: string
+        const argInfoName = this.#argsInfo(args)
 
         const result: string[] = [`export type ${argName} = {`]
-        const info: Record<string, string> = {}
 
         for (const { name, type, description, deprecationReason, defaultValue } of args) {
             const ft = isNonNullType(type)
@@ -555,25 +560,63 @@ class Transformer {
                 ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`),
                 `${this.#indent}${name}${ft}`
             )
-            info[name] = type.toString()
         }
 
         result.push("}")
 
-        const infoKey = Object.entries(info)
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .map(v => v.join(":"))
-            .join(",")
-        if (!(infoKey in this.#argumentInfosName)) {
-            argInfoName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
-            this.#argumentInfosName[infoKey] = argInfoName
-            this.#argumentInfos.push(`const ${argInfoName} = ${JSON.stringify(info)}`)
-        } else {
-            argInfoName = this.#argumentInfosName[infoKey]
-        }
-
         this.#argumentTypes[argName] = result.join("\n")
         return [argName, argInfoName] as const
+    }
+
+    #argsInfo(type: ReadonlyArray<GraphQLArgument>): string {
+        const key = type.map(v => `${v.name}:${v.type.toString()}`).join(",")
+        if (this.#argumentInfosName[key]) {
+            return this.#argumentInfosName[key]
+        }
+
+        const selfName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
+        this.#argumentInfosName[key] = selfName
+        const result = [`const ${selfName} = { `]
+
+        for (const arg of type) {
+            const name = this.#argInfo(arg.type)
+            result.push(`${arg.name}: ${name},`)
+        }
+
+        result.push(" }")
+        this.#argumentInfos.push(result.join(""))
+
+        return selfName
+    }
+
+    #argInfo(type: GraphQLInputType): string {
+        const typename = type.toString()
+        if (this.#argumentInfosName[typename]) {
+            return this.#argumentInfosName[typename]
+        }
+        const varName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
+        this.#argumentInfosName[typename] = varName
+
+        this.#argumentInfos.push(`const ${varName} = ${this.#argInfoCode(type)}`)
+
+        return varName
+    }
+
+    #argInfoCode(type: GraphQLInputType, realTypename?: string): string {
+        realTypename ??= type.toString()
+        if (isListType(type)) {
+            return `{ tn: ${JSON.stringify(realTypename)}, items: () => ${this.#argInfo(type.ofType)} }`
+        } else if (isNonNullType(type)) {
+            return this.#argInfoCode(type.ofType, type.toString())
+        } else if (isInputObjectType(type)) {
+            const fields = Object.entries(type.getFields()).reduce<string[]>((acc, [name, field]) => {
+                acc.push(`${name}: ${this.#argInfo(field.type)}`)
+                return acc
+            }, [])
+            return `{ tn: ${JSON.stringify(realTypename)}, fields: () => ({ ${fields.join(", ")} }) }`
+        } else {
+            return `{ tn: ${JSON.stringify(realTypename)} }`
+        }
     }
 
     #omit(t: string, field: string): string {

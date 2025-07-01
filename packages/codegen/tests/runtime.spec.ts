@@ -187,6 +187,73 @@ describe("runtime", () => {
             )
         })
 
+        describe("filter variable", () => {
+            type OrderDirection = import("./__generated__/runtime").OrderDirection
+            type AFCKind = import("./__generated__/runtime").AFCKind
+
+            test("by const id", () => {
+                testQuery<Array<{ __typename: "AFC"; id: string }>, never>(
+                    G.queryFilterAfc({ filter: { id: "idOfUser" } }, q => q.id),
+                    `query{filterAfc(filter:{id:"idOfUser"}){__typename,id}}`
+                )
+            })
+
+            test("by id default filter", () => {
+                testQuery<Array<{ __typename: "AFC"; id: string }>, { filter__id: string }>(
+                    G.queryFilterAfc({ filter: { id: G.$$ } }, q => q.id),
+                    `query($filter__id:ID){filterAfc(filter:{id:$filter__id}){__typename,id}}`
+                )
+            })
+
+            test("by id defaults", () => {
+                testQuery<
+                    Array<{ __typename: "AFC"; id: string }>,
+                    { filter__id: string; order__kind: OrderDirection; limit: number; offset: number }
+                >(
+                    G.queryFilterAfc(
+                        { filter: { id: G.$$ }, order: { kind: G.$$ }, limit: G.$$, offset: G.$$ },
+                        q => q.id
+                    ),
+                    `query($filter__id:ID,$order__kind:OrderDirection,$limit:Int,$offset:Int){filterAfc(filter:{id:$filter__id},order:{kind:$order__kind},limit:$limit,offset:$offset){__typename,id}}`
+                )
+            })
+
+            test("by id fixed var", () => {
+                testQuery<Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
+                    G.queryFilterAfc({ filter: { id: G.$("afcId") } }, q => q.id),
+                    `query($afcId:ID){filterAfc(filter:{id:$afcId}){__typename,id}}`
+                )
+            })
+
+            test("mixed", () => {
+                testQuery<Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
+                    G.queryFilterAfc({ filter: { id: G.$("afcId"), kind: "EXTENDED" } }, q => q.id),
+                    `query($afcId:ID){filterAfc(filter:{id:$afcId,kind:"EXTENDED"}){__typename,id}}`
+                )
+            })
+
+            test("mixed2", () => {
+                testQuery<Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
+                    G.queryFilterAfc({ filter: { id: G.$("afcId") }, order: { kind: "ASC" } }, q => q.id),
+                    `query($afcId:ID){filterAfc(filter:{id:$afcId},order:{kind:"ASC"}){__typename,id}}`
+                )
+            })
+
+            test("array", () => {
+                testQuery<Array<{ __typename: "AFC"; id: string }>, { filter__and__id: string }>(
+                    G.queryFilterAfc({ filter: { and: [{ id: G.$$, kind: "EXTENDED" }] } }, q => q.id),
+                    `query($filter__and__id:ID){filterAfc(filter:{and:[{id:$filter__and__id,kind:"EXTENDED"}]}){__typename,id}}`
+                )
+            })
+
+            test("array2", () => {
+                testQuery<Array<{ __typename: "AFC"; id: string }>, { filter__and__id: string; notKind: AFCKind }>(
+                    G.queryFilterAfc({ filter: { and: [{ id: G.$$, not: [{ kind: G.$("notKind") }] }] } }, q => q.id),
+                    `query($filter__and__id:ID,$notKind:AFCKind){filterAfc(filter:{and:[{id:$filter__and__id,not:[{kind:$notKind}]}]}){__typename,id}}`
+                )
+            })
+        })
+
         test("union", () => {
             type AFCKind = import("./__generated__/runtime").AFCKind
             testQuery<
