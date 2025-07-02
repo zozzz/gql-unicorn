@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.2](https://github.com/zozzz/gql-unicorn/compare/0.3.1...0.3.2) (2025-07-02)
+
+
+* optimize generated file imports ([97680b0](https://github.com/zozzz/gql-unicorn/commit/97680b084260fdafa4056a51326bd8b8bac0095f))
+
 ## [0.3.1](https://github.com/zozzz/gql-unicorn/compare/0.3.0...0.3.1) (2025-07-01)
 
 
