@@ -79,16 +79,19 @@ class Transformer {
 
         const query = this.schema.getQueryType()
         if (query != null) {
+            this.#import(RuntimeLib, "queryBuilder", false)
             builders.push(...this.#rootBuilder(query, "query", "queryBuilder"))
         }
 
         const mutation = this.schema.getMutationType()
         if (mutation != null) {
+            this.#import(RuntimeLib, "mutationBuilder", false)
             builders.push(...this.#rootBuilder(mutation, "mutate", "mutationBuilder"))
         }
 
         const subscription = this.schema.getSubscriptionType()
         if (subscription != null) {
+            this.#import(RuntimeLib, "subscriptionBuilder", false)
             builders.push(...this.#rootBuilder(subscription, "subscribe", "subscriptionBuilder"))
         }
 
@@ -232,6 +235,8 @@ class Transformer {
 
     #generateTypeBuilder(context: GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType): string[] {
         this.#import(RuntimeLib, "TypeBuilder", true)
+        this.#import(RuntimeLib, "BuilderInfo", true)
+        this.#import(RuntimeLib, "typeBuilder", false)
         const info: string[] = []
 
         if (!isUnionType(context)) {
@@ -252,11 +257,11 @@ class Transformer {
             }
         }
 
-        const infoStr = info.length > 0 ? `, (() => ({ ${info.join(", ")} })) as () => __runtime.BuilderInfo` : ""
+        const infoStr = info.length > 0 ? `, (() => ({ ${info.join(", ")} })) as () => BuilderInfo` : ""
         const T = this.#selectType(this.#selectName(context), `["__typename"]`, "{}", "[]")
         const TN = JSON.stringify(context.name)
         return [
-            `export const ${this.#bareTypename(context)} = __runtime.typeBuilder("${context.name}"${infoStr}) as TypeBuilder<${T}, ${TN}>`
+            `export const ${this.#bareTypename(context)} = typeBuilder("${context.name}"${infoStr}) as TypeBuilder<${T}, ${TN}>`
         ]
     }
 
@@ -379,8 +384,8 @@ class Transformer {
             const _builderFn = `{ builder: ${builderFn} }`
             result.push(
                 ...this.#comment(description, deprecationReason),
-                // `export const ${varName} = __runtime.${builder}("${name}"${argInfoRes}) as (${builderT}) & ${_builderFn}`
-                `export const ${varName} = __runtime.${builder}("${name}"${argInfoRes}) as (${builderT})`
+                // `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT}) & ${_builderFn}`
+                `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})`
             )
         }
 
@@ -412,11 +417,8 @@ class Transformer {
     #selectFields(context: GraphQLType, fields: GraphQLFieldMap<any, any>): string[] {
         const result: string[] = []
         for (const { name, args, type, description, deprecationReason } of Object.values(fields)) {
-            const extraComment = bareIsScalar(type)
-                ? ` * @type ${this.#typename(type)}`
-                : ` * @type {${this.#typename(type)}}`
             result.push(
-                ...this.#comment(description, deprecationReason, undefined, [extraComment]),
+                ...this.#comment(description, deprecationReason, undefined),
                 ...this.#selectField(context, name, args, type)
             )
         }
