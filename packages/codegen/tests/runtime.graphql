@@ -127,6 +127,7 @@ type AFC {
     nearest(lat: Float!, lng: Float!): Location
     hq: Location!
     hqName: String!
+    allOptional(arg1: String, arg2: String): String
 }
 
 union SearchResult = AFC | SelfRecursive

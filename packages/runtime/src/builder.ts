@@ -517,7 +517,7 @@ const RootBuilderProxy = {
  */
 function rootBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
     let name: string | undefined
-    if (args.length > 1 && typeof args[0] === "string") {
+    if (args.length >= 1 && typeof args[0] === "string") {
         name = args[0]
         args = args.slice(1)
     }
@@ -593,19 +593,30 @@ function handleMethodCall(
     } else if (Array.isArray(info)) {
         // type, with args
         const [argInfo, selectInfo] = info
-        const select = args[1]
-        if (typeof select !== "function") {
+        let select: any
+        let params: any
+        if (typeof args[0] === "function") {
+            params = null
+            select = args[0]
+        } else if (typeof args[1] === "function") {
+            params = args[0]
+            select = args[1]
+        } else {
             throw new Error("Invalid type of argument, must be a select function")
         }
 
         const operation = context.sub("Operation", [opName])
-        operation.handleArgs(args[0], argInfo)
+        if (params) {
+            operation.handleArgs(params, argInfo)
+        }
         const sub = newSelectionBuilder(asContext(selectInfo)!.clone(operation))
         select(sub)
         return sub as ProxyTarget
     } else if (isPlainObject(info)) {
         const operation = context.sub("Operation", [opName])
-        operation.handleArgs(args[0], info as ArgsType)
+        if (args[0] != null) {
+            operation.handleArgs(args[0], info as ArgsType)
+        }
         return newSelectionBuilder(operation.sub("Type", [])) as ProxyTarget
     }
     throw new Error("Invalid type of argument")

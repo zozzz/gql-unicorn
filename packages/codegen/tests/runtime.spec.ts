@@ -115,6 +115,37 @@ describe("runtime", () => {
                     `query($id:ID){atomicArgsScalar(id:$id)}`
                 )
             })
+
+            describe("all args optional & omit", () => {
+                test("type without name", () => {
+                    testQuery<Array<{ __typename: "AFC"; id: string }>, never>(
+                        G.queryFilterAfc(q => q.id),
+                        `query{filterAfc{__typename,id}}`
+                    )
+                })
+
+                test("type with name", () => {
+                    testQuery<Array<{ __typename: "AFC"; id: string }>, never>(
+                        G.queryFilterAfc("qAFC", q => q.id),
+                        `query qAFC{filterAfc{__typename,id}}`
+                    )
+                })
+
+                test("scalar without name", () => {
+                    testQuery<string | null, never>(G.queryAtomicArgsScalar(), `query{atomicArgsScalar}`)
+                })
+
+                test("scalar with name", () => {
+                    testQuery<string | null, never>(G.queryAtomicArgsScalar("XYZ"), `query XYZ{atomicArgsScalar}`)
+                })
+
+                test("field", () => {
+                    testQuery<Array<{ __typename: "AFC"; id: string; allOptional?: string | null }>, never>(
+                        G.queryFilterAfc("qAFC", q => q.id.allOptional()),
+                        `query qAFC{filterAfc{__typename,id,allOptional}}`
+                    )
+                })
+            })
         })
 
         test("variables", () => {
