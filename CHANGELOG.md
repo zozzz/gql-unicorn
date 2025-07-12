@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.3](https://github.com/zozzz/gql-unicorn/compare/0.3.2...0.3.3) (2025-07-12)
+
+
+* Ommitable all args when all is optional ([0cf47da](https://github.com/zozzz/gql-unicorn/commit/0cf47dabd4d98d12f40008d4943b201197287265))
+
 ## [0.3.2](https://github.com/zozzz/gql-unicorn/compare/0.3.1...0.3.2) (2025-07-02)
 
 
