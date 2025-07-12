@@ -181,7 +181,7 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     id: Omit<UserSelect<ExtendSelected<R, ["id"]>, V, P>, keyof R | "id">
     $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<User, SR, SV>): UserSelect<[...R, ...SR], V & SV, P>
 }
-export const queryUsers = queryBuilder("users", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<Array<User>, SS, SV & ToVars<Arguments0, [], AA>>)
+export const queryUsers = queryBuilder("users", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [string, (select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, []>) => Selection<any, SS, SV>]) => BuildReturn<Array<User>, SS, SV & ToVars<Arguments0, [], AA>>)
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
