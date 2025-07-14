@@ -388,7 +388,7 @@ export interface TypeBuilder<T, TN extends string> {
     is<V extends SimpleType | null | undefined>(obj: V): obj is TypeVariant<V, TN> & NonNullable<V>
     <ST, SS extends SelectionDef, SV extends Vars>(
         ...args: [string, (select: T) => Selection<ST, SS, SV>] | [(select: T) => Selection<ST, SS, SV>]
-    ): Selection<ST, SS, SV>
+    ): Selection<ST, [{ $on: { [k in TN]: SS } }], SV>
 }
 
 type TypeVariant<V extends SimpleType, TN extends string> = MergeUnion<{ __typename: TN } & V>

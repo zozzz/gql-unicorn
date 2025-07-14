@@ -437,7 +437,7 @@ class Transformer {
         const contextName = this.#selectName(context)
         const result: string[] = []
 
-        this.#import(RuntimeLib, "ExtendSelected", true)
+        this.#import(RuntimeLib, "ExtendSelection", true)
         if (args.length > 0) {
             this.#import(RuntimeLib, "Arguments", true)
             this.#import(RuntimeLib, "ArgsParam", true)
@@ -446,14 +446,14 @@ class Transformer {
             const VP = `[...P, ${JSON.stringify(name)}]`
 
             if (bareIsScalar(type)) {
-                const R = `ExtendSelected<R, [${JSON.stringify(name)}]>`
+                const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
                 const V = `V & ToVars<${argumentType}, ${VP}, A>`
                 const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
                 const args = `ArgsParam<${argumentType}, A>`
                 const qm = argOptional ? "?" : ""
                 result.push(`${name}<A extends Arguments<${argumentType}>>(args${qm}: ${args}): ${returnType}`)
             } else {
-                const R = `ExtendSelected<R, [Record<${JSON.stringify(name)}, SR>]>`
+                const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, SR>>`
                 const V = `V & SV & ToVars<${argumentType}, ${VP}, A>`
                 const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
@@ -466,12 +466,12 @@ class Transformer {
             }
         } else {
             if (bareIsScalar(type)) {
-                const R = `ExtendSelected<R, [${JSON.stringify(name)}]>`
+                const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
                 const V = `V`
                 const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
                 result.push(`${name}: ${returnType}`)
             } else {
-                const R = `ExtendSelected<R, [Record<${JSON.stringify(name)}, SR>]>`
+                const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, SR>>`
                 const V = `V & SV`
                 const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
@@ -483,8 +483,14 @@ class Transformer {
     }
 
     #onFns(type: GraphQLType): string[] {
+        this.#import(RuntimeLib, "MergeSelection", true)
         // this.#import(RuntimeLib, "OnFnResult", true)
-        const selfT = this.#selectType(this.#selectName(type), "[...R, ...SR]", "V & SV", "P")
+        const selfT = this.#selectType(
+            this.#selectName(type),
+            `MergeSelection<R, ExtendSelection<SR, "__typename">>`,
+            "V & SV",
+            "P"
+        )
         const onSelf = `$on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<${this.#bareTypename(type)}, SR, SV>): ${selfT}`
         const result: string[] = [onSelf]
 
@@ -647,7 +653,7 @@ class Transformer {
     }
 
     #omit(t: string, field: string): string {
-        return `Omit<${t}, keyof R | "${field}">`
+        return `Omit<${t}, R[number] extends string ? R[number] | "${field}" : "${field}">`
         // return `Omit<${t}, keyof R | "${field}" | "$build" | "$gql">`
     }
 

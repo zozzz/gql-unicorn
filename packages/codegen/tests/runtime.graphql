@@ -62,6 +62,8 @@ type Article implements Node {
     title: String!
     "Tags of Article"
     tags: [Tag!]
+    "Events..."
+    events: [Event!]!
 }
 
 input ArticleFilter {

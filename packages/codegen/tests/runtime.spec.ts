@@ -3,6 +3,7 @@ import { mkdir } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import type { TypeOf } from "@gql-unicorn/runtime"
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
 import { beforeAll, describe, expect, test } from "bun:test"
 import { buildSchema, parse } from "graphql"
@@ -449,8 +450,9 @@ describe("runtime", () => {
         describe("$on", () => {
             test("type", () => {
                 testQuery<
-                    | { __typename: "User" | "Article" | "Tag"; id: string }
-                    | { __typename: "User"; name: string }
+                    | { __typename: "Article"; id: string }
+                    | { __typename: "Tag"; id: string }
+                    | { __typename: "User"; id: string; name: string }
                     | null
                     | undefined,
                     { id: string }
@@ -460,10 +462,25 @@ describe("runtime", () => {
                 )
             })
 
+            test("type", () => {
+                testQuery<
+                    | { __typename: "Article" }
+                    | { __typename: "Tag" }
+                    | { __typename: "User"; name: string }
+                    | null
+                    | undefined,
+                    { id: string }
+                >(
+                    G.queryNode(G.$$, q => q.$on(G.User(q => q.name))),
+                    `query($id:ID!){node(id:$id){__typename,... on User{name}}}`
+                )
+            })
+
             test("fragment 1", () => {
                 testQuery<
-                    | { __typename: "User" | "Article" | "Tag"; id: string }
-                    | { __typename: "User"; name: string }
+                    | { __typename: "Article"; id: string }
+                    | { __typename: "Tag"; id: string }
+                    | { __typename: "User"; id: string; name: string }
                     | null
                     | undefined,
                     { id: string }
@@ -473,11 +490,15 @@ describe("runtime", () => {
                 )
             })
 
-            // TODO: strictier type
             type NodeRes =
-                | { __typename: "User" | "Article" | "Tag"; id: string }
-                | { __typename: "User"; name: string }
-                | { __typename: "Article"; title: string; tags: Array<{ id: string; tag: string }> | null }
+                | { __typename: "Tag"; id: string }
+                | { __typename: "User"; id: string; name: string }
+                | {
+                      __typename: "Article"
+                      id: string
+                      title: string
+                      tags?: Array<{ __typename: "Tag"; id: string; tag: string }> | null
+                  }
                 | null
                 | undefined
 
@@ -492,24 +513,56 @@ describe("runtime", () => {
                 )
             })
 
+            type NodeRes2 =
+                | { __typename: "Tag"; id: string }
+                | { __typename: "User"; id: string; name: string }
+                | {
+                      __typename: "Article"
+                      id: string
+                      title: string
+                      tags?: Array<{ __typename: "Tag"; id: string; tag: string }> | null
+                      events?: Array<
+                          | {
+                                __typename: "ArticleChangeEvent"
+                                curr: { __typename: "Article"; id: string }
+                            }
+                          | { __typename: "UserChangeEvent" }
+                      >
+                  }
+                | null
+                | undefined
+
+            const queryNodeRes2 = G.queryNodes(q =>
+                q.id
+                    .$on(G.User("userFragment", q => q.name))
+                    .$on(
+                        G.Article("articleFragment", q =>
+                            q.title.tags(q => q.id.tag).events(q => q.$on(G.ArticleChangeEvent(q => q.curr(q => q.id))))
+                        )
+                    )
+            )
             test("fragment 2", () => {
-                testQuery<NodeRes[], never>(
-                    G.queryNodes(q =>
-                        q.id
-                            .$on(G.User("userFragment", q => q.name))
-                            .$on(G.Article("articleFragment", q => q.title.tags(q => q.id.tag)))
-                    ),
-                    `query{nodes{__typename,id,...userFragment,...articleFragment}} fragment userFragment on User{name} fragment articleFragment on Article{title,tags{id,tag}}`
+                testQuery<NodeRes2[], never>(
+                    queryNodeRes2,
+                    `query{nodes{__typename,id,...userFragment,...articleFragment}} fragment userFragment on User{name} fragment articleFragment on Article{title,tags{id,tag},events{... on ArticleChangeEvent{curr{id}}}}`
                 )
             })
 
+            type QueryNodeRes2 = TypeOf<typeof queryNodeRes2>
             test("is", () => {
-                const article: NodeRes = { __typename: "Article", id: "id", title: "title" }
+                const articles: QueryNodeRes2 = [{ __typename: "Article", id: "id", title: "title", events: [] }]
+                const article = articles[0]
                 if (G.Article.is(article)) {
-                    const { __typename, id, title }: { __typename: "Article"; id: string; title: string } = article
+                    const {
+                        __typename,
+                        id,
+                        title,
+                        events
+                    }: { __typename: "Article"; id: string; title: string; events: any[] } = article
                     expect(__typename).toBe("Article")
                     expect(id).toBe("id")
                     expect(title).toBe("title")
+                    expect(events).toEqual([])
                 } else {
                     throw new Error("not article")
                 }

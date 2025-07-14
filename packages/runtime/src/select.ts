@@ -232,7 +232,15 @@ export type BuildReturn<T, S extends SelectionDef, V extends Vars> = TypedDocume
     V extends Record<string, any> ? ExcludeEmpty<V> : V
 >
 
-export type TypeOf<T> = T extends TypedDocumentNode<infer R, any> ? R : unknown
+// export type TypeOf<T> =
+//     T extends TypedDocumentNode<infer R, any>
+//         ? R
+//         : T extends BuildReturn<infer BT, infer BS, any>
+//           ? Selected<BT, BS>
+//           : unknown
+export type TypeOf<T> = T extends TypedDocumentNode<infer R, never> ? R : unknown
+// export type TypeOf<T> = ReturnType<<R, V>(x: TypedDocumentNode<R, V>) => R>
+// export type TypeOf<T> = T extends BuildReturn<infer BT, infer BS, any> ? Selected<BT, BS> : unknown
 export type VarOf<T> = T extends TypedDocumentNode<any, infer V> ? V : unknown
 
 // export type AddFieldToResult<R, TN extends string, K extends string, V> = R extends { __typename: string }
@@ -250,30 +258,104 @@ export type VarOf<T> = T extends TypedDocumentNode<any, infer V> ? V : unknown
 //           ? ObjectSpread<[R, Record<K, V>]>
 //           : ObjectSpread<[Record<"__typename", TN>, Record<K, V>]>
 
-// TODO: unique keys
 // TODO: merge {subField: ["id"]}, {subField: ["name"]}
 // currently working without todos, but not so fancy
-export type ExtendSelected<B extends SelectionDef, S extends SelectionDef> = [...B, ...S]
+
+export type ExtendSelection<S extends SelectionDef, I extends SelectionItem> = S["length"] extends 0
+    ? [I]
+    : I extends SelectionOn
+      ? _ExtendWithOn<S, I>
+      : I extends SelectionSub
+        ? _ExtendWithSub<S, I>
+        : I extends SelectionField
+          ? _ExtendWithField<S, I>
+          : S
+
+type _ExtendWithOn<S extends SelectionDef, I extends SelectionOn> =
+    _HasItem<S, SelectionOn> extends never ? [...S, I] : _UpdateOn<S, I>
+
+type _UpdateOn<S extends SelectionDef, I extends SelectionOn> = S extends [...infer S1 extends SelectionDef, infer S2]
+    ? S2 extends SelectionOn
+        ? [...S1, { $on: _MergeSub<S2["$on"], I["$on"]> }]
+        : [..._UpdateOn<S1, I>, S2]
+    : S
+
+type _ExtendWithSub<S extends SelectionDef, I extends SelectionSub> =
+    _HasItem<S, SelectionSub> extends never ? [...S, I] : _UpdateSub<S, I>
+
+type _ExtendWithField<S extends SelectionDef, I extends SelectionField> = I extends S[number] ? S : [...S, I]
+
+type _HasItem<S extends SelectionDef, I> = S extends Array<infer V> ? (V extends I ? true : never) : never
+
+type _UpdateSub<S extends SelectionDef, I extends SelectionSub> = S extends [...infer S1 extends SelectionDef, infer S2]
+    ? S2 extends SelectionSub
+        ? [...S1, _MergeSub<S2, I>]
+        : [..._UpdateSub<S1, I>, S2]
+    : S
+
+type _MergeSub<A extends SelectionSub, B extends SelectionSub> = {
+    [K in keyof A | keyof B]: K extends keyof A & keyof B
+        ? MergeSelection<A[K], B[K]>
+        : K extends keyof A
+          ? A[K]
+          : K extends keyof B
+            ? B[K]
+            : never
+}
+
+// type Alma1 = ExtendSelection<[], "id">
+// type Alma2 = ExtendSelection<["id", "name"], "id">
+// type Alma3 = ExtendSelection<["id"], { $on: { User: ["name"] } }>
+// type Alma4 = ExtendSelection<Alma3, { $on: { User: ["name", "id"] } }>
+// type Alma5 = ExtendSelection<Alma4, { $on: { Worker: ["org"] } }>
+// type Alma6 = ExtendSelection<Alma5, "title">
+// type Alma7 = ExtendSelection<Alma6, { child: ["id"] }>
+// type Alma8 = ExtendSelection<Alma7, { child: ["name"] }>
+// type Alma9 = ExtendSelection<Alma8, { child: [{ $on: { User: ["id"] } }] }>
+// type AlmaXXX = Alma9[3]
+
+export type MergeSelection<A extends SelectionDef, B extends SelectionDef> = B["length"] extends 1
+    ? ExtendSelection<A, B[0]>
+    : B extends [...infer B1 extends SelectionItem[], infer B2 extends SelectionItem]
+      ? ExtendSelection<MergeSelection<A, B1>, B2>
+      : A
 
 export type Selected<T, S extends SelectionDef> = T extends null
     ? Selected<NonNullable<T>, S> | null
     : T extends Array<infer TA>
       ? Array<Selected<TA, S>>
       : T extends SimpleType
-        ? OmitNever<{
-              [K in keyof T]: S extends Array<infer A>
-                  ? K extends A
-                      ? T[K]
-                      : A extends Record<string, any>
-                        ? K extends keyof A
-                            ? A[K] extends SelectionDef
-                                ? Selected<T[K], A[K]>
-                                : never
-                            : never
-                        : never
+        ? T extends { __typename: infer TN extends string }
+            ? /*{ __typename: TN } &*/ _Selected<T, _SelectionByType<TN, S>>
+            : never
+        : never
+
+type _SelectionByType<TN extends string, S extends SelectionDef> = S extends [
+    ...infer S1 extends SelectionDef,
+    infer S2 extends SelectionItem
+]
+    ? S2 extends SelectionOn
+        ? S2["$on"][TN] extends infer S2D extends SelectionDef
+            ? MergeSelection<_SelectionByType<TN, S1>, S2D>
+            : S1["length"] extends 0
+              ? never
+              : _SelectionByType<TN, S1>
+        : ExtendSelection<_SelectionByType<TN, S1>, S2>
+    : S
+
+type _Selected<T extends SimpleType, S extends SelectionDef> = OmitNever<{
+    [K in keyof T]: S extends Array<infer A>
+        ? K extends A
+            ? T[K]
+            : A extends Record<string, any>
+              ? K extends keyof A
+                  ? A[K] extends SelectionDef
+                      ? Selected<T[K], A[K]>
+                      : never
                   : never
-          }>
-        : T
+              : never
+        : never
+}>
 
 type OmitNever<T extends Record<string, any>> = Omit<T, NeverKeys<T>>
 
@@ -295,7 +377,11 @@ type Alias<T, N extends string> = T & { [ALIAS]: N }
 
 // TODO: Handle aliases
 // export type SelectionDef = Array<string | Record<string, string> | Record<string, SelectionDef>>
-export type SelectionDef = Array<string | Record<string, SelectionDef>>
+export type SelectionDef = SelectionItem[]
+export type SelectionItem = SelectionField | SelectionSub | SelectionOn
+export type SelectionField = string
+export type SelectionSub = Record<string, SelectionDef>
+export type SelectionOn = { $on: SelectionSub }
 
 // export type ExtendSelection<SD extends SelectionDef, P extends string[], K extends string> = P["length"] extends 0
 //     ? [...SD, K]
