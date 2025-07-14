@@ -47,6 +47,18 @@ function doSomethingWithFragment(fragment: TypeOf<typeof fragment>) {}
 
 ```
 
+#### Builder
+
+```typescript
+import { queryUsers } from "genrated-pacakge-name"
+
+const GetUserBuilder = queryUsers.builder().id
+
+const GetUsersWithName = GetUserBuilder.name.$build()
+const PFragment = Pagination.fragment(q => q.offset.limit)
+const GetUsersWithPganination = GetUserBuilder.$on(PFragment).$build()
+```
+
 #### Selected type
 
 ```typescript

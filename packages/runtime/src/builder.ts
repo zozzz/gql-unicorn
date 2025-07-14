@@ -220,18 +220,24 @@ class Context {
 
     // TODO: implement
     builder(this: ProxyTarget, ...args: any[]) {
-        throw new Error("Not implemented")
-        // const self = this[CONTEXT]
+        let name: string | undefined
+        if (args.length >= 1 && typeof args[0] === "string") {
+            name = args[0]
+            args = args.slice(1)
+        }
 
-        // let name: string | undefined
-        // if (args.length > 1 && typeof args[0] === "string") {
-        //     name = args[0]
-        //     args = args.slice(1)
-        // }
+        const self = this[CONTEXT]
+        const opName = self.path[0]
+        // console.log(args)
+        // console.log(self.info?.[opName])
+        const root = new Context(self.type, name ? [name] : [], self.info)
+        const [subSelect, cb] = handleMethodCall(root, opName, args, self.info?.[opName])
 
-        // const opName = self.path[0]
-        // const info = self.info?.[opName]
-        // const root = new Context(self.type, name ? [name] : [], self.info)
+        if (cb != null) {
+            throw new Error("The selector function is not allowed here")
+        }
+
+        return subSelect
     }
 
     // TODO: some option to switch betwwen parser
@@ -525,8 +531,12 @@ function rootBuilderCall(proxy: ProxyTarget, context: Context, args: any[]) {
     const opName = context.path[0]
     const info = context.info?.[opName]
     const root = new Context(context.type, name ? [name] : [], context.info)
+    const [subSelect, cb] = handleMethodCall(root, opName, args, info)
+    if (cb != null) {
+        cb(subSelect)
+    }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return (handleMethodCall(root, opName, args, info) as any).$build()
+    return (subSelect as unknown as any).$build()
 }
 
 function newSelectionBuilder(context: Context) {
@@ -566,7 +576,10 @@ function selectionBuilderCall(proxy: ProxyTarget, context: Context, args: any[])
 
     const opName = context.fields.pop()!
     const info = context.info?.[opName]
-    handleMethodCall(context, opName, args, info)
+    const [subSelect, cb] = handleMethodCall(context, opName, args, info)
+    if (cb != null) {
+        cb(subSelect)
+    }
     return proxy
 }
 
@@ -575,34 +588,28 @@ function handleMethodCall(
     opName: string,
     args: any[],
     info: BuilderInfoEntry | undefined
-): ProxyTarget {
+): [ProxyTarget, ((s: ProxyTarget) => void) | undefined] {
     // scalar, no args
     if (info == null) {
         const operation = context.sub("Operation", [opName])
-        return newSelectionBuilder(operation.sub("Type", [])) as ProxyTarget
+        return [newSelectionBuilder(operation.sub("Type", [])), undefined]
     } else if (isType(info)) {
         // type, no args
         const select = args[0]
-        if (typeof select !== "function") {
-            throw new Error("Invalid type of argument, must be a select function")
-        }
         const operation = context.sub("Operation", [opName])
         const sub = newSelectionBuilder(asContext(info)!.clone(operation))
-        select(sub)
-        return sub as ProxyTarget
+        return [sub, select]
     } else if (Array.isArray(info)) {
         // type, with args
         const [argInfo, selectInfo] = info
-        let select: any
-        let params: any
-        if (typeof args[0] === "function") {
-            params = null
-            select = args[0]
-        } else if (typeof args[1] === "function") {
-            params = args[0]
-            select = args[1]
+
+        let select = args.at(-1)
+        let params
+        if (typeof select !== "function") {
+            params = select
+            select = undefined
         } else {
-            throw new Error("Invalid type of argument, must be a select function")
+            params = args.slice(0, -1)[0]
         }
 
         const operation = context.sub("Operation", [opName])
@@ -610,17 +617,68 @@ function handleMethodCall(
             operation.handleArgs(params, argInfo)
         }
         const sub = newSelectionBuilder(asContext(selectInfo)!.clone(operation))
-        select(sub)
-        return sub as ProxyTarget
+        return [sub, select]
     } else if (isPlainObject(info)) {
         const operation = context.sub("Operation", [opName])
         if (args[0] != null) {
             operation.handleArgs(args[0], info as ArgsType)
         }
-        return newSelectionBuilder(operation.sub("Type", [])) as ProxyTarget
+        return [newSelectionBuilder(operation.sub("Type", [])), undefined]
     }
     throw new Error("Invalid type of argument")
 }
+
+// function _handleMethodCall(
+//     context: Context,
+//     opName: string,
+//     args: any[],
+//     info: BuilderInfoEntry | undefined
+// ): ProxyTarget {
+//     // scalar, no args
+//     if (info == null) {
+//         const operation = context.sub("Operation", [opName])
+//         return newSelectionBuilder(operation.sub("Type", [])) as ProxyTarget
+//     } else if (isType(info)) {
+//         // type, no args
+//         const select = args[0]
+//         if (typeof select !== "function") {
+//             throw new Error("Invalid type of argument, must be a select function")
+//         }
+//         const operation = context.sub("Operation", [opName])
+//         const sub = newSelectionBuilder(asContext(info)!.clone(operation))
+//         select(sub)
+//         return sub as ProxyTarget
+//     } else if (Array.isArray(info)) {
+//         // type, with args
+//         const [argInfo, selectInfo] = info
+//         let select: any
+//         let params: any
+//         if (typeof args[0] === "function") {
+//             params = null
+//             select = args[0]
+//         } else if (typeof args[1] === "function") {
+//             params = args[0]
+//             select = args[1]
+//         } else {
+//             throw new Error("Invalid type of argument, must be a select function")
+//         }
+
+//         const operation = context.sub("Operation", [opName])
+//         if (params) {
+//             operation.handleArgs(params, argInfo)
+//         }
+//         const sub = newSelectionBuilder(asContext(selectInfo)!.clone(operation))
+//         select(sub)
+//         return sub as ProxyTarget
+//     } else if (isPlainObject(info)) {
+//         const operation = context.sub("Operation", [opName])
+//         if (args[0] != null) {
+//             operation.handleArgs(args[0], info as ArgsType)
+//         }
+//         return newSelectionBuilder(operation.sub("Type", [])) as ProxyTarget
+//     }
+//     throw new Error("Invalid type of argument")
+// }
 
 function newTypeBuilder(context: Context) {
     return _newBuilder(context, typeBuilderCall, TypeBuilderProxy)

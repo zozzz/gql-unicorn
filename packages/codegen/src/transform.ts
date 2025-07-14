@@ -51,7 +51,7 @@ export function transform(schema: GraphQLSchema, config?: TransformConfig) {
     return new Transformer(schema, config || {}).transform()
 }
 
-const SelectTypeArgs = `R extends SelectionDef, V extends Vars, P extends string[]`
+const SelectTypeArgs = `R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never`
 
 class Transformer {
     readonly #scalarMap: Record<string, string>
@@ -75,7 +75,7 @@ class Transformer {
     }
 
     transform(): string {
-        const builders: string[] = []
+        const builders: string[] = [`type AsBuilder = { input: Input, output: any }`]
 
         const query = this.schema.getQueryType()
         if (query != null) {
@@ -99,6 +99,7 @@ class Transformer {
         this.#import(RuntimeLib, "TypeOf", true)
         this.#import(RuntimeLib, "VarOf", true)
         this.#import(RuntimeLib, "Selected", true)
+        this.#import(RuntimeLib, "Input", true)
 
         this.#parts.unshift(...Banner, ...this.#generateImports(), ...this.#argumentInfos)
         return [
@@ -332,7 +333,7 @@ class Transformer {
             let argOptional: boolean
             let typeValue: string = "any"
             let builderT: string = "any"
-            let builderFn: string = "(...args: never[]) => never"
+            let builderFn: string | undefined
 
             this.#import(RuntimeLib, "BuildReturn", true)
 
@@ -355,17 +356,26 @@ class Transformer {
                     const sfn = `(select: ${typeValue}) => Selection<any, SS, SV>`
                     const args = `ArgsParam<${argType}, AA>`
                     const optArgs = argOptional ? ` | [string, ${sfn}] | [${sfn}]` : ""
+
                     builderT =
                         `<SS extends SelectionDef, SV extends Vars, AA extends Arguments<${argType}>>`
                         + `(...args: [string, ${args}, ${sfn}] | [${args}, ${sfn}]${optArgs}) `
                         + `=> BuildReturn<${this.#typename(type)}, SS, SV & ToVars<${argType}, [], AA>>`
 
-                    const builderFnRet = this.#selectType(this.#selectName(type), R, "AA", "[]")
-                    builderFn = `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]) => ${builderFnRet}`
+                    const builderFnRet = this.#selectType(
+                        this.#selectName(type),
+                        R,
+                        "AA",
+                        "[]",
+                        `{ input: ${argType}, output: ${this.#typename(type)} }`
+                    )
+                    const builderFnOptArgs = argOptional ? ` | [string] | []` : ""
+                    builderFn = `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]${builderFnOptArgs}) => ${builderFnRet}`
                 }
             } else {
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
+
                     builderT = `(name?: string) => BuildReturn<${typeValue}, never, never>`
                 } else {
                     this.#import(RuntimeLib, "SelectionDef", true)
@@ -375,6 +385,7 @@ class Transformer {
                     typeValue = this.#selectType(this.#selectName(type), R, "{}", "[]")
                     argInfo = this.#bareTypename(type)
                     const sfn = `(select: ${typeValue}) => Selection<any, SS, SV>`
+
                     builderT =
                         `<SS extends SelectionDef, SV extends Vars, >`
                         + `(...args: [string, ${sfn}] | [${sfn}])`
@@ -383,12 +394,12 @@ class Transformer {
             }
 
             const argInfoRes = argInfo ? `, ${argInfo}` : ""
-            // eslint-disable-next-line unused-imports/no-unused-vars
+
             const _builderFn = `{ builder: ${builderFn} }`
             result.push(
                 ...this.#comment(description, deprecationReason),
-                // `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT}) & ${_builderFn}`
-                `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})`
+                `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})${_builderFn ? ` & ${_builderFn}` : ""}`
+                // `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})`
             )
         }
 
@@ -404,6 +415,7 @@ class Transformer {
         const fields = isUnionType(type) ? [] : this.#selectFields(type, type.getFields())
 
         fields.push(...this.#onFns(type))
+        fields.push(...this.#buildFn())
 
         // const R = isObjectType(type) ? `[...R, "__typename"]` : "R"
         result.push(
@@ -448,14 +460,14 @@ class Transformer {
             if (bareIsScalar(type)) {
                 const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
                 const V = `V & ToVars<${argumentType}, ${VP}, A>`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
                 const args = `ArgsParam<${argumentType}, A>`
                 const qm = argOptional ? "?" : ""
                 result.push(`${name}<A extends Arguments<${argumentType}>>(args${qm}: ${args}): ${returnType}`)
             } else {
                 const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, SR>>`
                 const V = `V & SV & ToVars<${argumentType}, ${VP}, A>`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SR, SV>`
                 const args = `ArgsParam<${argumentType}, A>`
@@ -468,12 +480,12 @@ class Transformer {
             if (bareIsScalar(type)) {
                 const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
                 const V = `V`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
                 result.push(`${name}: ${returnType}`)
             } else {
                 const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, SR>>`
                 const V = `V & SV`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P"), name)
+                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SR, SV>`
                 result.push(`${name}<ST, SR extends SelectionDef, SV extends Vars>(select: ${subf}): ${returnType}`)
@@ -489,10 +501,12 @@ class Transformer {
             this.#selectName(type),
             `MergeSelection<R, ExtendSelection<SR, "__typename">>`,
             "V & SV",
-            "P"
+            "P",
+            "B",
+            "E"
         )
         const onSelf = `$on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<${this.#bareTypename(type)}, SR, SV>): ${selfT}`
-        const result: string[] = [onSelf]
+        const result: string[] = ["/**", " * Constraint type selection", " */", onSelf]
 
         // TODO: maybe once upon a time
         // const otherSelfT = this.#selectType(this.#selectName(type), "R | SR", "V & SV", "P")
@@ -515,6 +529,16 @@ class Transformer {
         // if (fragmentTypes.length > 0) {
         //     result.push(`$on<SR, SV extends Vars>(fragments: ${fragmentTypes.join(" | ")}): ${selfT} | ${otherSelfT}`)
         // }
+
+        return result
+    }
+
+    #buildFn(): string[] {
+        this.#import(RuntimeLib, "BuildReturn", true)
+        const result: string[] = ["/**", " * Build the typed document node", " */"]
+        result.push(
+            `$build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never`
+        )
 
         return result
     }
@@ -545,8 +569,8 @@ class Transformer {
         }
     }
 
-    #selectType(name: string, R: string, V: string, P: string): string {
-        return `${name}<${R}, ${V}, ${P}>`
+    #selectType(name: string, R: string, V: string, P: string, B: string = "never", E: string = "never"): string {
+        return `${name}<${R}, ${V}, ${P}, ${B}, ${E}>`
     }
 
     #selectR(type: GraphQLType): string {
@@ -561,7 +585,7 @@ class Transformer {
     }
 
     #subSelectType(name: string, R: string, V: string, P: string): string {
-        return this.#selectType(name, R, V, P)
+        return this.#selectType(name, R, V, P, "never", `"$build"`)
     }
 
     #argumentsType(args: ReadonlyArray<GraphQLArgument>): [string, string, boolean] {
@@ -653,7 +677,7 @@ class Transformer {
     }
 
     #omit(t: string, field: string): string {
-        return `Omit<${t}, R[number] extends string ? R[number] | "${field}" : "${field}">`
+        return `Omit<${t}, (R[number] extends infer RF extends string ? RF : never) | "${field}" | E>`
         // return `Omit<${t}, keyof R | "${field}" | "$build" | "$gql">`
     }
 

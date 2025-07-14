@@ -668,18 +668,91 @@ describe("runtime", () => {
         })
     })
 
-    // TODO: implement builder()
-    // describe("builder", () => {
-    //     test("basic", () => {
-    //         const builder = G.queryUser.builder({ id: G.$$ }).id.name
-    //     })
+    describe("builder", () => {
+        test("basic", () => {
+            const builder = G.queryUser.builder({ id: G.$$ }).id.name
+            testQuery<{ __typename: "User"; id: string; name: string } | null | undefined, { id: string }>(
+                builder.$build(),
+                `query($id:ID!){user(id:$id){__typename,id,name}}`
+            )
+        })
 
-    //     test("with name", () => {
-    //         const builder = G.queryUser.builder("QueryName", { id: G.$$ }).id.name
-    //     })
+        test("omit optional args", () => {
+            const builder = G.queryArticles.builder().id
+            testQuery<Array<{ __typename: "Article"; id: string }> | null, never>(
+                builder.$build(),
+                `query{articles{__typename,id}}`
+            )
+        })
 
-    //     test("with articles", () => {
-    //         const builder = G.queryUser.builder({ id: G.$$ }).id.name.articles({ count: 10 }, q => q.id)
-    //     })
-    // })
+        test("with name", () => {
+            const builder = G.queryUser.builder("QueryName", { id: G.$$ }).id.name
+            testQuery<{ __typename: "User"; id: string; name: string } | null, { id: string }>(
+                builder.$build(),
+                `query QueryName($id:ID!){user(id:$id){__typename,id,name}}`
+            )
+        })
+
+        test("omit optional args with name", () => {
+            const builder = G.queryArticles.builder("QueryArticles").id
+            testQuery<Array<{ __typename: "Article"; id: string }> | null, never>(
+                builder.$build(),
+                `query QueryArticles{articles{__typename,id}}`
+            )
+        })
+
+        test("with articles", () => {
+            const builder = G.queryUser.builder({ id: G.$$ }).id.name.articles({ count: 10 }, q => q.id)
+            testQuery<
+                {
+                    __typename: "User"
+                    id: string
+                    name: string
+                    articles: Array<{ __typename: "Article"; id: string }>
+                } | null,
+                { id: string }
+            >(builder.$build(), `query($id:ID!){user(id:$id){__typename,id,name,articles(count:10){__typename,id}}}`)
+        })
+
+        test("later on", () => {
+            const queryNode = G.queryNode.builder(G.$$).id
+            const whenUser = queryNode.$on(G.User(q => q.name))
+            testQuery<{ id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
+                whenUser.$build(),
+                `query($id:ID!){node(id:$id){__typename,id,... on User{name}}}`
+            )
+        })
+
+        // TODO: elimanitae dublbe id query
+        test("later on 2", () => {
+            const queryNode = G.queryNode.builder(G.$$).id
+            const whenUser = queryNode.$on(G.User(q => q.name.id))
+            testQuery<{ id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
+                whenUser.$build(),
+                `query($id:ID!){node(id:$id){__typename,id,... on User{name,id}}}`
+            )
+        })
+
+        test("later on", () => {
+            const queryNode = G.queryNode.builder(G.$$).id
+            const when = queryNode.$on(G.User(q => q.name)).$on(G.Tag(q => q.tag))
+            testQuery<
+                | { id: string }
+                | { __typename: "User"; id: string; name: string }
+                | { __typename: "Tag"; id: string; tag: string }
+                | null,
+                { id: string }
+            >(when.$build(), `query($id:ID!){node(id:$id){__typename,id,... on User{name},... on Tag{tag}}}`)
+        })
+
+        test("fragment", () => {
+            const userFragment = G.User("userFragment", q => q.name)
+            const queryNode = G.queryNode.builder(G.$$).id
+            const when = queryNode.$on(userFragment)
+            testQuery<{ id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
+                when.$build(),
+                `query($id:ID!){node(id:$id){__typename,id,...userFragment}} fragment userFragment on User{name}`
+            )
+        })
+    })
 })
