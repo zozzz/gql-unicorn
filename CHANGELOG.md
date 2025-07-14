@@ -1,5 +1,11 @@
 # Changelog
 
+# [0.4.0](https://github.com/zozzz/gql-unicorn/compare/0.3.3...0.4.0) (2025-07-14)
+
+
+* builder pattern ([a446541](https://github.com/zozzz/gql-unicorn/commit/a446541d1128a22946c199075f106719d32f28bc))
+* Improve Selected type with $on ([ef79fb1](https://github.com/zozzz/gql-unicorn/commit/ef79fb17b657df036c346e89a141847ae8c9ad15))
+
 ## [0.3.3](https://github.com/zozzz/gql-unicorn/compare/0.3.2...0.3.3) (2025-07-12)
 
 
