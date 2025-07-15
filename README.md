@@ -80,9 +80,9 @@ type SUserWithAlias = Selected<User, [{ id: "userId" }, "name", { articles: ["id
 ### Mutation
 
 ```typescript
-import { mutationCreateUser } from "genrated-pacakge-name"
+import { createUser } from "genrated-pacakge-name"
 
-const CreateUser = mutationCreateUser({ name: "Some User Name" }, q => q.id.name)
+const CreateUser = createUser({ name: "Some User Name" }, q => q.id.name)
 ```
 
 
@@ -149,16 +149,6 @@ type _UserVars = VarOf<typeof q>
 
 ## TODO
 
-* nested variables:
-    ```ts
-    queryUsers({filter: { id: $("userId"), name: $ /*filter__id*/ }})
-    ```
-    ```gql
-    query (userId: ID!, $filter__id: String) {
-        users(filter: { id: $userId, name: $filter__id })
-    }
-    ```
-
 * find a way to replace `$$` with `$`, or something more intuitive than `$$`
 * find a way to use `$.varName` instead `$("varName")`
-* handle aliases: `queryUsers(q => q.id("userId").parent("userParent", q => q.id))`
+* handle aliases: `queryUsers(q => q.id("userId").attr("name", { name: "name" }, q => q.value).attr("age", { name: "age" }, q => q.value))`
