@@ -22,8 +22,8 @@ export function variableName(obj: Variable<any>): string | undefined {
  * Query.user({id: $("userId")})
  * ```
  */
-export const $ = <N extends string>(name: N) => ({ [VARIABLE]: name })
+export const $ = <N extends string>(name: N) => ({ [VARIABLE]: name }) as const
 
-export const $$ = { [VARIABLE]: "$" } satisfies VarRef<"$">
+export const $$ = { [VARIABLE]: "$" } as const
 
 export type Vars = Record<string, any>
