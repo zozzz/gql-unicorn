@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.2](https://github.com/zozzz/gql-unicorn/compare/0.4.1...0.4.2) (2025-07-15)
+
+
+* export VarRef ([51fd286](https://github.com/zozzz/gql-unicorn/commit/51fd2860c93b20045b28aca985e94b354806b56f))
+
 ## [0.4.1](https://github.com/zozzz/gql-unicorn/compare/0.4.0...0.4.1) (2025-07-15)
 
 
