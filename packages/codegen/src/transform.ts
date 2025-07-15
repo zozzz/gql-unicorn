@@ -1,5 +1,5 @@
 /* eslint-disable @stylistic/js/max-len */
-import { pascalCase } from "es-toolkit"
+import { camelCase, pascalCase } from "es-toolkit"
 import {
     type GraphQLArgument,
     type GraphQLEnumType,
@@ -86,7 +86,7 @@ class Transformer {
         const mutation = this.schema.getMutationType()
         if (mutation != null) {
             this.#import(RuntimeLib, "mutationBuilder", false)
-            builders.push(...this.#rootBuilder(mutation, "mutate", "mutationBuilder"))
+            builders.push(...this.#rootBuilder(mutation, "", "mutationBuilder"))
         }
 
         const subscription = this.schema.getSubscriptionType()
@@ -327,7 +327,7 @@ class Transformer {
         const result: string[] = []
 
         for (const { name, args, type, description, deprecationReason } of Object.values(context.getFields())) {
-            const varName = `${prefix}${pascalCase(name)}`
+            const varName = prefix && prefix.length > 0 ? `${prefix}${pascalCase(name)}` : camelCase(name)
             let argType: string = "undefined"
             let argInfo: string | undefined
             let argOptional: boolean

@@ -51,7 +51,7 @@ describe("runtime", () => {
         test("query section", () => {
             const querySection = G.queryOrgSection(
                 { filter: { id: { eq: G.$("sectionId") } }, offset: 0, limit: 1 },
-                q => q.id.title.children(q => q.id.$on(G.Org_CareType(q => q.kind.isActive)).title)
+                q => q.id.title.children(q => q.id.title.$on(G.Org_CareType(q => q.kind.isActive)))
             )
 
             testQuery<

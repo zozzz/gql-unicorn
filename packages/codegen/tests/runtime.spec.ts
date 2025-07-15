@@ -620,7 +620,7 @@ describe("runtime", () => {
     describe("mutation", () => {
         test("scalar opertaion return w parameters", () => {
             testQuery<number | null, { something?: string }>(
-                G.mutateDoSomething(G.$$),
+                G.doSomething(G.$$),
                 `mutation($something:String){doSomething(something:$something)}`
             )
         })
@@ -662,7 +662,7 @@ describe("runtime", () => {
             // type S4U = Selected<User, S4>
 
             testQuery<{ id: string }, { id: string; params: ArticleUpdate }>(
-                G.mutateUpdateArticle(G.$$, q => q.id),
+                G.updateArticle(G.$$, q => q.id),
                 `mutation($id:ID!,$params:ArticleUpdate!){updateArticle(id:$id,params:$params){__typename,id}}`
             )
         })
