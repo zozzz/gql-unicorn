@@ -91,7 +91,7 @@ const CreateUser = createUser({ name: "Some User Name" }, q => q.id.name)
 ```typescript
 import { Worker } from "genrated-pacakge-name"
 
-if (Worker.$is(user)) {
+if (Worker.is(user)) {
     // only usable fields is selected worker fields
 }
 ```
