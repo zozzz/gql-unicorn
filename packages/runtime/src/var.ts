@@ -2,7 +2,7 @@ import { checker, VARIABLE } from "./symbols"
 
 export type Variable<N extends string> = VarRef<"$"> | VarRef<N>
 
-type VarRef<N> = { [VARIABLE]: N }
+export type VarRef<N> = { [VARIABLE]: N }
 
 export const isVariable = checker<Variable<any>>(VARIABLE)
 
