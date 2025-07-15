@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.1](https://github.com/zozzz/gql-unicorn/compare/0.4.0...0.4.1) (2025-07-15)
+
+
+* remove $build from sub select ([6f16bf1](https://github.com/zozzz/gql-unicorn/commit/6f16bf1d8f70aaae8ff4aca220b47a9b4da7cf36))
+
 # [0.4.0](https://github.com/zozzz/gql-unicorn/compare/0.3.3...0.4.0) (2025-07-14)
 
 
