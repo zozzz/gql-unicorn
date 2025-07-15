@@ -351,7 +351,7 @@ class Transformer {
                     this.#import(RuntimeLib, "SelectionDef", true)
 
                     const R = this.#selectR(type)
-                    typeValue = this.#selectType(this.#selectName(type), R, "{}", "[]")
+                    typeValue = this.#subSelectType(this.#selectName(type), R, "{}", "[]")
                     argInfo = `[${argInfo}, ${this.#bareTypename(type)}]`
                     const sfn = `(select: ${typeValue}) => Selection<any, SS, SV>`
                     const args = `ArgsParam<${argType}, AA>`
@@ -382,7 +382,7 @@ class Transformer {
 
                     // const R = this.#rootBuilderResult(type)
                     const R = this.#selectR(type)
-                    typeValue = this.#selectType(this.#selectName(type), R, "{}", "[]")
+                    typeValue = this.#subSelectType(this.#selectName(type), R, "{}", "[]")
                     argInfo = this.#bareTypename(type)
                     const sfn = `(select: ${typeValue}) => Selection<any, SS, SV>`
 
@@ -497,13 +497,15 @@ class Transformer {
     #onFns(type: GraphQLType): string[] {
         this.#import(RuntimeLib, "MergeSelection", true)
         // this.#import(RuntimeLib, "OnFnResult", true)
-        const selfT = this.#selectType(
-            this.#selectName(type),
-            `MergeSelection<R, ExtendSelection<SR, "__typename">>`,
-            "V & SV",
-            "P",
-            "B",
-            "E"
+        const selfT = this.#omit(
+            this.#selectType(
+                this.#selectName(type),
+                `MergeSelection<R, ExtendSelection<SR, "__typename">>`,
+                "V & SV",
+                "P",
+                "B",
+                "E"
+            )
         )
         const onSelf = `$on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<${this.#bareTypename(type)}, SR, SV>): ${selfT}`
         const result: string[] = ["/**", " * Constraint type selection", " */", onSelf]
@@ -676,8 +678,9 @@ class Transformer {
         }
     }
 
-    #omit(t: string, field: string): string {
-        return `Omit<${t}, (R[number] extends infer RF extends string ? RF : never) | "${field}" | E>`
+    #omit(t: string, field?: string): string {
+        this.#import(RuntimeLib, "SelectedFields", true)
+        return `Omit<${t}, SelectedFields<R>${field ? ` | "${field}"` : ""} | E>`
         // return `Omit<${t}, keyof R | "${field}" | "$build" | "$gql">`
     }
 

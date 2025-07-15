@@ -1,0 +1,3153 @@
+type AttributeImpl implements Eav_Attribute {
+	id: UUID!
+	name: String!
+	entity: Eav_Entity!
+}
+
+input AuditLogKindFilter @oneOf {
+	eq: Audit_AuditLogKind
+}
+
+type Audit_AuditLog {
+	id: UUID!
+	author: Auth_User!
+	correlationId: UUID
+	kind: Audit_AuditLogKind!
+	objectId: UUID!
+	old: JSON
+	timestamp: Zoned!
+	new: JSON
+}
+
+input Audit_AuditLogFilter {
+	and: [Audit_AuditLogFilter!]
+	or: [Audit_AuditLogFilter!]
+	not: [Audit_AuditLogFilter!]
+	id: StdUuidFilter
+	author: Auth_UserFilter
+	correlationId: StdUuidFilter
+	kind: AuditLogKindFilter
+	objectId: StdUuidFilter
+	timestamp: StdDatetimeFilter
+}
+
+input Audit_AuditLogInput {
+	author: Auth_UserLinkInput!
+	correlationId: UUID
+	kind: Audit_AuditLogKind!
+	objectId: UUID!
+	old: JSON
+	timestamp: Zoned!
+	new: JSON
+}
+
+enum Audit_AuditLogKind {
+	CREATE
+	UPDATE
+	DELETE
+}
+
+input Audit_AuditLogLinkInput {
+	patch: Audit_AuditLogPatch
+	set: Audit_AuditLogFilter
+}
+
+input Audit_AuditLogOrder {
+	id: OrderDirection
+	author: OrderDirection
+	correlationId: OrderDirection
+	kind: OrderDirection
+	objectId: OrderDirection
+	old: OrderDirection
+	timestamp: OrderDirection
+	new: OrderDirection
+}
+
+input Audit_AuditLogPatch {
+	id: UUID!
+	author: Auth_UserLinkInput
+	correlationId: UUID
+	kind: Audit_AuditLogKind
+	objectId: UUID
+	old: JSON
+	timestamp: Zoned
+	new: JSON
+}
+
+interface Auth_Account {
+	id: UUID!
+	provider: Auth_Provider!
+}
+
+input Auth_AccountFilter {
+	and: [Auth_AccountFilter!]
+	or: [Auth_AccountFilter!]
+	not: [Auth_AccountFilter!]
+	id: StdUuidFilter
+	provider: Auth_ProviderFilter
+}
+
+input Auth_AccountMultiLinkInput {
+	patch: [Auth_AccountPatch!]
+	append: Auth_AccountFilter
+	remove: Auth_AccountFilter
+	set: Auth_AccountFilter
+}
+
+input Auth_AccountOrder {
+	id: OrderDirection
+	provider: OrderDirection
+}
+
+input Auth_AccountPatch {
+	id: UUID!
+	provider: Auth_ProviderLinkInput
+}
+
+type Auth_EmailAccount implements Auth_Account {
+	id: UUID!
+	provider: Auth_EmailProvider!
+	email: String!
+	isVerified: Boolean!
+}
+
+input Auth_EmailAccountFilter {
+	and: [Auth_EmailAccountFilter!]
+	or: [Auth_EmailAccountFilter!]
+	not: [Auth_EmailAccountFilter!]
+	id: StdUuidFilter
+	provider: Auth_EmailProviderFilter
+	email: StdStrFilter
+	isVerified: StdBoolFilter
+}
+
+input Auth_EmailAccountInput {
+	provider: Auth_EmailProviderLinkInput!
+	email: String!
+	isVerified: Boolean!
+}
+
+input Auth_EmailAccountOrder {
+	id: OrderDirection
+	provider: OrderDirection
+	email: OrderDirection
+	isVerified: OrderDirection
+}
+
+input Auth_EmailAccountPatch {
+	id: UUID!
+	provider: Auth_EmailProviderLinkInput
+	email: String
+	isVerified: Boolean
+}
+
+type Auth_EmailProvider implements Auth_Provider {
+	name: String!
+	id: UUID!
+}
+
+input Auth_EmailProviderFilter {
+	and: [Auth_EmailProviderFilter!]
+	or: [Auth_EmailProviderFilter!]
+	not: [Auth_EmailProviderFilter!]
+	name: StdStrFilter
+	id: StdUuidFilter
+}
+
+input Auth_EmailProviderInput {
+	name: String!
+}
+
+input Auth_EmailProviderLinkInput {
+	patch: Auth_EmailProviderPatch
+	set: Auth_EmailProviderFilter
+}
+
+input Auth_EmailProviderOrder {
+	name: OrderDirection
+	id: OrderDirection
+}
+
+input Auth_EmailProviderPatch {
+	name: String
+	id: UUID!
+}
+
+type Auth_OAuthAccount implements Auth_Account {
+	id: UUID!
+	provider: Auth_OAuthProvider!
+}
+
+input Auth_OAuthAccountFilter {
+	and: [Auth_OAuthAccountFilter!]
+	or: [Auth_OAuthAccountFilter!]
+	not: [Auth_OAuthAccountFilter!]
+	id: StdUuidFilter
+	provider: Auth_OAuthProviderFilter
+}
+
+input Auth_OAuthAccountInput {
+	provider: Auth_OAuthProviderLinkInput!
+}
+
+input Auth_OAuthAccountOrder {
+	id: OrderDirection
+	provider: OrderDirection
+}
+
+input Auth_OAuthAccountPatch {
+	id: UUID!
+	provider: Auth_OAuthProviderLinkInput
+}
+
+type Auth_OAuthProvider implements Auth_Provider {
+	name: String!
+	id: UUID!
+	clientId: String!
+	clientSecret: String!
+	redirectUri: String!
+}
+
+input Auth_OAuthProviderFilter {
+	and: [Auth_OAuthProviderFilter!]
+	or: [Auth_OAuthProviderFilter!]
+	not: [Auth_OAuthProviderFilter!]
+	name: StdStrFilter
+	id: StdUuidFilter
+	clientId: StdStrFilter
+	clientSecret: StdStrFilter
+	redirectUri: StdStrFilter
+}
+
+input Auth_OAuthProviderInput {
+	name: String!
+	clientId: String!
+	clientSecret: String!
+	redirectUri: String!
+}
+
+input Auth_OAuthProviderLinkInput {
+	patch: Auth_OAuthProviderPatch
+	set: Auth_OAuthProviderFilter
+}
+
+input Auth_OAuthProviderOrder {
+	name: OrderDirection
+	id: OrderDirection
+	clientId: OrderDirection
+	clientSecret: OrderDirection
+	redirectUri: OrderDirection
+}
+
+input Auth_OAuthProviderPatch {
+	name: String
+	id: UUID!
+	clientId: String
+	clientSecret: String
+	redirectUri: String
+}
+
+type Auth_Permission {
+	id: UUID!
+	parent: Auth_Permission
+	name: String!
+	title: String!
+}
+
+input Auth_PermissionFilter {
+	and: [Auth_PermissionFilter!]
+	or: [Auth_PermissionFilter!]
+	not: [Auth_PermissionFilter!]
+	id: StdUuidFilter
+	parent: Auth_PermissionFilter
+	name: StdStrFilter
+	title: StdStrFilter
+}
+
+input Auth_PermissionInput {
+	parent: Auth_PermissionLinkInput
+	name: String!
+	title: String!
+}
+
+input Auth_PermissionLinkInput {
+	patch: Auth_PermissionPatch
+	set: Auth_PermissionFilter
+}
+
+input Auth_PermissionMultiLinkInput {
+	patch: [Auth_PermissionPatch!]
+	append: Auth_PermissionFilter
+	remove: Auth_PermissionFilter
+	set: Auth_PermissionFilter
+}
+
+input Auth_PermissionOrder {
+	id: OrderDirection
+	parent: OrderDirection
+	name: OrderDirection
+	title: OrderDirection
+}
+
+input Auth_PermissionPatch {
+	id: UUID!
+	parent: Auth_PermissionLinkInput
+	name: String
+	title: String
+}
+
+interface Auth_Provider {
+	id: UUID!
+	name: String!
+}
+
+input Auth_ProviderFilter {
+	and: [Auth_ProviderFilter!]
+	or: [Auth_ProviderFilter!]
+	not: [Auth_ProviderFilter!]
+	id: StdUuidFilter
+	name: StdStrFilter
+}
+
+input Auth_ProviderLinkInput {
+	patch: Auth_ProviderPatch
+	set: Auth_ProviderFilter
+}
+
+input Auth_ProviderPatch {
+	id: UUID!
+	name: String
+}
+
+type Auth_Role {
+	id: UUID!
+	permissions(filter: Auth_PermissionFilter = null, order: Auth_PermissionOrder = null, offset: Int = null, limit: Int = null): [Auth_Permission!]!
+	title: String!
+}
+
+input Auth_RoleFilter {
+	and: [Auth_RoleFilter!]
+	or: [Auth_RoleFilter!]
+	not: [Auth_RoleFilter!]
+	id: StdUuidFilter
+	permissions: Auth_PermissionFilter
+	title: StdStrFilter
+}
+
+input Auth_RoleInput {
+	permissions: Auth_PermissionMultiLinkInput!
+	title: String!
+}
+
+input Auth_RoleMultiLinkInput {
+	patch: [Auth_RolePatch!]
+	append: Auth_RoleFilter
+	remove: Auth_RoleFilter
+	set: Auth_RoleFilter
+}
+
+input Auth_RoleOrder {
+	id: OrderDirection
+	title: OrderDirection
+}
+
+input Auth_RolePatch {
+	id: UUID!
+	permissions: Auth_PermissionMultiLinkInput
+	title: String
+}
+
+type Auth_User {
+	title: String
+	given: String
+	family: String
+	fullName: String!
+	id: UUID!
+	accounts(filter: Auth_AccountFilter = null, order: Auth_AccountOrder = null, offset: Int = null, limit: Int = null): [Auth_Account!]!
+	roles(filter: Auth_RoleFilter = null, order: Auth_RoleOrder = null, offset: Int = null, limit: Int = null): [Auth_Role!]
+	isActive: Boolean!
+	isInternal: Boolean!
+	phones: [String!]
+	username: String!
+	passwordExpireAt: Zoned!
+}
+
+input Auth_UserFilter {
+	and: [Auth_UserFilter!]
+	or: [Auth_UserFilter!]
+	not: [Auth_UserFilter!]
+	title: StdStrFilter
+	given: StdStrFilter
+	family: StdStrFilter
+	fullName: StdStrFilter
+	id: StdUuidFilter
+	accounts: Auth_AccountFilter
+	roles: Auth_RoleFilter
+	isActive: StdBoolFilter
+	isInternal: StdBoolFilter
+	phones: StdStrFilter
+	username: StdStrFilter
+	passwordExpireAt: StdDatetimeFilter
+}
+
+input Auth_UserInput {
+	title: String
+	given: String
+	family: String
+	fullName: String!
+	password: String!
+	secret: String!
+	accounts: Auth_AccountMultiLinkInput!
+	roles: Auth_RoleMultiLinkInput
+	isActive: Boolean!
+	isInternal: Boolean!
+	phones: [String!]
+	username: String!
+	passwordExpireAt: Zoned!
+}
+
+input Auth_UserLinkInput {
+	patch: Auth_UserPatch
+	set: Auth_UserFilter
+}
+
+input Auth_UserOrder {
+	title: OrderDirection
+	given: OrderDirection
+	family: OrderDirection
+	fullName: OrderDirection
+	id: OrderDirection
+	password: OrderDirection
+	secret: OrderDirection
+	isActive: OrderDirection
+	isInternal: OrderDirection
+	phones: OrderDirection
+	username: OrderDirection
+	passwordExpireAt: OrderDirection
+}
+
+input Auth_UserPatch {
+	title: String
+	given: String
+	family: String
+	fullName: String
+	id: UUID!
+	password: String
+	secret: String
+	accounts: Auth_AccountMultiLinkInput
+	roles: Auth_RoleMultiLinkInput
+	isActive: Boolean
+	isInternal: Boolean
+	phones: [String!]
+	username: String
+	passwordExpireAt: Zoned
+}
+
+type Calendar_Recurring {
+	id: UUID!
+	duration: Duration
+	rrule: String!
+}
+
+input Calendar_RecurringFilter {
+	and: [Calendar_RecurringFilter!]
+	or: [Calendar_RecurringFilter!]
+	not: [Calendar_RecurringFilter!]
+	id: StdUuidFilter
+	duration: StdCalRelativeDurationFilter
+	rrule: StdStrFilter
+}
+
+input Calendar_RecurringMultiLinkInput {
+	patch: [Calendar_RecurringPatch!]
+	append: Calendar_RecurringFilter
+	remove: Calendar_RecurringFilter
+	set: Calendar_RecurringFilter
+}
+
+input Calendar_RecurringOrder {
+	id: OrderDirection
+	duration: OrderDirection
+	rrule: OrderDirection
+}
+
+input Calendar_RecurringPatch {
+	id: UUID!
+	duration: Duration
+	rrule: String
+}
+
+input CareTypeKindFilter @oneOf {
+	eq: Org_CareTypeKind
+}
+
+interface Care_Service {
+	orgVisibility(filter: Org_UnitFilter, order: Org_UnitOrder, offset: Int, limit: Int): [Org_Unit!]!
+	id: UUID!
+	createdIn: Org_Unit!
+	date: CivilDate!
+	span: CivilDateTimeRange!
+	client: Client_Client!
+	duty: Org_Duty!
+	services(filter: Care_ServiceUsageFilter, order: Care_ServiceUsageOrder, offset: Int, limit: Int): [Care_ServiceUsage!]
+}
+
+input Care_ServiceFilter {
+	and: [Care_ServiceFilter!]
+	or: [Care_ServiceFilter!]
+	not: [Care_ServiceFilter!]
+	orgVisibility: Org_UnitFilter
+	id: StdUuidFilter
+	createdIn: Org_UnitFilter
+	date: StdCalLocalDateFilter
+	span: CivilDateTimeRangeFilter
+	client: Client_ClientFilter
+	duty: Org_DutyFilter
+	services: Care_ServiceUsageFilter
+}
+
+input Care_ServiceInput {
+	orgVisibility: Org_UnitMultiLinkInput!
+	createdIn: Org_UnitLinkInput!
+	date: CivilDate!
+	span: CivilDateTimeRange!
+	client: Client_ClientLinkInput!
+	duty: Org_DutyLinkInput!
+	services: Care_ServiceUsageMultiLinkInput
+}
+
+input Care_ServiceLinkInput {
+	patch: Care_ServicePatch
+	set: Care_ServiceFilter
+}
+
+input Care_ServiceOrder {
+	id: OrderDirection
+	createdIn: OrderDirection
+	date: OrderDirection
+	span: OrderDirection
+	client: OrderDirection
+	duty: OrderDirection
+}
+
+input Care_ServicePatch {
+	orgVisibility: Org_UnitMultiLinkInput
+	id: UUID!
+	createdIn: Org_UnitLinkInput
+	date: CivilDate
+	span: CivilDateTimeRange
+	client: Client_ClientLinkInput
+	duty: Org_DutyLinkInput
+	services: Care_ServiceUsageMultiLinkInput
+}
+
+type Care_ServiceUsage {
+	id: UUID!
+	care: Care_Service!
+	service: Service_AssignedService!
+}
+
+input Care_ServiceUsageFilter {
+	and: [Care_ServiceUsageFilter!]
+	or: [Care_ServiceUsageFilter!]
+	not: [Care_ServiceUsageFilter!]
+	id: StdUuidFilter
+	care: Care_ServiceFilter
+	service: Service_AssignedServiceFilter
+}
+
+input Care_ServiceUsageInput {
+	care: Care_ServiceLinkInput!
+	service: Service_AssignedServiceLinkInput!
+}
+
+input Care_ServiceUsageMultiLinkInput {
+	patch: [Care_ServiceUsagePatch!]
+	append: Care_ServiceUsageFilter
+	remove: Care_ServiceUsageFilter
+	set: Care_ServiceUsageFilter
+}
+
+input Care_ServiceUsageOrder {
+	id: OrderDirection
+	care: OrderDirection
+	service: OrderDirection
+}
+
+input Care_ServiceUsagePatch {
+	id: UUID!
+	care: Care_ServiceLinkInput
+	service: Service_AssignedServiceLinkInput
+}
+
+type Care_StreetActivity {
+	placeExtra: String
+	place: Place_POI!
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_Unit!
+	id: UUID!
+	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	duty: Org_Duty!
+}
+
+input Care_StreetActivityFilter {
+	and: [Care_StreetActivityFilter!]
+	or: [Care_StreetActivityFilter!]
+	not: [Care_StreetActivityFilter!]
+	placeExtra: StdStrFilter
+	place: Place_POIFilter
+	span: CivilDateTimeRangeFilter
+	date: StdCalLocalDateFilter
+	createdIn: Org_UnitFilter
+	id: StdUuidFilter
+	orgVisibility: Org_UnitFilter
+	duty: Org_DutyFilter
+}
+
+input Care_StreetActivityInput {
+	placeExtra: String
+	place: Place_POILinkInput!
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_UnitLinkInput!
+	orgVisibility: Org_UnitMultiLinkInput!
+	duty: Org_DutyLinkInput!
+}
+
+input Care_StreetActivityOrder {
+	placeExtra: OrderDirection
+	place: OrderDirection
+	span: OrderDirection
+	date: OrderDirection
+	createdIn: OrderDirection
+	id: OrderDirection
+	duty: OrderDirection
+}
+
+input Care_StreetActivityPatch {
+	placeExtra: String
+	place: Place_POILinkInput
+	span: CivilDateTimeRange
+	date: CivilDate
+	createdIn: Org_UnitLinkInput
+	id: UUID!
+	orgVisibility: Org_UnitMultiLinkInput
+	duty: Org_DutyLinkInput
+}
+
+type Care_StreetService implements Care_Service {
+	placeExtra: String
+	place: Place_POI!
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_Unit!
+	id: UUID!
+	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	client: Client_Client!
+	duty: Org_Duty!
+	services(filter: Care_ServiceUsageFilter = null, order: Care_ServiceUsageOrder = null, offset: Int = null, limit: Int = null): [Care_ServiceUsage!]
+}
+
+input Care_StreetServiceFilter {
+	and: [Care_StreetServiceFilter!]
+	or: [Care_StreetServiceFilter!]
+	not: [Care_StreetServiceFilter!]
+	placeExtra: StdStrFilter
+	place: Place_POIFilter
+	span: CivilDateTimeRangeFilter
+	date: StdCalLocalDateFilter
+	createdIn: Org_UnitFilter
+	id: StdUuidFilter
+	orgVisibility: Org_UnitFilter
+	client: Client_ClientFilter
+	duty: Org_DutyFilter
+	services: Care_ServiceUsageFilter
+}
+
+input Care_StreetServiceInput {
+	placeExtra: String
+	place: Place_POILinkInput!
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_UnitLinkInput!
+	orgVisibility: Org_UnitMultiLinkInput!
+	client: Client_ClientLinkInput!
+	duty: Org_DutyLinkInput!
+	services: Care_ServiceUsageMultiLinkInput
+}
+
+input Care_StreetServiceOrder {
+	placeExtra: OrderDirection
+	place: OrderDirection
+	span: OrderDirection
+	date: OrderDirection
+	createdIn: OrderDirection
+	id: OrderDirection
+	client: OrderDirection
+	duty: OrderDirection
+}
+
+input Care_StreetServicePatch {
+	placeExtra: String
+	place: Place_POILinkInput
+	span: CivilDateTimeRange
+	date: CivilDate
+	createdIn: Org_UnitLinkInput
+	id: UUID!
+	orgVisibility: Org_UnitMultiLinkInput
+	client: Client_ClientLinkInput
+	duty: Org_DutyLinkInput
+	services: Care_ServiceUsageMultiLinkInput
+}
+
+interface Care_Text {
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_Unit!
+	id: UUID!
+	orgVisibility(filter: Org_UnitFilter, order: Org_UnitOrder, offset: Int, limit: Int): [Org_Unit!]!
+	client: Client_Client!
+	content: Richtext_Richtext
+}
+
+input Care_TextFilter {
+	and: [Care_TextFilter!]
+	or: [Care_TextFilter!]
+	not: [Care_TextFilter!]
+	span: CivilDateTimeRangeFilter
+	date: StdCalLocalDateFilter
+	createdIn: Org_UnitFilter
+	id: StdUuidFilter
+	orgVisibility: Org_UnitFilter
+	client: Client_ClientFilter
+	content: Richtext_RichtextFilter
+}
+
+input Care_TextInput {
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_UnitLinkInput!
+	orgVisibility: Org_UnitMultiLinkInput!
+	client: Client_ClientLinkInput!
+	content: Richtext_RichtextLinkInput
+}
+
+input Care_TextOrder {
+	span: OrderDirection
+	date: OrderDirection
+	createdIn: OrderDirection
+	id: OrderDirection
+	client: OrderDirection
+	content: OrderDirection
+}
+
+input Care_TextPatch {
+	span: CivilDateTimeRange
+	date: CivilDate
+	createdIn: Org_UnitLinkInput
+	id: UUID!
+	orgVisibility: Org_UnitMultiLinkInput
+	client: Client_ClientLinkInput
+	content: Richtext_RichtextLinkInput
+}
+
+scalar CivilDate
+
+scalar CivilDateRange
+
+input CivilDateRangeFilter @oneOf {
+	eq: CivilDateRange
+}
+
+scalar CivilDateTimeRange
+
+input CivilDateTimeRangeFilter @oneOf {
+	eq: CivilDateTimeRange
+}
+
+scalar CivilTime
+
+type Client_Client implements Eav_Entity {
+	id: UUID!
+	attributes(filter: Eav_AttributeFilter = null, order: Eav_AttributeOrder = null, offset: Int = null, limit: Int = null): [Eav_Attribute!]
+	kenyszi: Kenyszi_KenysziClient
+}
+
+type Client_ClientDataChange implements Care_Text {
+	client: Client_Client!
+	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	id: UUID!
+	createdIn: Org_Unit!
+	date: CivilDate!
+	span: CivilDateTimeRange!
+	log: Audit_AuditLog!
+	content: Richtext_Richtext
+}
+
+input Client_ClientDataChangeFilter {
+	and: [Client_ClientDataChangeFilter!]
+	or: [Client_ClientDataChangeFilter!]
+	not: [Client_ClientDataChangeFilter!]
+	client: Client_ClientFilter
+	orgVisibility: Org_UnitFilter
+	id: StdUuidFilter
+	createdIn: Org_UnitFilter
+	date: StdCalLocalDateFilter
+	span: CivilDateTimeRangeFilter
+	log: Audit_AuditLogFilter
+	content: Richtext_RichtextFilter
+}
+
+input Client_ClientDataChangeInput {
+	client: Client_ClientLinkInput!
+	orgVisibility: Org_UnitMultiLinkInput!
+	createdIn: Org_UnitLinkInput!
+	date: CivilDate!
+	span: CivilDateTimeRange!
+	log: Audit_AuditLogLinkInput!
+	content: Richtext_RichtextLinkInput
+}
+
+input Client_ClientDataChangeOrder {
+	client: OrderDirection
+	id: OrderDirection
+	createdIn: OrderDirection
+	date: OrderDirection
+	span: OrderDirection
+	log: OrderDirection
+	content: OrderDirection
+}
+
+input Client_ClientDataChangePatch {
+	client: Client_ClientLinkInput
+	orgVisibility: Org_UnitMultiLinkInput
+	id: UUID!
+	createdIn: Org_UnitLinkInput
+	date: CivilDate
+	span: CivilDateTimeRange
+	log: Audit_AuditLogLinkInput
+	content: Richtext_RichtextLinkInput
+}
+
+input Client_ClientFilter {
+	and: [Client_ClientFilter!]
+	or: [Client_ClientFilter!]
+	not: [Client_ClientFilter!]
+	id: StdUuidFilter
+	attributes: Eav_AttributeFilter
+	kenyszi: Kenyszi_KenysziClientFilter
+}
+
+input Client_ClientInput {
+	attributes: Eav_AttributeMultiLinkInput
+	kenyszi: Kenyszi_KenysziClientLinkInput
+}
+
+input Client_ClientLinkInput {
+	patch: Client_ClientPatch
+	set: Client_ClientFilter
+}
+
+input Client_ClientMultiLinkInput {
+	patch: [Client_ClientPatch!]
+	append: Client_ClientFilter
+	remove: Client_ClientFilter
+	set: Client_ClientFilter
+}
+
+input Client_ClientOrder {
+	id: OrderDirection
+	kenyszi: OrderDirection
+}
+
+input Client_ClientPatch {
+	id: UUID!
+	attributes: Eav_AttributeMultiLinkInput
+	kenyszi: Kenyszi_KenysziClientLinkInput
+}
+
+type Common_Tuple0 {
+	start: CivilTime!
+	end: CivilTime!
+}
+
+input Common_Tuple0Input {
+	start: CivilTime
+	end: CivilTime
+}
+
+scalar Decimal
+
+scalar Duration
+
+interface Eav_Attribute {
+	id: UUID!
+	name: String!
+	entity: Eav_Entity!
+}
+
+input Eav_AttributeFilter {
+	and: [Eav_AttributeFilter!]
+	or: [Eav_AttributeFilter!]
+	not: [Eav_AttributeFilter!]
+	id: StdUuidFilter
+	name: StdStrFilter
+	entity: Eav_EntityFilter
+}
+
+input Eav_AttributeMultiLinkInput {
+	patch: [Eav_AttributePatch!]
+	append: Eav_AttributeFilter
+	remove: Eav_AttributeFilter
+	set: Eav_AttributeFilter
+}
+
+input Eav_AttributeOrder {
+	id: OrderDirection
+	name: OrderDirection
+	entity: OrderDirection
+}
+
+input Eav_AttributePatch {
+	id: UUID!
+	name: String
+	entity: Eav_EntityLinkInput
+}
+
+type Eav_Decimal implements Eav_Attribute {
+	entity: Eav_Entity!
+	name: String!
+	id: UUID!
+	value: Decimal!
+}
+
+type Eav_Dict implements Eav_Entity & Eav_Attribute {
+	entity: Eav_Entity!
+	name: String!
+	id: UUID!
+	attributes(filter: Eav_AttributeFilter = null, order: Eav_AttributeOrder = null, offset: Int = null, limit: Int = null): [Eav_Attribute!]
+}
+
+interface Eav_Entity {
+	id: UUID!
+	attributes(filter: Eav_AttributeFilter, order: Eav_AttributeOrder, offset: Int, limit: Int): [Eav_Attribute!]
+}
+
+input Eav_EntityFilter {
+	and: [Eav_EntityFilter!]
+	or: [Eav_EntityFilter!]
+	not: [Eav_EntityFilter!]
+	id: StdUuidFilter
+	attributes: Eav_AttributeFilter
+}
+
+input Eav_EntityLinkInput {
+	patch: Eav_EntityPatch
+	set: Eav_EntityFilter
+}
+
+input Eav_EntityPatch {
+	id: UUID!
+	attributes: Eav_AttributeMultiLinkInput
+}
+
+type Eav_Int implements Eav_Attribute {
+	entity: Eav_Entity!
+	name: String!
+	id: UUID!
+	value: Int!
+}
+
+type Eav_Name implements Eav_Attribute {
+	entity: Eav_Entity!
+	name: String!
+	id: UUID!
+	title: String
+	given: String
+	family: String
+	fullName: String!
+}
+
+type Eav_Richtext implements Eav_Attribute {
+	entity: Eav_Entity!
+	name: String!
+	id: UUID!
+	value: Richtext_Richtext!
+}
+
+input EntryActionFilter @oneOf {
+	eq: Kenyszi_EntryAction
+}
+
+input EntryStatusFilter @oneOf {
+	eq: Kenyszi_EntryStatus
+}
+
+type FileImpl implements Fs_File {
+	id: UUID!
+	mime: String!
+	name: String!
+	path: String!
+	size: Int!
+}
+
+interface Fs_File {
+	id: UUID!
+	mime: String!
+	name: String!
+	path: String!
+	size: Int!
+}
+
+input Fs_FileFilter {
+	and: [Fs_FileFilter!]
+	or: [Fs_FileFilter!]
+	not: [Fs_FileFilter!]
+	id: StdUuidFilter
+	mime: StdStrFilter
+	name: StdStrFilter
+	path: StdStrFilter
+	size: StdInt32Filter
+}
+
+input Fs_FileInput {
+	mime: String!
+	name: String!
+	path: String!
+	size: Int!
+}
+
+input Fs_FileLinkInput {
+	patch: Fs_FilePatch
+	set: Fs_FileFilter
+}
+
+input Fs_FileOrder {
+	id: OrderDirection
+	mime: OrderDirection
+	name: OrderDirection
+	path: OrderDirection
+	size: OrderDirection
+}
+
+input Fs_FilePatch {
+	id: UUID!
+	mime: String
+	name: String
+	path: String
+	size: Int
+}
+
+type Fs_Image implements Fs_File {
+	size: Int!
+	name: String!
+	mime: String!
+	id: UUID!
+	path: String!
+	crop: JSON
+	resize: JSON
+}
+
+input Fs_ImageFilter {
+	and: [Fs_ImageFilter!]
+	or: [Fs_ImageFilter!]
+	not: [Fs_ImageFilter!]
+	size: StdInt32Filter
+	name: StdStrFilter
+	mime: StdStrFilter
+	id: StdUuidFilter
+	path: StdStrFilter
+}
+
+input Fs_ImageInput {
+	size: Int!
+	name: String!
+	mime: String!
+	path: String!
+	crop: JSON
+	resize: JSON
+}
+
+input Fs_ImageLinkInput {
+	patch: Fs_ImagePatch
+	set: Fs_ImageFilter
+}
+
+input Fs_ImageOrder {
+	size: OrderDirection
+	name: OrderDirection
+	mime: OrderDirection
+	id: OrderDirection
+	path: OrderDirection
+	crop: OrderDirection
+	resize: OrderDirection
+}
+
+input Fs_ImagePatch {
+	size: Int
+	name: String
+	mime: String
+	id: UUID!
+	path: String
+	crop: JSON
+	resize: JSON
+}
+
+type Fs_Modified implements Fs_File {
+	size: Int!
+	name: String!
+	mime: String!
+	id: UUID!
+	path: String!
+	original: Fs_File!
+}
+
+input Fs_ModifiedFilter {
+	and: [Fs_ModifiedFilter!]
+	or: [Fs_ModifiedFilter!]
+	not: [Fs_ModifiedFilter!]
+	size: StdInt32Filter
+	name: StdStrFilter
+	mime: StdStrFilter
+	id: StdUuidFilter
+	path: StdStrFilter
+	original: Fs_FileFilter
+}
+
+input Fs_ModifiedInput {
+	size: Int!
+	name: String!
+	mime: String!
+	path: String!
+	original: Fs_FileLinkInput!
+}
+
+input Fs_ModifiedOrder {
+	size: OrderDirection
+	name: OrderDirection
+	mime: OrderDirection
+	id: OrderDirection
+	path: OrderDirection
+	original: OrderDirection
+}
+
+input Fs_ModifiedPatch {
+	size: Int
+	name: String
+	mime: String
+	id: UUID!
+	path: String
+	original: Fs_FileLinkInput
+}
+
+type Fs_Template implements Fs_File {
+	size: Int!
+	name: String!
+	mime: String!
+	id: UUID!
+	path: String!
+	title: String!
+	vars: JSON!
+}
+
+input Fs_TemplateFilter {
+	and: [Fs_TemplateFilter!]
+	or: [Fs_TemplateFilter!]
+	not: [Fs_TemplateFilter!]
+	size: StdInt32Filter
+	name: StdStrFilter
+	mime: StdStrFilter
+	id: StdUuidFilter
+	path: StdStrFilter
+	title: StdStrFilter
+}
+
+input Fs_TemplateInput {
+	size: Int!
+	name: String!
+	mime: String!
+	path: String!
+	title: String!
+	vars: JSON!
+}
+
+input Fs_TemplateOrder {
+	size: OrderDirection
+	name: OrderDirection
+	mime: OrderDirection
+	id: OrderDirection
+	path: OrderDirection
+	title: OrderDirection
+	vars: OrderDirection
+}
+
+input Fs_TemplatePatch {
+	size: Int
+	name: String
+	mime: String
+	id: UUID!
+	path: String
+	title: String
+	vars: JSON
+}
+
+scalar Geography
+
+"""
+A scalar that can represent any JSON value.
+"""
+scalar JSON
+
+enum Kenyszi_EntryAction {
+	ADD
+	REMOVE
+}
+
+enum Kenyszi_EntryStatus {
+	ADDED
+	REMOVED
+	PENDING
+	ERROR
+	SKIPED
+}
+
+type Kenyszi_KenysziActivity {
+	id: UUID!
+	title: String!
+	value: String!
+}
+
+input Kenyszi_KenysziActivityFilter {
+	and: [Kenyszi_KenysziActivityFilter!]
+	or: [Kenyszi_KenysziActivityFilter!]
+	not: [Kenyszi_KenysziActivityFilter!]
+	id: StdUuidFilter
+	title: StdStrFilter
+	value: StdStrFilter
+}
+
+input Kenyszi_KenysziActivityLinkInput {
+	patch: Kenyszi_KenysziActivityPatch
+	set: Kenyszi_KenysziActivityFilter
+}
+
+input Kenyszi_KenysziActivityOrder {
+	id: OrderDirection
+	title: OrderDirection
+	value: OrderDirection
+}
+
+input Kenyszi_KenysziActivityPatch {
+	id: UUID!
+	title: String
+	value: String
+}
+
+type Kenyszi_KenysziClient {
+	id: UUID!
+	idTevadminIgenybevevo: Int!
+	previouse: [Int!]
+	client(filter: Client_ClientFilter = null, order: Client_ClientOrder = null, offset: Int = null, limit: Int = null): [Client_Client!]
+}
+
+input Kenyszi_KenysziClientFilter {
+	and: [Kenyszi_KenysziClientFilter!]
+	or: [Kenyszi_KenysziClientFilter!]
+	not: [Kenyszi_KenysziClientFilter!]
+	id: StdUuidFilter
+	idTevadminIgenybevevo: StdInt64Filter
+	previouse: StdInt64Filter
+	client: Client_ClientFilter
+}
+
+input Kenyszi_KenysziClientInput {
+	idTevadminIgenybevevo: Int!
+	previouse: [Int!]
+	client: Client_ClientMultiLinkInput
+}
+
+input Kenyszi_KenysziClientLinkInput {
+	patch: Kenyszi_KenysziClientPatch
+	set: Kenyszi_KenysziClientFilter
+}
+
+input Kenyszi_KenysziClientOrder {
+	id: OrderDirection
+	idTevadminIgenybevevo: OrderDirection
+	previouse: OrderDirection
+}
+
+input Kenyszi_KenysziClientPatch {
+	id: UUID!
+	idTevadminIgenybevevo: Int
+	previouse: [Int!]
+	client: Client_ClientMultiLinkInput
+}
+
+type Kenyszi_KenysziContract {
+	id: UUID!
+	kenyszi: Kenyszi_KenysziOrg!
+	duration: CivilDateRange!
+	idTevadminJog: Int!
+}
+
+input Kenyszi_KenysziContractFilter {
+	and: [Kenyszi_KenysziContractFilter!]
+	or: [Kenyszi_KenysziContractFilter!]
+	not: [Kenyszi_KenysziContractFilter!]
+	id: StdUuidFilter
+	kenyszi: Kenyszi_KenysziOrgFilter
+	duration: CivilDateRangeFilter
+	idTevadminJog: StdInt32Filter
+}
+
+input Kenyszi_KenysziContractInput {
+	kenyszi: Kenyszi_KenysziOrgLinkInput!
+	duration: CivilDateRange!
+	idTevadminJog: Int!
+}
+
+input Kenyszi_KenysziContractOrder {
+	id: OrderDirection
+	kenyszi: OrderDirection
+	duration: OrderDirection
+	idTevadminJog: OrderDirection
+}
+
+input Kenyszi_KenysziContractPatch {
+	id: UUID!
+	kenyszi: Kenyszi_KenysziOrgLinkInput
+	duration: CivilDateRange
+	idTevadminJog: Int
+}
+
+type Kenyszi_KenysziKind {
+	id: UUID!
+	title: String!
+	value: String!
+}
+
+input Kenyszi_KenysziKindFilter {
+	and: [Kenyszi_KenysziKindFilter!]
+	or: [Kenyszi_KenysziKindFilter!]
+	not: [Kenyszi_KenysziKindFilter!]
+	id: StdUuidFilter
+	title: StdStrFilter
+	value: StdStrFilter
+}
+
+input Kenyszi_KenysziKindLinkInput {
+	patch: Kenyszi_KenysziKindPatch
+	set: Kenyszi_KenysziKindFilter
+}
+
+input Kenyszi_KenysziKindOrder {
+	id: OrderDirection
+	title: OrderDirection
+	value: OrderDirection
+}
+
+input Kenyszi_KenysziKindPatch {
+	id: UUID!
+	title: String
+	value: String
+}
+
+type Kenyszi_KenysziOrg {
+	id: UUID!
+	loginName: String!
+	loginPass: String!
+	nrszhId: String!
+	kind: Kenyszi_KenysziKind!
+}
+
+input Kenyszi_KenysziOrgFilter {
+	and: [Kenyszi_KenysziOrgFilter!]
+	or: [Kenyszi_KenysziOrgFilter!]
+	not: [Kenyszi_KenysziOrgFilter!]
+	id: StdUuidFilter
+	loginName: StdStrFilter
+	loginPass: StdStrFilter
+	nrszhId: StdStrFilter
+	kind: Kenyszi_KenysziKindFilter
+}
+
+input Kenyszi_KenysziOrgInput {
+	loginName: String!
+	loginPass: String!
+	nrszhId: String!
+	kind: Kenyszi_KenysziKindLinkInput!
+}
+
+input Kenyszi_KenysziOrgLinkInput {
+	patch: Kenyszi_KenysziOrgPatch
+	set: Kenyszi_KenysziOrgFilter
+}
+
+input Kenyszi_KenysziOrgOrder {
+	id: OrderDirection
+	loginName: OrderDirection
+	loginPass: OrderDirection
+	nrszhId: OrderDirection
+	kind: OrderDirection
+}
+
+input Kenyszi_KenysziOrgPatch {
+	id: UUID!
+	loginName: String
+	loginPass: String
+	nrszhId: String
+	kind: Kenyszi_KenysziKindLinkInput
+}
+
+type Kenyszi_KenysziReport {
+	id: UUID!
+	kenyszi: Kenyszi_KenysziOrg!
+	date: CivilDate!
+	entries(filter: Kenyszi_KenysziReportEntryFilter = null, order: Kenyszi_KenysziReportEntryOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziReportEntry!]
+}
+
+type Kenyszi_KenysziReportEntry {
+	id: UUID!
+	client: Client_Client!
+	action: Kenyszi_EntryAction!
+	error: String
+	manualEntry: Boolean!
+	status: Kenyszi_EntryStatus!
+}
+
+input Kenyszi_KenysziReportEntryFilter {
+	and: [Kenyszi_KenysziReportEntryFilter!]
+	or: [Kenyszi_KenysziReportEntryFilter!]
+	not: [Kenyszi_KenysziReportEntryFilter!]
+	id: StdUuidFilter
+	client: Client_ClientFilter
+	action: EntryActionFilter
+	error: StdStrFilter
+	manualEntry: StdBoolFilter
+	status: EntryStatusFilter
+}
+
+input Kenyszi_KenysziReportEntryInput {
+	client: Client_ClientLinkInput!
+	action: Kenyszi_EntryAction!
+	error: String
+	manualEntry: Boolean!
+	status: Kenyszi_EntryStatus!
+}
+
+input Kenyszi_KenysziReportEntryMultiLinkInput {
+	patch: [Kenyszi_KenysziReportEntryPatch!]
+	append: Kenyszi_KenysziReportEntryFilter
+	remove: Kenyszi_KenysziReportEntryFilter
+	set: Kenyszi_KenysziReportEntryFilter
+}
+
+input Kenyszi_KenysziReportEntryOrder {
+	id: OrderDirection
+	client: OrderDirection
+	action: OrderDirection
+	error: OrderDirection
+	manualEntry: OrderDirection
+	status: OrderDirection
+}
+
+input Kenyszi_KenysziReportEntryPatch {
+	id: UUID!
+	client: Client_ClientLinkInput
+	action: Kenyszi_EntryAction
+	error: String
+	manualEntry: Boolean
+	status: Kenyszi_EntryStatus
+}
+
+input Kenyszi_KenysziReportFilter {
+	and: [Kenyszi_KenysziReportFilter!]
+	or: [Kenyszi_KenysziReportFilter!]
+	not: [Kenyszi_KenysziReportFilter!]
+	id: StdUuidFilter
+	kenyszi: Kenyszi_KenysziOrgFilter
+	date: StdCalLocalDateFilter
+	entries: Kenyszi_KenysziReportEntryFilter
+}
+
+input Kenyszi_KenysziReportInput {
+	kenyszi: Kenyszi_KenysziOrgLinkInput!
+	date: CivilDate!
+	entries: Kenyszi_KenysziReportEntryMultiLinkInput
+}
+
+input Kenyszi_KenysziReportLinkInput {
+	patch: Kenyszi_KenysziReportPatch
+	set: Kenyszi_KenysziReportFilter
+}
+
+input Kenyszi_KenysziReportOrder {
+	id: OrderDirection
+	kenyszi: OrderDirection
+	date: OrderDirection
+}
+
+input Kenyszi_KenysziReportPatch {
+	id: UUID!
+	kenyszi: Kenyszi_KenysziOrgLinkInput
+	date: CivilDate
+	entries: Kenyszi_KenysziReportEntryMultiLinkInput
+}
+
+type Kenyszi_KenysziUtalization {
+	id: UUID!
+	client: Kenyszi_KenysziClient!
+}
+
+input Kenyszi_KenysziUtalizationFilter {
+	and: [Kenyszi_KenysziUtalizationFilter!]
+	or: [Kenyszi_KenysziUtalizationFilter!]
+	not: [Kenyszi_KenysziUtalizationFilter!]
+	id: StdUuidFilter
+	client: Kenyszi_KenysziClientFilter
+}
+
+input Kenyszi_KenysziUtalizationInput {
+	client: Kenyszi_KenysziClientLinkInput!
+}
+
+input Kenyszi_KenysziUtalizationOrder {
+	id: OrderDirection
+	client: OrderDirection
+}
+
+input Kenyszi_KenysziUtalizationPatch {
+	id: UUID!
+	client: Kenyszi_KenysziClientLinkInput
+}
+
+type Kenyszi_TransactionLog {
+	id: UUID!
+	report: Kenyszi_KenysziReport!
+	careType: Org_CareType!
+	batchId: UUID!
+	error: String
+	method: String!
+	recv: String
+	sent: String
+	timestamp: Zoned!
+}
+
+input Kenyszi_TransactionLogFilter {
+	and: [Kenyszi_TransactionLogFilter!]
+	or: [Kenyszi_TransactionLogFilter!]
+	not: [Kenyszi_TransactionLogFilter!]
+	id: StdUuidFilter
+	report: Kenyszi_KenysziReportFilter
+	careType: Org_CareTypeFilter
+	batchId: StdUuidFilter
+	error: StdStrFilter
+	method: StdStrFilter
+	recv: StdStrFilter
+	sent: StdStrFilter
+	timestamp: StdDatetimeFilter
+}
+
+input Kenyszi_TransactionLogInput {
+	report: Kenyszi_KenysziReportLinkInput!
+	careType: Org_CareTypeLinkInput!
+	batchId: UUID!
+	error: String
+	method: String!
+	recv: String
+	sent: String
+	timestamp: Zoned!
+}
+
+input Kenyszi_TransactionLogOrder {
+	id: OrderDirection
+	report: OrderDirection
+	careType: OrderDirection
+	batchId: OrderDirection
+	error: OrderDirection
+	method: OrderDirection
+	recv: OrderDirection
+	sent: OrderDirection
+	timestamp: OrderDirection
+}
+
+input Kenyszi_TransactionLogPatch {
+	id: UUID!
+	report: Kenyszi_KenysziReportLinkInput
+	careType: Org_CareTypeLinkInput
+	batchId: UUID
+	error: String
+	method: String
+	recv: String
+	sent: String
+	timestamp: Zoned
+}
+
+input LeaveReasonKSHFilter @oneOf {
+	eq: Service_LeaveReasonKSH
+}
+
+type Mutation {
+	patchAuthPermission(data: Auth_PermissionPatch!): Auth_Permission!
+	insertAuthPermission(data: Auth_PermissionInput!): Auth_Permission!
+	deleteAuthPermission(id: UUID!): Boolean!
+	patchAuthRole(data: Auth_RolePatch!): Auth_Role!
+	insertAuthRole(data: Auth_RoleInput!): Auth_Role!
+	deleteAuthRole(id: UUID!): Boolean!
+	patchAuthUser(data: Auth_UserPatch!): Auth_User!
+	insertAuthUser(data: Auth_UserInput!): Auth_User!
+	deleteAuthUser(id: UUID!): Boolean!
+	patchAuditAuditLog(data: Audit_AuditLogPatch!): Audit_AuditLog!
+	insertAuditAuditLog(data: Audit_AuditLogInput!): Audit_AuditLog!
+	deleteAuditAuditLog(id: UUID!): Boolean!
+	patchFsFile(data: Fs_FilePatch!): Fs_File!
+	insertFsFile(data: Fs_FileInput!): Fs_File!
+	deleteFsFile(id: UUID!): Boolean!
+	patchFsImage(data: Fs_ImagePatch!): Fs_Image!
+	insertFsImage(data: Fs_ImageInput!): Fs_Image!
+	deleteFsImage(id: UUID!): Boolean!
+	patchFsModified(data: Fs_ModifiedPatch!): Fs_Modified!
+	insertFsModified(data: Fs_ModifiedInput!): Fs_Modified!
+	deleteFsModified(id: UUID!): Boolean!
+	patchFsTemplate(data: Fs_TemplatePatch!): Fs_Template!
+	insertFsTemplate(data: Fs_TemplateInput!): Fs_Template!
+	deleteFsTemplate(id: UUID!): Boolean!
+	patchKenysziKenysziOrg(data: Kenyszi_KenysziOrgPatch!): Kenyszi_KenysziOrg!
+	insertKenysziKenysziOrg(data: Kenyszi_KenysziOrgInput!): Kenyszi_KenysziOrg!
+	deleteKenysziKenysziOrg(id: UUID!): Boolean!
+	patchKenysziKenysziContract(data: Kenyszi_KenysziContractPatch!): Kenyszi_KenysziContract!
+	insertKenysziKenysziContract(data: Kenyszi_KenysziContractInput!): Kenyszi_KenysziContract!
+	deleteKenysziKenysziContract(id: UUID!): Boolean!
+	patchClientClient(data: Client_ClientPatch!): Client_Client!
+	insertClientClient(data: Client_ClientInput!): Client_Client!
+	deleteClientClient(id: UUID!): Boolean!
+	patchKenysziKenysziReportEntry(data: Kenyszi_KenysziReportEntryPatch!): Kenyszi_KenysziReportEntry!
+	insertKenysziKenysziReportEntry(data: Kenyszi_KenysziReportEntryInput!): Kenyszi_KenysziReportEntry!
+	deleteKenysziKenysziReportEntry(id: UUID!): Boolean!
+	patchServiceLeaveReason(data: Service_LeaveReasonPatch!): Service_LeaveReason!
+	insertServiceLeaveReason(data: Service_LeaveReasonInput!): Service_LeaveReason!
+	deleteServiceLeaveReason(id: UUID!): Boolean!
+	patchOrgRoot(data: Org_RootPatch!): Org_Root!
+	insertOrgRoot(data: Org_RootInput!): Org_Root!
+	deleteOrgRoot(id: UUID!): Boolean!
+	patchOrgMaintainer(data: Org_MaintainerPatch!): Org_Maintainer!
+	insertOrgMaintainer(data: Org_MaintainerInput!): Org_Maintainer!
+	deleteOrgMaintainer(id: UUID!): Boolean!
+	patchOrgRegion(data: Org_RegionPatch!): Org_Region!
+	insertOrgRegion(data: Org_RegionInput!): Org_Region!
+	deleteOrgRegion(id: UUID!): Boolean!
+	patchOrgInstitution(data: Org_InstitutionPatch!): Org_Institution!
+	insertOrgInstitution(data: Org_InstitutionInput!): Org_Institution!
+	deleteOrgInstitution(id: UUID!): Boolean!
+	patchOrgHeadquarter(data: Org_HeadquarterPatch!): Org_Headquarter!
+	insertOrgHeadquarter(data: Org_HeadquarterInput!): Org_Headquarter!
+	deleteOrgHeadquarter(id: UUID!): Boolean!
+	patchOrgSection(data: Org_SectionPatch!): Org_Section!
+	insertOrgSection(data: Org_SectionInput!): Org_Section!
+	deleteOrgSection(id: UUID!): Boolean!
+	patchOrgVehicle(data: Org_VehiclePatch!): Org_Vehicle!
+	insertOrgVehicle(data: Org_VehicleInput!): Org_Vehicle!
+	deleteOrgVehicle(id: UUID!): Boolean!
+	patchCareText(data: Care_TextPatch!): Care_Text!
+	insertCareText(data: Care_TextInput!): Care_Text!
+	deleteCareText(id: UUID!): Boolean!
+	patchClientClientDataChange(data: Client_ClientDataChangePatch!): Client_ClientDataChange!
+	insertClientClientDataChange(data: Client_ClientDataChangeInput!): Client_ClientDataChange!
+	deleteClientClientDataChange(id: UUID!): Boolean!
+	patchCareService(data: Care_ServicePatch!): Care_Service!
+	insertCareService(data: Care_ServiceInput!): Care_Service!
+	deleteCareService(id: UUID!): Boolean!
+	patchPlacePoi(data: Place_POIPatch!): Place_POI!
+	insertPlacePoi(data: Place_POIInput!): Place_POI!
+	deletePlacePoi(id: UUID!): Boolean!
+	patchCareStreetActivity(data: Care_StreetActivityPatch!): Care_StreetActivity!
+	insertCareStreetActivity(data: Care_StreetActivityInput!): Care_StreetActivity!
+	deleteCareStreetActivity(id: UUID!): Boolean!
+	patchCareStreetService(data: Care_StreetServicePatch!): Care_StreetService!
+	insertCareStreetService(data: Care_StreetServiceInput!): Care_StreetService!
+	deleteCareStreetService(id: UUID!): Boolean!
+	patchOrgDuty(data: Org_DutyPatch!): Org_Duty!
+	insertOrgDuty(data: Org_DutyInput!): Org_Duty!
+	deleteOrgDuty(id: UUID!): Boolean!
+	patchAuthEmailProvider(data: Auth_EmailProviderPatch!): Auth_EmailProvider!
+	insertAuthEmailProvider(data: Auth_EmailProviderInput!): Auth_EmailProvider!
+	deleteAuthEmailProvider(id: UUID!): Boolean!
+	patchAuthEmailAccount(data: Auth_EmailAccountPatch!): Auth_EmailAccount!
+	insertAuthEmailAccount(data: Auth_EmailAccountInput!): Auth_EmailAccount!
+	deleteAuthEmailAccount(id: UUID!): Boolean!
+	patchAuthOAuthProvider(data: Auth_OAuthProviderPatch!): Auth_OAuthProvider!
+	insertAuthOAuthProvider(data: Auth_OAuthProviderInput!): Auth_OAuthProvider!
+	deleteAuthOAuthProvider(id: UUID!): Boolean!
+	patchAuthOAuthAccount(data: Auth_OAuthAccountPatch!): Auth_OAuthAccount!
+	insertAuthOAuthAccount(data: Auth_OAuthAccountInput!): Auth_OAuthAccount!
+	deleteAuthOAuthAccount(id: UUID!): Boolean!
+	patchServiceResource(data: Service_ResourcePatch!): Service_Resource!
+	insertServiceResource(data: Service_ResourceInput!): Service_Resource!
+	deleteServiceResource(id: UUID!): Boolean!
+	patchServiceTimeSlotResource(data: Service_TimeSlotResourcePatch!): Service_TimeSlotResource!
+	insertServiceTimeSlotResource(data: Service_TimeSlotResourceInput!): Service_TimeSlotResource!
+	deleteServiceTimeSlotResource(id: UUID!): Boolean!
+	patchCareServiceUsage(data: Care_ServiceUsagePatch!): Care_ServiceUsage!
+	insertCareServiceUsage(data: Care_ServiceUsageInput!): Care_ServiceUsage!
+	deleteCareServiceUsage(id: UUID!): Boolean!
+	patchServiceAssignedService(data: Service_AssignedServicePatch!): Service_AssignedService!
+	insertServiceAssignedService(data: Service_AssignedServiceInput!): Service_AssignedService!
+	deleteServiceAssignedService(id: UUID!): Boolean!
+	patchRichtextRichtext(data: Richtext_RichtextPatch!): Richtext_Richtext!
+	insertRichtextRichtext(data: Richtext_RichtextInput!): Richtext_Richtext!
+	deleteRichtextRichtext(id: UUID!): Boolean!
+	patchKenysziKenysziClient(data: Kenyszi_KenysziClientPatch!): Kenyszi_KenysziClient!
+	insertKenysziKenysziClient(data: Kenyszi_KenysziClientInput!): Kenyszi_KenysziClient!
+	deleteKenysziKenysziClient(id: UUID!): Boolean!
+	patchServiceResourceVariant(data: Service_ResourceVariantPatch!): Service_ResourceVariant!
+	insertServiceResourceVariant(data: Service_ResourceVariantInput!): Service_ResourceVariant!
+	deleteServiceResourceVariant(id: UUID!): Boolean!
+	patchServiceReservation(data: Service_ReservationPatch!): Service_Reservation!
+	insertServiceReservation(data: Service_ReservationInput!): Service_Reservation!
+	deleteServiceReservation(id: UUID!): Boolean!
+	patchOrgCareType(data: Org_CareTypePatch!): Org_CareType!
+	insertOrgCareType(data: Org_CareTypeInput!): Org_CareType!
+	deleteOrgCareType(id: UUID!): Boolean!
+	patchKenysziKenysziUtalization(data: Kenyszi_KenysziUtalizationPatch!): Kenyszi_KenysziUtalization!
+	insertKenysziKenysziUtalization(data: Kenyszi_KenysziUtalizationInput!): Kenyszi_KenysziUtalization!
+	deleteKenysziKenysziUtalization(id: UUID!): Boolean!
+	patchKenysziKenysziReport(data: Kenyszi_KenysziReportPatch!): Kenyszi_KenysziReport!
+	insertKenysziKenysziReport(data: Kenyszi_KenysziReportInput!): Kenyszi_KenysziReport!
+	deleteKenysziKenysziReport(id: UUID!): Boolean!
+	patchKenysziTransactionLog(data: Kenyszi_TransactionLogPatch!): Kenyszi_TransactionLog!
+	insertKenysziTransactionLog(data: Kenyszi_TransactionLogInput!): Kenyszi_TransactionLog!
+	deleteKenysziTransactionLog(id: UUID!): Boolean!
+	patchOrgExternal(data: Org_ExternalPatch!): Org_External!
+	insertOrgExternal(data: Org_ExternalInput!): Org_External!
+	deleteOrgExternal(id: UUID!): Boolean!
+	patchPlaceAddress(data: Place_AddressPatch!): Place_Address!
+	insertPlaceAddress(data: Place_AddressInput!): Place_Address!
+	deletePlaceAddress(id: UUID!): Boolean!
+	patchRichtextHastag(data: Richtext_HastagPatch!): Richtext_Hastag!
+	insertRichtextHastag(data: Richtext_HastagInput!): Richtext_Hastag!
+	deleteRichtextHastag(id: UUID!): Boolean!
+	patchServiceDailyResource(data: Service_DailyResourcePatch!): Service_DailyResource!
+	insertServiceDailyResource(data: Service_DailyResourceInput!): Service_DailyResource!
+	deleteServiceDailyResource(id: UUID!): Boolean!
+	anyMutationHere: ID!
+}
+
+enum OrderDirection {
+	ASC
+	DESC
+}
+
+type Org_CareType implements Org_Unit {
+	title: String!
+	id: UUID!
+	kenysziActivity: Kenyszi_KenysziActivity
+	kenyszi: Kenyszi_KenysziOrg
+	duties: [Common_Tuple0!]
+	isActive: Boolean!
+	kind: Org_CareTypeKind!
+	services(filter: Service_AssignedServiceFilter = null, order: Service_AssignedServiceOrder = null, offset: Int = null, limit: Int = null): [Service_AssignedService!]
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	parent: Org_Section!
+	vehicles(filter: Org_VehicleFilter = null, order: Org_VehicleOrder = null, offset: Int = null, limit: Int = null): [Org_Vehicle!]
+	fullTitle: String!
+}
+
+input Org_CareTypeFilter {
+	and: [Org_CareTypeFilter!]
+	or: [Org_CareTypeFilter!]
+	not: [Org_CareTypeFilter!]
+	title: StdStrFilter
+	id: StdUuidFilter
+	kenysziActivity: Kenyszi_KenysziActivityFilter
+	kenyszi: Kenyszi_KenysziOrgFilter
+	duties: Tuple0Filter
+	isActive: StdBoolFilter
+	kind: CareTypeKindFilter
+	services: Service_AssignedServiceFilter
+	children: Org_UnitFilter
+	parent: Org_SectionFilter
+	vehicles: Org_VehicleFilter
+	fullTitle: StdStrFilter
+}
+
+input Org_CareTypeInput {
+	title: String!
+	kenysziActivity: Kenyszi_KenysziActivityLinkInput
+	kenyszi: Kenyszi_KenysziOrgLinkInput
+	duties: [Common_Tuple0Input!]
+	isActive: Boolean!
+	kind: Org_CareTypeKind!
+	services: Service_AssignedServiceMultiLinkInput
+	children: Org_UnitMultiLinkInput
+	parent: Org_SectionLinkInput!
+	vehicles: Org_VehicleMultiLinkInput
+	fullTitle: String!
+}
+
+enum Org_CareTypeKind {
+	COMMUNAL
+	DISPATCHER
+	RESIDENTIAL
+	MEDICAL
+	OTHER
+	STREET
+}
+
+input Org_CareTypeLinkInput {
+	patch: Org_CareTypePatch
+	set: Org_CareTypeFilter
+}
+
+input Org_CareTypeOrder {
+	title: OrderDirection
+	id: OrderDirection
+	kenysziActivity: OrderDirection
+	kenyszi: OrderDirection
+	duties: OrderDirection
+	isActive: OrderDirection
+	kind: OrderDirection
+	parent: OrderDirection
+	fullTitle: OrderDirection
+}
+
+input Org_CareTypePatch {
+	title: String
+	id: UUID!
+	kenysziActivity: Kenyszi_KenysziActivityLinkInput
+	kenyszi: Kenyszi_KenysziOrgLinkInput
+	duties: [Common_Tuple0Input!]
+	isActive: Boolean
+	kind: Org_CareTypeKind
+	services: Service_AssignedServiceMultiLinkInput
+	children: Org_UnitMultiLinkInput
+	parent: Org_SectionLinkInput
+	vehicles: Org_VehicleMultiLinkInput
+	fullTitle: String
+}
+
+type Org_Duty {
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_Unit!
+	id: UUID!
+	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	careType: Org_CareType!
+}
+
+input Org_DutyFilter {
+	and: [Org_DutyFilter!]
+	or: [Org_DutyFilter!]
+	not: [Org_DutyFilter!]
+	span: CivilDateTimeRangeFilter
+	date: StdCalLocalDateFilter
+	createdIn: Org_UnitFilter
+	id: StdUuidFilter
+	orgVisibility: Org_UnitFilter
+	careType: Org_CareTypeFilter
+}
+
+input Org_DutyInput {
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_UnitLinkInput!
+	orgVisibility: Org_UnitMultiLinkInput!
+	careType: Org_CareTypeLinkInput!
+}
+
+input Org_DutyLinkInput {
+	patch: Org_DutyPatch
+	set: Org_DutyFilter
+}
+
+input Org_DutyOrder {
+	span: OrderDirection
+	date: OrderDirection
+	createdIn: OrderDirection
+	id: OrderDirection
+	careType: OrderDirection
+}
+
+input Org_DutyPatch {
+	span: CivilDateTimeRange
+	date: CivilDate
+	createdIn: Org_UnitLinkInput
+	id: UUID!
+	orgVisibility: Org_UnitMultiLinkInput
+	careType: Org_CareTypeLinkInput
+}
+
+type Org_External implements Org_Unit {
+	title: String!
+	id: UUID!
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	parent: Org_Root!
+}
+
+input Org_ExternalFilter {
+	and: [Org_ExternalFilter!]
+	or: [Org_ExternalFilter!]
+	not: [Org_ExternalFilter!]
+	title: StdStrFilter
+	id: StdUuidFilter
+	children: Org_UnitFilter
+	parent: Org_RootFilter
+}
+
+input Org_ExternalInput {
+	title: String!
+	children: Org_UnitMultiLinkInput
+	parent: Org_RootLinkInput!
+}
+
+input Org_ExternalOrder {
+	title: OrderDirection
+	id: OrderDirection
+	parent: OrderDirection
+}
+
+input Org_ExternalPatch {
+	title: String
+	id: UUID!
+	children: Org_UnitMultiLinkInput
+	parent: Org_RootLinkInput
+}
+
+type Org_Headquarter implements Org_Unit {
+	title: String!
+	id: UUID!
+	boss: Auth_User
+	place: Place_Place
+	phones: [String!]
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	parent: Org_Institution!
+}
+
+input Org_HeadquarterFilter {
+	and: [Org_HeadquarterFilter!]
+	or: [Org_HeadquarterFilter!]
+	not: [Org_HeadquarterFilter!]
+	title: StdStrFilter
+	id: StdUuidFilter
+	boss: Auth_UserFilter
+	place: Place_PlaceFilter
+	phones: StdStrFilter
+	children: Org_UnitFilter
+	parent: Org_InstitutionFilter
+}
+
+input Org_HeadquarterInput {
+	title: String!
+	boss: Auth_UserLinkInput
+	place: Place_PlaceLinkInput
+	phones: [String!]
+	children: Org_UnitMultiLinkInput
+	parent: Org_InstitutionLinkInput!
+}
+
+input Org_HeadquarterOrder {
+	title: OrderDirection
+	id: OrderDirection
+	boss: OrderDirection
+	place: OrderDirection
+	phones: OrderDirection
+	parent: OrderDirection
+}
+
+input Org_HeadquarterPatch {
+	title: String
+	id: UUID!
+	boss: Auth_UserLinkInput
+	place: Place_PlaceLinkInput
+	phones: [String!]
+	children: Org_UnitMultiLinkInput
+	parent: Org_InstitutionLinkInput
+}
+
+type Org_Institution implements Org_Unit {
+	title: String!
+	id: UUID!
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	parent: Org_Region!
+}
+
+input Org_InstitutionFilter {
+	and: [Org_InstitutionFilter!]
+	or: [Org_InstitutionFilter!]
+	not: [Org_InstitutionFilter!]
+	title: StdStrFilter
+	id: StdUuidFilter
+	children: Org_UnitFilter
+	parent: Org_RegionFilter
+}
+
+input Org_InstitutionInput {
+	title: String!
+	children: Org_UnitMultiLinkInput
+	parent: Org_RegionLinkInput!
+}
+
+input Org_InstitutionLinkInput {
+	patch: Org_InstitutionPatch
+	set: Org_InstitutionFilter
+}
+
+input Org_InstitutionOrder {
+	title: OrderDirection
+	id: OrderDirection
+	parent: OrderDirection
+}
+
+input Org_InstitutionPatch {
+	title: String
+	id: UUID!
+	children: Org_UnitMultiLinkInput
+	parent: Org_RegionLinkInput
+}
+
+type Org_Maintainer implements Org_Unit {
+	title: String!
+	id: UUID!
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	logo: Fs_Image
+	parent: Org_Root!
+}
+
+input Org_MaintainerFilter {
+	and: [Org_MaintainerFilter!]
+	or: [Org_MaintainerFilter!]
+	not: [Org_MaintainerFilter!]
+	title: StdStrFilter
+	id: StdUuidFilter
+	children: Org_UnitFilter
+	logo: Fs_ImageFilter
+	parent: Org_RootFilter
+}
+
+input Org_MaintainerInput {
+	title: String!
+	children: Org_UnitMultiLinkInput
+	logo: Fs_ImageLinkInput
+	parent: Org_RootLinkInput!
+}
+
+input Org_MaintainerLinkInput {
+	patch: Org_MaintainerPatch
+	set: Org_MaintainerFilter
+}
+
+input Org_MaintainerOrder {
+	title: OrderDirection
+	id: OrderDirection
+	logo: OrderDirection
+	parent: OrderDirection
+}
+
+input Org_MaintainerPatch {
+	title: String
+	id: UUID!
+	children: Org_UnitMultiLinkInput
+	logo: Fs_ImageLinkInput
+	parent: Org_RootLinkInput
+}
+
+type Org_Region implements Org_Unit {
+	title: String!
+	id: UUID!
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	parent: Org_Maintainer!
+}
+
+input Org_RegionFilter {
+	and: [Org_RegionFilter!]
+	or: [Org_RegionFilter!]
+	not: [Org_RegionFilter!]
+	title: StdStrFilter
+	id: StdUuidFilter
+	children: Org_UnitFilter
+	parent: Org_MaintainerFilter
+}
+
+input Org_RegionInput {
+	title: String!
+	children: Org_UnitMultiLinkInput
+	parent: Org_MaintainerLinkInput!
+}
+
+input Org_RegionLinkInput {
+	patch: Org_RegionPatch
+	set: Org_RegionFilter
+}
+
+input Org_RegionOrder {
+	title: OrderDirection
+	id: OrderDirection
+	parent: OrderDirection
+}
+
+input Org_RegionPatch {
+	title: String
+	id: UUID!
+	children: Org_UnitMultiLinkInput
+	parent: Org_MaintainerLinkInput
+}
+
+type Org_Root implements Org_Unit {
+	title: String!
+	parent: Org_Unit
+	id: UUID!
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+}
+
+input Org_RootFilter {
+	and: [Org_RootFilter!]
+	or: [Org_RootFilter!]
+	not: [Org_RootFilter!]
+	title: StdStrFilter
+	parent: Org_UnitFilter
+	id: StdUuidFilter
+	children: Org_UnitFilter
+}
+
+input Org_RootInput {
+	title: String!
+	parent: Org_UnitLinkInput
+	children: Org_UnitMultiLinkInput
+}
+
+input Org_RootLinkInput {
+	patch: Org_RootPatch
+	set: Org_RootFilter
+}
+
+input Org_RootOrder {
+	title: OrderDirection
+	parent: OrderDirection
+	id: OrderDirection
+}
+
+input Org_RootPatch {
+	title: String
+	parent: Org_UnitLinkInput
+	id: UUID!
+	children: Org_UnitMultiLinkInput
+}
+
+type Org_Section implements Org_Unit {
+	title: String!
+	id: UUID!
+	maintainer: Org_Maintainer
+	officialTitle: String
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	parent: Org_Unit!
+}
+
+input Org_SectionFilter {
+	and: [Org_SectionFilter!]
+	or: [Org_SectionFilter!]
+	not: [Org_SectionFilter!]
+	title: StdStrFilter
+	id: StdUuidFilter
+	maintainer: Org_MaintainerFilter
+	officialTitle: StdStrFilter
+	children: Org_UnitFilter
+	parent: Org_UnitFilter
+}
+
+input Org_SectionInput {
+	title: String!
+	maintainer: Org_MaintainerLinkInput
+	officialTitle: String
+	children: Org_UnitMultiLinkInput
+	parent: Org_UnitLinkInput!
+}
+
+input Org_SectionLinkInput {
+	patch: Org_SectionPatch
+	set: Org_SectionFilter
+}
+
+input Org_SectionOrder {
+	title: OrderDirection
+	id: OrderDirection
+	maintainer: OrderDirection
+	officialTitle: OrderDirection
+	parent: OrderDirection
+}
+
+input Org_SectionPatch {
+	title: String
+	id: UUID!
+	maintainer: Org_MaintainerLinkInput
+	officialTitle: String
+	children: Org_UnitMultiLinkInput
+	parent: Org_UnitLinkInput
+}
+
+interface Org_Unit {
+	id: UUID!
+	parent: Org_Unit
+	title: String!
+	children(filter: Org_UnitFilter, order: Org_UnitOrder, offset: Int, limit: Int): [Org_Unit!]
+}
+
+input Org_UnitFilter {
+	and: [Org_UnitFilter!]
+	or: [Org_UnitFilter!]
+	not: [Org_UnitFilter!]
+	id: StdUuidFilter
+	parent: Org_UnitFilter
+	title: StdStrFilter
+	children: Org_UnitFilter
+}
+
+input Org_UnitLinkInput {
+	patch: Org_UnitPatch
+	set: Org_UnitFilter
+}
+
+input Org_UnitMultiLinkInput {
+	patch: [Org_UnitPatch!]
+	append: Org_UnitFilter
+	remove: Org_UnitFilter
+	set: Org_UnitFilter
+}
+
+input Org_UnitOrder {
+	id: OrderDirection
+	parent: OrderDirection
+	title: OrderDirection
+}
+
+input Org_UnitPatch {
+	id: UUID!
+	parent: Org_UnitLinkInput
+	title: String
+	children: Org_UnitMultiLinkInput
+}
+
+type Org_Vehicle {
+	id: UUID!
+	isActive: Boolean!
+	title: String!
+}
+
+input Org_VehicleFilter {
+	and: [Org_VehicleFilter!]
+	or: [Org_VehicleFilter!]
+	not: [Org_VehicleFilter!]
+	id: StdUuidFilter
+	isActive: StdBoolFilter
+	title: StdStrFilter
+}
+
+input Org_VehicleInput {
+	isActive: Boolean!
+	title: String!
+}
+
+input Org_VehicleMultiLinkInput {
+	patch: [Org_VehiclePatch!]
+	append: Org_VehicleFilter
+	remove: Org_VehicleFilter
+	set: Org_VehicleFilter
+}
+
+input Org_VehicleOrder {
+	id: OrderDirection
+	isActive: OrderDirection
+	title: OrderDirection
+}
+
+input Org_VehiclePatch {
+	id: UUID!
+	isActive: Boolean
+	title: String
+}
+
+type Place_Address implements Place_Place {
+	country: String!
+	id: UUID!
+	city: String!
+	postalCode: String!
+	publicPlace: String!
+	streetNumber: String!
+	address: String!
+	description: String!
+}
+
+input Place_AddressFilter {
+	and: [Place_AddressFilter!]
+	or: [Place_AddressFilter!]
+	not: [Place_AddressFilter!]
+	country: StdStrFilter
+	id: StdUuidFilter
+	city: StdStrFilter
+	postalCode: StdStrFilter
+	publicPlace: StdStrFilter
+	streetNumber: StdStrFilter
+	address: StdStrFilter
+	description: StdStrFilter
+}
+
+input Place_AddressInput {
+	country: String!
+	city: String!
+	postalCode: String!
+	publicPlace: String!
+	streetNumber: String!
+	address: String!
+	description: String!
+}
+
+input Place_AddressOrder {
+	country: OrderDirection
+	id: OrderDirection
+	city: OrderDirection
+	postalCode: OrderDirection
+	publicPlace: OrderDirection
+	streetNumber: OrderDirection
+	address: OrderDirection
+	description: OrderDirection
+}
+
+input Place_AddressPatch {
+	country: String
+	id: UUID!
+	city: String
+	postalCode: String
+	publicPlace: String
+	streetNumber: String
+	address: String
+	description: String
+}
+
+type Place_POI implements Place_Place {
+	streetNumber: String
+	publicPlace: String
+	postalCode: String
+	country: String!
+	id: UUID!
+	externalId: String!
+	city: String!
+	subLocality: String
+	address: String!
+	name: String
+	description: String!
+	coords: Geography!
+}
+
+input Place_POIFilter {
+	and: [Place_POIFilter!]
+	or: [Place_POIFilter!]
+	not: [Place_POIFilter!]
+	streetNumber: StdStrFilter
+	publicPlace: StdStrFilter
+	postalCode: StdStrFilter
+	country: StdStrFilter
+	id: StdUuidFilter
+	externalId: StdStrFilter
+	city: StdStrFilter
+	subLocality: StdStrFilter
+	address: StdStrFilter
+	name: StdStrFilter
+	description: StdStrFilter
+}
+
+input Place_POIInput {
+	streetNumber: String
+	publicPlace: String
+	postalCode: String
+	country: String!
+	externalId: String!
+	city: String!
+	subLocality: String
+	address: String!
+	name: String
+	description: String!
+	coords: Geography!
+}
+
+input Place_POILinkInput {
+	patch: Place_POIPatch
+	set: Place_POIFilter
+}
+
+input Place_POIOrder {
+	streetNumber: OrderDirection
+	publicPlace: OrderDirection
+	postalCode: OrderDirection
+	country: OrderDirection
+	id: OrderDirection
+	externalId: OrderDirection
+	city: OrderDirection
+	subLocality: OrderDirection
+	address: OrderDirection
+	name: OrderDirection
+	description: OrderDirection
+	coords: OrderDirection
+}
+
+input Place_POIPatch {
+	streetNumber: String
+	publicPlace: String
+	postalCode: String
+	country: String
+	id: UUID!
+	externalId: String
+	city: String
+	subLocality: String
+	address: String
+	name: String
+	description: String
+	coords: Geography
+}
+
+interface Place_Place {
+	id: UUID!
+	address: String!
+	city: String
+	country: String!
+	description: String!
+	postalCode: String
+	publicPlace: String
+	streetNumber: String
+}
+
+input Place_PlaceFilter {
+	and: [Place_PlaceFilter!]
+	or: [Place_PlaceFilter!]
+	not: [Place_PlaceFilter!]
+	id: StdUuidFilter
+	address: StdStrFilter
+	city: StdStrFilter
+	country: StdStrFilter
+	description: StdStrFilter
+	postalCode: StdStrFilter
+	publicPlace: StdStrFilter
+	streetNumber: StdStrFilter
+}
+
+input Place_PlaceLinkInput {
+	patch: Place_PlacePatch
+	set: Place_PlaceFilter
+}
+
+input Place_PlacePatch {
+	id: UUID!
+	address: String
+	city: String
+	country: String
+	description: String
+	postalCode: String
+	publicPlace: String
+	streetNumber: String
+}
+
+type Query {
+	authPermission(filter: Auth_PermissionFilter = null, order: Auth_PermissionOrder = null, offset: Int = null, limit: Int = null): [Auth_Permission!]!
+	authRole(filter: Auth_RoleFilter = null, order: Auth_RoleOrder = null, offset: Int = null, limit: Int = null): [Auth_Role!]!
+	authUser(filter: Auth_UserFilter = null, order: Auth_UserOrder = null, offset: Int = null, limit: Int = null): [Auth_User!]!
+	auditAuditLog(filter: Audit_AuditLogFilter = null, order: Audit_AuditLogOrder = null, offset: Int = null, limit: Int = null): [Audit_AuditLog!]!
+	fsFile(filter: Fs_FileFilter = null, order: Fs_FileOrder = null, offset: Int = null, limit: Int = null): [Fs_File!]!
+	fsImage(filter: Fs_ImageFilter = null, order: Fs_ImageOrder = null, offset: Int = null, limit: Int = null): [Fs_Image!]!
+	fsModified(filter: Fs_ModifiedFilter = null, order: Fs_ModifiedOrder = null, offset: Int = null, limit: Int = null): [Fs_Modified!]!
+	fsTemplate(filter: Fs_TemplateFilter = null, order: Fs_TemplateOrder = null, offset: Int = null, limit: Int = null): [Fs_Template!]!
+	kenysziKenysziKind(filter: Kenyszi_KenysziKindFilter = null, order: Kenyszi_KenysziKindOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziKind!]!
+	kenysziKenysziOrg(filter: Kenyszi_KenysziOrgFilter = null, order: Kenyszi_KenysziOrgOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziOrg!]!
+	kenysziKenysziContract(filter: Kenyszi_KenysziContractFilter = null, order: Kenyszi_KenysziContractOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziContract!]!
+	clientClient(filter: Client_ClientFilter = null, order: Client_ClientOrder = null, offset: Int = null, limit: Int = null): [Client_Client!]!
+	kenysziKenysziReportEntry(filter: Kenyszi_KenysziReportEntryFilter = null, order: Kenyszi_KenysziReportEntryOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziReportEntry!]!
+	serviceLeaveReason(filter: Service_LeaveReasonFilter = null, order: Service_LeaveReasonOrder = null, offset: Int = null, limit: Int = null): [Service_LeaveReason!]!
+	orgRoot(filter: Org_RootFilter = null, order: Org_RootOrder = null, offset: Int = null, limit: Int = null): [Org_Root!]!
+	orgMaintainer(filter: Org_MaintainerFilter = null, order: Org_MaintainerOrder = null, offset: Int = null, limit: Int = null): [Org_Maintainer!]!
+	orgRegion(filter: Org_RegionFilter = null, order: Org_RegionOrder = null, offset: Int = null, limit: Int = null): [Org_Region!]!
+	orgInstitution(filter: Org_InstitutionFilter = null, order: Org_InstitutionOrder = null, offset: Int = null, limit: Int = null): [Org_Institution!]!
+	orgHeadquarter(filter: Org_HeadquarterFilter = null, order: Org_HeadquarterOrder = null, offset: Int = null, limit: Int = null): [Org_Headquarter!]!
+	orgSection(filter: Org_SectionFilter = null, order: Org_SectionOrder = null, offset: Int = null, limit: Int = null): [Org_Section!]!
+	kenysziKenysziActivity(filter: Kenyszi_KenysziActivityFilter = null, order: Kenyszi_KenysziActivityOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziActivity!]!
+	orgVehicle(filter: Org_VehicleFilter = null, order: Org_VehicleOrder = null, offset: Int = null, limit: Int = null): [Org_Vehicle!]!
+	careText(filter: Care_TextFilter = null, order: Care_TextOrder = null, offset: Int = null, limit: Int = null): [Care_Text!]!
+	clientClientDataChange(filter: Client_ClientDataChangeFilter = null, order: Client_ClientDataChangeOrder = null, offset: Int = null, limit: Int = null): [Client_ClientDataChange!]!
+	careService(filter: Care_ServiceFilter = null, order: Care_ServiceOrder = null, offset: Int = null, limit: Int = null): [Care_Service!]!
+	placePoi(filter: Place_POIFilter = null, order: Place_POIOrder = null, offset: Int = null, limit: Int = null): [Place_POI!]!
+	careStreetActivity(filter: Care_StreetActivityFilter = null, order: Care_StreetActivityOrder = null, offset: Int = null, limit: Int = null): [Care_StreetActivity!]!
+	careStreetService(filter: Care_StreetServiceFilter = null, order: Care_StreetServiceOrder = null, offset: Int = null, limit: Int = null): [Care_StreetService!]!
+	orgDuty(filter: Org_DutyFilter = null, order: Org_DutyOrder = null, offset: Int = null, limit: Int = null): [Org_Duty!]!
+	authEmailProvider(filter: Auth_EmailProviderFilter = null, order: Auth_EmailProviderOrder = null, offset: Int = null, limit: Int = null): [Auth_EmailProvider!]!
+	authEmailAccount(filter: Auth_EmailAccountFilter = null, order: Auth_EmailAccountOrder = null, offset: Int = null, limit: Int = null): [Auth_EmailAccount!]!
+	authOAuthProvider(filter: Auth_OAuthProviderFilter = null, order: Auth_OAuthProviderOrder = null, offset: Int = null, limit: Int = null): [Auth_OAuthProvider!]!
+	authOAuthAccount(filter: Auth_OAuthAccountFilter = null, order: Auth_OAuthAccountOrder = null, offset: Int = null, limit: Int = null): [Auth_OAuthAccount!]!
+	serviceResource(filter: Service_ResourceFilter = null, order: Service_ResourceOrder = null, offset: Int = null, limit: Int = null): [Service_Resource!]!
+	serviceTimeSlotResource(filter: Service_TimeSlotResourceFilter = null, order: Service_TimeSlotResourceOrder = null, offset: Int = null, limit: Int = null): [Service_TimeSlotResource!]!
+	careServiceUsage(filter: Care_ServiceUsageFilter = null, order: Care_ServiceUsageOrder = null, offset: Int = null, limit: Int = null): [Care_ServiceUsage!]!
+	serviceAssignedService(filter: Service_AssignedServiceFilter = null, order: Service_AssignedServiceOrder = null, offset: Int = null, limit: Int = null): [Service_AssignedService!]!
+	richtextRichtext(filter: Richtext_RichtextFilter = null, order: Richtext_RichtextOrder = null, offset: Int = null, limit: Int = null): [Richtext_Richtext!]!
+	kenysziKenysziClient(filter: Kenyszi_KenysziClientFilter = null, order: Kenyszi_KenysziClientOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziClient!]!
+	serviceResourceVariant(filter: Service_ResourceVariantFilter = null, order: Service_ResourceVariantOrder = null, offset: Int = null, limit: Int = null): [Service_ResourceVariant!]!
+	serviceReservation(filter: Service_ReservationFilter = null, order: Service_ReservationOrder = null, offset: Int = null, limit: Int = null): [Service_Reservation!]!
+	orgCareType(filter: Org_CareTypeFilter = null, order: Org_CareTypeOrder = null, offset: Int = null, limit: Int = null): [Org_CareType!]!
+	kenysziKenysziUtalization(filter: Kenyszi_KenysziUtalizationFilter = null, order: Kenyszi_KenysziUtalizationOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziUtalization!]!
+	kenysziKenysziReport(filter: Kenyszi_KenysziReportFilter = null, order: Kenyszi_KenysziReportOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziReport!]!
+	kenysziTransactionLog(filter: Kenyszi_TransactionLogFilter = null, order: Kenyszi_TransactionLogOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_TransactionLog!]!
+	orgExternal(filter: Org_ExternalFilter = null, order: Org_ExternalOrder = null, offset: Int = null, limit: Int = null): [Org_External!]!
+	placeAddress(filter: Place_AddressFilter = null, order: Place_AddressOrder = null, offset: Int = null, limit: Int = null): [Place_Address!]!
+	richtextHastag(filter: Richtext_HastagFilter = null, order: Richtext_HastagOrder = null, offset: Int = null, limit: Int = null): [Richtext_Hastag!]!
+	serviceDailyResource(filter: Service_DailyResourceFilter = null, order: Service_DailyResourceOrder = null, offset: Int = null, limit: Int = null): [Service_DailyResource!]!
+	currentUserId: ID!
+	_service: _Service!
+}
+
+type ResourceImpl implements Service_Resource {
+	id: UUID!
+	isRemoved: Boolean!
+	title: String!
+	service: Service_AssignedService!
+}
+
+input ResourceVariantKindFilter @oneOf {
+	eq: Service_ResourceVariantKind
+}
+
+type Richtext_ClientRef implements Richtext_Component {
+	richtext: Richtext_Richtext!
+	id: UUID!
+	client: Client_Client!
+}
+
+interface Richtext_Component {
+	id: UUID!
+	richtext: Richtext_Richtext!
+}
+
+input Richtext_ComponentFilter {
+	and: [Richtext_ComponentFilter!]
+	or: [Richtext_ComponentFilter!]
+	not: [Richtext_ComponentFilter!]
+	id: StdUuidFilter
+	richtext: Richtext_RichtextFilter
+}
+
+input Richtext_ComponentMultiLinkInput {
+	patch: [Richtext_ComponentPatch!]
+	append: Richtext_ComponentFilter
+	remove: Richtext_ComponentFilter
+	set: Richtext_ComponentFilter
+}
+
+input Richtext_ComponentOrder {
+	id: OrderDirection
+	richtext: OrderDirection
+}
+
+input Richtext_ComponentPatch {
+	id: UUID!
+	richtext: Richtext_RichtextLinkInput
+}
+
+type Richtext_Hastag {
+	id: UUID!
+	name: String!
+}
+
+input Richtext_HastagFilter {
+	and: [Richtext_HastagFilter!]
+	or: [Richtext_HastagFilter!]
+	not: [Richtext_HastagFilter!]
+	id: StdUuidFilter
+	name: StdStrFilter
+}
+
+input Richtext_HastagInput {
+	name: String!
+}
+
+input Richtext_HastagOrder {
+	id: OrderDirection
+	name: OrderDirection
+}
+
+input Richtext_HastagPatch {
+	id: UUID!
+	name: String
+}
+
+type Richtext_HastagRef implements Richtext_Component {
+	richtext: Richtext_Richtext!
+	id: UUID!
+	hastag: Richtext_Hastag!
+}
+
+type Richtext_Housing implements Richtext_Component {
+	richtext: Richtext_Richtext!
+	id: UUID!
+	section: Org_Section!
+}
+
+type Richtext_MedicalExam implements Richtext_Component {
+	richtext: Richtext_Richtext!
+	id: UUID!
+	section: Org_Section
+	contactName: String
+	contactTel: String
+	diagnosis: String
+}
+
+type Richtext_PublicService implements Richtext_Component {
+	richtext: Richtext_Richtext!
+	id: UUID!
+	contactId: String
+	contactName: String
+	description: String
+	kind: Richtext_PublicServiceKind
+	plateNumber: String
+	transport: String
+}
+
+enum Richtext_PublicServiceKind {
+	AMBULANCE
+	ANTSZ
+	FIRE_FIGHTER
+	PS_SURVEILLANCE
+}
+
+type Richtext_Richtext {
+	id: UUID!
+	plain: String
+	value: String!
+	components(filter: Richtext_ComponentFilter = null, order: Richtext_ComponentOrder = null, offset: Int = null, limit: Int = null): [Richtext_Component!]
+}
+
+input Richtext_RichtextFilter {
+	and: [Richtext_RichtextFilter!]
+	or: [Richtext_RichtextFilter!]
+	not: [Richtext_RichtextFilter!]
+	id: StdUuidFilter
+	plain: StdStrFilter
+	value: StdStrFilter
+	components: Richtext_ComponentFilter
+}
+
+input Richtext_RichtextInput {
+	plain: String
+	value: String!
+	components: Richtext_ComponentMultiLinkInput
+}
+
+input Richtext_RichtextLinkInput {
+	patch: Richtext_RichtextPatch
+	set: Richtext_RichtextFilter
+}
+
+input Richtext_RichtextOrder {
+	id: OrderDirection
+	plain: OrderDirection
+	value: OrderDirection
+}
+
+input Richtext_RichtextPatch {
+	id: UUID!
+	plain: String
+	value: String
+	components: Richtext_ComponentMultiLinkInput
+}
+
+type Richtext_ServiceRef implements Richtext_Component {
+	richtext: Richtext_Richtext!
+	id: UUID!
+	service: Service_Service!
+}
+
+type Richtext_Transport implements Richtext_Component {
+	richtext: Richtext_Richtext!
+	id: UUID!
+	section: Org_Section!
+}
+
+type Richtext_UserRef implements Richtext_Component {
+	id: UUID!
+	user: Auth_User!
+	richtext: Richtext_Richtext!
+}
+
+type ServiceImpl implements Care_Service {
+	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	id: UUID!
+	createdIn: Org_Unit!
+	date: CivilDate!
+	span: CivilDateTimeRange!
+	client: Client_Client!
+	duty: Org_Duty!
+	services(filter: Care_ServiceUsageFilter = null, order: Care_ServiceUsageOrder = null, offset: Int = null, limit: Int = null): [Care_ServiceUsage!]
+}
+
+input ServiceKindFilter @oneOf {
+	eq: Service_ServiceKind
+}
+
+input ServiceTickBehaviorFilter @oneOf {
+	eq: Service_ServiceTickBehavior
+}
+
+type Service_AssignedService {
+	id: UUID!
+	service: Service_Service!
+	isPinned: Boolean!
+	isPrimary: Boolean!
+	tickBehavior: Service_ServiceTickBehavior!
+	careType: Org_CareType!
+}
+
+input Service_AssignedServiceFilter {
+	and: [Service_AssignedServiceFilter!]
+	or: [Service_AssignedServiceFilter!]
+	not: [Service_AssignedServiceFilter!]
+	id: StdUuidFilter
+	service: Service_ServiceFilter
+	isPinned: StdBoolFilter
+	isPrimary: StdBoolFilter
+	tickBehavior: ServiceTickBehaviorFilter
+	careType: Org_CareTypeFilter
+}
+
+input Service_AssignedServiceInput {
+	service: Service_ServiceLinkInput!
+	isPinned: Boolean!
+	isPrimary: Boolean!
+	tickBehavior: Service_ServiceTickBehavior!
+	careType: Org_CareTypeLinkInput!
+}
+
+input Service_AssignedServiceLinkInput {
+	patch: Service_AssignedServicePatch
+	set: Service_AssignedServiceFilter
+}
+
+input Service_AssignedServiceMultiLinkInput {
+	patch: [Service_AssignedServicePatch!]
+	append: Service_AssignedServiceFilter
+	remove: Service_AssignedServiceFilter
+	set: Service_AssignedServiceFilter
+}
+
+input Service_AssignedServiceOrder {
+	id: OrderDirection
+	service: OrderDirection
+	isPinned: OrderDirection
+	isPrimary: OrderDirection
+	tickBehavior: OrderDirection
+	careType: OrderDirection
+}
+
+input Service_AssignedServicePatch {
+	id: UUID!
+	service: Service_ServiceLinkInput
+	isPinned: Boolean
+	isPrimary: Boolean
+	tickBehavior: Service_ServiceTickBehavior
+	careType: Org_CareTypeLinkInput
+}
+
+type Service_DailyResource implements Service_Resource {
+	service: Service_AssignedService!
+	title: String!
+	isRemoved: Boolean!
+	id: UUID!
+	variants(filter: Service_ResourceVariantFilter = null, order: Service_ResourceVariantOrder = null, offset: Int = null, limit: Int = null): [Service_ResourceVariant!]
+}
+
+input Service_DailyResourceFilter {
+	and: [Service_DailyResourceFilter!]
+	or: [Service_DailyResourceFilter!]
+	not: [Service_DailyResourceFilter!]
+	service: Service_AssignedServiceFilter
+	title: StdStrFilter
+	isRemoved: StdBoolFilter
+	id: StdUuidFilter
+	variants: Service_ResourceVariantFilter
+}
+
+input Service_DailyResourceInput {
+	service: Service_AssignedServiceLinkInput!
+	title: String!
+	isRemoved: Boolean!
+	variants: Service_ResourceVariantMultiLinkInput
+}
+
+input Service_DailyResourceOrder {
+	service: OrderDirection
+	title: OrderDirection
+	isRemoved: OrderDirection
+	id: OrderDirection
+}
+
+input Service_DailyResourcePatch {
+	service: Service_AssignedServiceLinkInput
+	title: String
+	isRemoved: Boolean
+	id: UUID!
+	variants: Service_ResourceVariantMultiLinkInput
+}
+
+type Service_LeaveReason {
+	id: UUID!
+	ksh: Service_LeaveReasonKSH!
+	title: String!
+}
+
+input Service_LeaveReasonFilter {
+	and: [Service_LeaveReasonFilter!]
+	or: [Service_LeaveReasonFilter!]
+	not: [Service_LeaveReasonFilter!]
+	id: StdUuidFilter
+	ksh: LeaveReasonKSHFilter
+	title: StdStrFilter
+}
+
+input Service_LeaveReasonInput {
+	ksh: Service_LeaveReasonKSH!
+	title: String!
+}
+
+enum Service_LeaveReasonKSH {
+	DECEASED
+	NOT_JUSTIFIED
+	OTHER_PERMANENT
+	OTHER_TEMPORARY
+}
+
+input Service_LeaveReasonOrder {
+	id: OrderDirection
+	ksh: OrderDirection
+	title: OrderDirection
+}
+
+input Service_LeaveReasonPatch {
+	id: UUID!
+	ksh: Service_LeaveReasonKSH
+	title: String
+}
+
+type Service_Reservation {
+	id: UUID!
+	client: Client_Client!
+	service: Service_AssignedService!
+	resource: Service_Resource!
+	resourceVariant: Service_ResourceVariant
+	span: CivilDateTimeRange!
+}
+
+input Service_ReservationFilter {
+	and: [Service_ReservationFilter!]
+	or: [Service_ReservationFilter!]
+	not: [Service_ReservationFilter!]
+	id: StdUuidFilter
+	client: Client_ClientFilter
+	service: Service_AssignedServiceFilter
+	resource: Service_ResourceFilter
+	resourceVariant: Service_ResourceVariantFilter
+	span: CivilDateTimeRangeFilter
+}
+
+input Service_ReservationInput {
+	client: Client_ClientLinkInput!
+	service: Service_AssignedServiceLinkInput!
+	resource: Service_ResourceLinkInput!
+	resourceVariant: Service_ResourceVariantLinkInput
+	span: CivilDateTimeRange!
+}
+
+input Service_ReservationOrder {
+	id: OrderDirection
+	client: OrderDirection
+	service: OrderDirection
+	resource: OrderDirection
+	resourceVariant: OrderDirection
+	span: OrderDirection
+}
+
+input Service_ReservationPatch {
+	id: UUID!
+	client: Client_ClientLinkInput
+	service: Service_AssignedServiceLinkInput
+	resource: Service_ResourceLinkInput
+	resourceVariant: Service_ResourceVariantLinkInput
+	span: CivilDateTimeRange
+}
+
+interface Service_Resource {
+	id: UUID!
+	isRemoved: Boolean!
+	title: String!
+	service: Service_AssignedService!
+}
+
+input Service_ResourceFilter {
+	and: [Service_ResourceFilter!]
+	or: [Service_ResourceFilter!]
+	not: [Service_ResourceFilter!]
+	id: StdUuidFilter
+	isRemoved: StdBoolFilter
+	title: StdStrFilter
+	service: Service_AssignedServiceFilter
+}
+
+input Service_ResourceInput {
+	isRemoved: Boolean!
+	title: String!
+	service: Service_AssignedServiceLinkInput!
+}
+
+input Service_ResourceLinkInput {
+	patch: Service_ResourcePatch
+	set: Service_ResourceFilter
+}
+
+input Service_ResourceOrder {
+	id: OrderDirection
+	isRemoved: OrderDirection
+	title: OrderDirection
+	service: OrderDirection
+}
+
+input Service_ResourcePatch {
+	id: UUID!
+	isRemoved: Boolean
+	title: String
+	service: Service_AssignedServiceLinkInput
+}
+
+type Service_ResourceVariant {
+	id: UUID!
+	resource: Service_Resource!
+	kind: Service_ResourceVariantKind!
+	title: String!
+}
+
+input Service_ResourceVariantFilter {
+	and: [Service_ResourceVariantFilter!]
+	or: [Service_ResourceVariantFilter!]
+	not: [Service_ResourceVariantFilter!]
+	id: StdUuidFilter
+	resource: Service_ResourceFilter
+	kind: ResourceVariantKindFilter
+	title: StdStrFilter
+}
+
+input Service_ResourceVariantInput {
+	resource: Service_ResourceLinkInput!
+	kind: Service_ResourceVariantKind!
+	title: String!
+}
+
+enum Service_ResourceVariantKind {
+	BED
+	CRISIS_BED
+	BARRIER_FREE_BED
+	DEVICE
+}
+
+input Service_ResourceVariantLinkInput {
+	patch: Service_ResourceVariantPatch
+	set: Service_ResourceVariantFilter
+}
+
+input Service_ResourceVariantMultiLinkInput {
+	patch: [Service_ResourceVariantPatch!]
+	append: Service_ResourceVariantFilter
+	remove: Service_ResourceVariantFilter
+	set: Service_ResourceVariantFilter
+}
+
+input Service_ResourceVariantOrder {
+	id: OrderDirection
+	resource: OrderDirection
+	kind: OrderDirection
+	title: OrderDirection
+}
+
+input Service_ResourceVariantPatch {
+	id: UUID!
+	resource: Service_ResourceLinkInput
+	kind: Service_ResourceVariantKind
+	title: String
+}
+
+type Service_Service {
+	id: UUID!
+	clientRequired: Boolean!
+	kind: Service_ServiceKind!
+	title: String!
+}
+
+input Service_ServiceFilter {
+	and: [Service_ServiceFilter!]
+	or: [Service_ServiceFilter!]
+	not: [Service_ServiceFilter!]
+	id: StdUuidFilter
+	clientRequired: StdBoolFilter
+	kind: ServiceKindFilter
+	title: StdStrFilter
+}
+
+enum Service_ServiceKind {
+	SIMPLE
+	ROOM
+	BNO
+	DEVICE
+	MAILING
+	LUGGAGE
+	COMMUNAL
+	SOCIAL
+}
+
+input Service_ServiceLinkInput {
+	patch: Service_ServicePatch
+	set: Service_ServiceFilter
+}
+
+input Service_ServicePatch {
+	id: UUID!
+	clientRequired: Boolean
+	kind: Service_ServiceKind
+	title: String
+}
+
+enum Service_ServiceTickBehavior {
+	DEFAULT
+	ALWAYS
+	CARE
+}
+
+type Service_TimeSlotResource implements Service_Resource {
+	title: String!
+	isRemoved: Boolean!
+	id: UUID!
+	recurring(filter: Calendar_RecurringFilter = null, order: Calendar_RecurringOrder = null, offset: Int = null, limit: Int = null): [Calendar_Recurring!]!
+	service: Service_AssignedService!
+}
+
+input Service_TimeSlotResourceFilter {
+	and: [Service_TimeSlotResourceFilter!]
+	or: [Service_TimeSlotResourceFilter!]
+	not: [Service_TimeSlotResourceFilter!]
+	title: StdStrFilter
+	isRemoved: StdBoolFilter
+	id: StdUuidFilter
+	recurring: Calendar_RecurringFilter
+	service: Service_AssignedServiceFilter
+}
+
+input Service_TimeSlotResourceInput {
+	title: String!
+	isRemoved: Boolean!
+	recurring: Calendar_RecurringMultiLinkInput!
+	service: Service_AssignedServiceLinkInput!
+}
+
+input Service_TimeSlotResourceOrder {
+	title: OrderDirection
+	isRemoved: OrderDirection
+	id: OrderDirection
+	service: OrderDirection
+}
+
+input Service_TimeSlotResourcePatch {
+	title: String
+	isRemoved: Boolean
+	id: UUID!
+	recurring: Calendar_RecurringMultiLinkInput
+	service: Service_AssignedServiceLinkInput
+}
+
+input StdBoolFilter @oneOf {
+	eq: Boolean
+}
+
+input StdCalLocalDateFilter @oneOf {
+	eq: CivilDate
+}
+
+input StdCalRelativeDurationFilter @oneOf {
+	eq: Duration
+}
+
+input StdDatetimeFilter @oneOf {
+	eq: Zoned
+}
+
+input StdInt32Filter @oneOf {
+	eq: Int
+}
+
+input StdInt64Filter @oneOf {
+	eq: Int
+}
+
+input StdStrFilter @oneOf {
+	eq: String
+}
+
+input StdUuidFilter @oneOf {
+	eq: UUID
+}
+
+type TextImpl implements Care_Text {
+	span: CivilDateTimeRange!
+	date: CivilDate!
+	createdIn: Org_Unit!
+	id: UUID!
+	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	client: Client_Client!
+	content: Richtext_Richtext
+}
+
+input Tuple0Filter @oneOf {
+	eq: Common_Tuple0Input
+}
+
+"""
+A UUID is a unique 128-bit number, stored as 16 octets. UUIDs are parsed as
+Strings within GraphQL. UUIDs are used to assign unique identifiers to
+entities without requiring a central allocating authority.
+
+# References
+
+* [Wikipedia: Universally Unique Identifier](http://en.wikipedia.org/wiki/Universally_unique_identifier)
+* [RFC4122: A Universally Unique Identifier (UUID) URN Namespace](http://tools.ietf.org/html/rfc4122)
+"""
+scalar UUID
+
+scalar Zoned
+
+"""
+The `_Any` scalar is used to pass representations of entities from external
+services into the root `_entities` field for execution.
+"""
+scalar _Any
+
+type _Service {
+	sdl: String
+}
+
+"""
+Directs the executor to include this field or fragment only when the `if` argument is true.
+"""
+directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"""
+Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)
+"""
+directive @oneOf on INPUT_OBJECT
+"""
+Directs the executor to skip this field or fragment when the `if` argument is true.
+"""
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"""
+Provides a scalar specification URL for specifying the behavior of custom scalar types.
+"""
+directive @specifiedBy(url: String!) on SCALAR
+schema {
+	query: Query
+	mutation: Mutation
+}

@@ -380,8 +380,33 @@ type Alias<T, N extends string> = T & { [ALIAS]: N }
 export type SelectionDef = SelectionItem[]
 export type SelectionItem = SelectionField | SelectionSub | SelectionOn
 export type SelectionField = string
-export type SelectionSub = Record<string, SelectionDef>
-export type SelectionOn = { $on: SelectionSub }
+export interface SelectionSub {
+    [key: string]: SelectionDef
+}
+export interface SelectionOn {
+    $on: SelectionSub
+}
+
+export type SelectedFields<S extends SelectionDef> = _FieldFromSelection<S, true>
+
+type _FieldFromSelection<S extends SelectionDef, AllowOn extends boolean> = S extends [
+    infer F extends SelectionItem,
+    ...infer R extends SelectionDef
+]
+    ? _SelectionIntoFields<F, AllowOn> | _FieldFromSelection<R, AllowOn>
+    : never
+
+type _SelectionIntoFields<I extends SelectionItem, AllowOn extends boolean> = I extends SelectionField
+    ? I
+    : I extends SelectionSub
+      ? keyof I
+      : AllowOn extends true
+        ? I extends SelectionOn
+            ? I["$on"] extends { [key: string]: infer SD extends SelectionDef }
+                ? _FieldFromSelection<SD, false>
+                : never
+            : never
+        : never
 
 // export type ExtendSelection<SD extends SelectionDef, P extends string[], K extends string> = P["length"] extends 0
 //     ? [...SD, K]
