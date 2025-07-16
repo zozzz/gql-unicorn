@@ -1,12 +1,16 @@
 import { checker, VARIABLE } from "./symbols"
 
-export type Variable<N extends string> = VarRef<"$"> | VarRef<N>
+// export type Variable<N extends string> = VarRef<"$"> | VarRef<N>
 
-export type VarRef<N> = { [VARIABLE]: N }
+export interface Variable<N extends string = string> {
+    readonly [VARIABLE]: N
+}
 
-export const isVariable = checker<Variable<any>>(VARIABLE)
+// export type VarRef<N> = { [VARIABLE]: N }
 
-export function variableName(obj: Variable<any>): string | undefined {
+export const isVariable = checker<Variable>(VARIABLE)
+
+export function variableName(obj: Variable): string | undefined {
     return obj[VARIABLE]
 }
 
@@ -22,7 +26,7 @@ export function variableName(obj: Variable<any>): string | undefined {
  * Query.user({id: $("userId")})
  * ```
  */
-export const $ = <N extends string>(name: N) => ({ [VARIABLE]: name }) as const
+export const $ = <N extends string>(name: N) => ({ [VARIABLE]: name }) as Variable<N>
 
 export const $$ = { [VARIABLE]: "$" } as const
 

@@ -4,14 +4,14 @@ import { type Variable } from "./var"
 
 export type Arguments<I> =
     I extends Array<infer V>
-        ? Array<Arguments<V>> | Variable<any>
+        ? Array<Arguments<V>> | Variable
         : I extends Record<string, any>
           ?
                 | {
                       [K in keyof I]: K extends string ? Arguments<I[K]> : never
                   }
-                | Variable<any>
-          : I | Variable<any>
+                | Variable
+          : I | Variable
 
 // export type Arguments<I extends Input> = _Arguments<I>
 // export type ArgsParam<I extends Input, A extends object> = {
@@ -22,7 +22,7 @@ export type Arguments<I> =
 //     | {
 //           [K in keyof A]: K extends keyof I ? A[K] : never
 //       }
-//     | Variable<any>
+//     | Variable<string>
 
 // TODO: harden: not allowing unknown keys
 // eslint-disable-next-line unused-imports/no-unused-vars
