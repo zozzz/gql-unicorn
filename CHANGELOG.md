@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.5](https://github.com/zozzz/gql-unicorn/compare/0.4.4...0.4.5) (2025-07-16)
+
+
+* try to fix Variable type ([8d420a1](https://github.com/zozzz/gql-unicorn/commit/8d420a1c69bb730c9f631e912ee19b37c455bd53))
+
 ## [0.4.4](https://github.com/zozzz/gql-unicorn/compare/0.4.3...0.4.4) (2025-07-15)
 
 ## [0.4.3](https://github.com/zozzz/gql-unicorn/compare/0.4.2...0.4.3) (2025-07-15)
