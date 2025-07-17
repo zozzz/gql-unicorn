@@ -75,7 +75,7 @@ class Transformer {
     }
 
     transform(): string {
-        const builders: string[] = [`type AsBuilder = { input: Input, output: any }`]
+        const builders: string[] = [`type AsBuilder = { input: Input; output: any; operation: string }`]
 
         const query = this.schema.getQueryType()
         if (query != null) {
@@ -346,7 +346,7 @@ class Transformer {
                     // <AA extends Arguments<A>>(...args: [string, AA] | [AA]): BuildReturn<T, {} & ToVars<A, [], AA>>
                     builderT =
                         `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]${optArgs}) `
-                        + `=> BuildReturn<${typeValue}, never, {} & ToVars<${argType}, [], AA>>`
+                        + `=> BuildReturn<"${name}", ${typeValue}, never, {} & ToVars<${argType}, [], AA>>`
                 } else {
                     this.#import(RuntimeLib, "SelectionDef", true)
 
@@ -360,14 +360,14 @@ class Transformer {
                     builderT =
                         `<SS extends SelectionDef, SV extends Vars, AA extends Arguments<${argType}>>`
                         + `(...args: [string, ${args}, ${sfn}] | [${args}, ${sfn}]${optArgs}) `
-                        + `=> BuildReturn<${this.#typename(type)}, SS, SV & ToVars<${argType}, [], AA>>`
+                        + `=> BuildReturn<"${name}", ${this.#typename(type)}, SS, SV & ToVars<${argType}, [], AA>>`
 
                     const builderFnRet = this.#selectType(
                         this.#selectName(type),
                         R,
                         "AA",
                         "[]",
-                        `{ input: ${argType}, output: ${this.#typename(type)} }`
+                        `{ input: ${argType}, output: ${this.#typename(type)}, operation: "${name}" }`
                     )
                     const builderFnOptArgs = argOptional ? ` | [string] | []` : ""
                     builderFn = `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]${builderFnOptArgs}) => ${builderFnRet}`
@@ -376,7 +376,7 @@ class Transformer {
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
 
-                    builderT = `(name?: string) => BuildReturn<${typeValue}, never, never>`
+                    builderT = `(name?: string) => BuildReturn<"${name}", ${typeValue}, never, never>`
                 } else {
                     this.#import(RuntimeLib, "SelectionDef", true)
 
@@ -389,7 +389,7 @@ class Transformer {
                     builderT =
                         `<SS extends SelectionDef, SV extends Vars, >`
                         + `(...args: [string, ${sfn}] | [${sfn}])`
-                        + `=> BuildReturn<${this.#typename(type)}, SS, SV>`
+                        + `=> BuildReturn<"${name}", ${this.#typename(type)}, SS, SV>`
                 }
             }
 
@@ -398,7 +398,7 @@ class Transformer {
             const _builderFn = `{ builder: ${builderFn} }`
             result.push(
                 ...this.#comment(description, deprecationReason),
-                `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})${_builderFn ? ` & ${_builderFn}` : ""}`
+                `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})${builderFn ? ` & ${_builderFn}` : ""}`
                 // `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})`
             )
         }
@@ -539,7 +539,7 @@ class Transformer {
         this.#import(RuntimeLib, "BuildReturn", true)
         const result: string[] = ["/**", " * Build the typed document node", " */"]
         result.push(
-            `$build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never`
+            `$build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never`
         )
 
         return result

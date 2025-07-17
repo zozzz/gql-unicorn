@@ -13,7 +13,7 @@ import { transform } from "../src/transform"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-function testQuery<O, V>(query: TypedDocumentNode<O, V>, x: string) {
+function testQuery<N extends string, O, V>(query: TypedDocumentNode<Record<N, O>, V>, x: string) {
     const gql = `${query as any}`
     // console.log(gql)
     expect(parse(gql)).toBeDefined()
@@ -35,39 +35,42 @@ describe("runtime", () => {
     describe("query", () => {
         describe("all argument combinations", () => {
             test("type", () => {
-                testQuery<{ __typename: "AFC"; id: string }, never>(
+                testQuery<"afc", { __typename: "AFC"; id: string }, never>(
                     G.queryAfc(q => q.id),
                     `query{afc{__typename,id}}`
                 )
             })
 
             test("type + arg", () => {
-                testQuery<{ __typename: "Location"; id: string } | null | undefined, { id: string }>(
+                testQuery<"location", { __typename: "Location"; id: string } | null | undefined, { id: string }>(
                     G.queryLocation({ id: G.$$ }, q => q.id),
                     `query($id:ID!){location(id:$id){__typename,id}}`
                 )
             })
 
             test("type + name", () => {
-                testQuery<{ __typename: "AFC"; id: string }, never>(
+                testQuery<"afc", { __typename: "AFC"; id: string }, never>(
                     G.queryAfc("QueryName", q => q.id),
                     `query QueryName{afc{__typename,id}}`
                 )
             })
 
             test("type + name + arg", () => {
-                testQuery<{ __typename: "Location"; id: string } | null | undefined, { id: string }>(
+                testQuery<"location", { __typename: "Location"; id: string } | null | undefined, { id: string }>(
                     G.queryLocation("LocName", { id: G.$$ }, q => q.id),
                     `query LocName($id:ID!){location(id:$id){__typename,id}}`
                 )
             })
 
             test("scalar", () => {
-                testQuery<string | null | undefined, never>(G.queryCurrentUserId(), `query{currentUserId}`)
+                testQuery<"currentUserId", string | null | undefined, never>(
+                    G.queryCurrentUserId(),
+                    `query{currentUserId}`
+                )
             })
 
             test("scalar + arg", () => {
-                testQuery<string | null | undefined, { id: string }>(
+                testQuery<"atomicArgsScalar", string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar({ id: G.$$ }),
                     `query($id:ID){atomicArgsScalar(id:$id)}`
                 )
@@ -75,7 +78,7 @@ describe("runtime", () => {
 
             test("scalar + name", () => {
                 test("scalar", () => {
-                    testQuery<string | null | undefined, never>(
+                    testQuery<"currentUserId", string | null | undefined, never>(
                         G.queryCurrentUserId("GetCurrentUserId"),
                         `query GetCurrentUserId{currentUserId}`
                     )
@@ -83,35 +86,35 @@ describe("runtime", () => {
             })
 
             test("scalar + name + arg", () => {
-                testQuery<string | null | undefined, { id: string }>(
+                testQuery<"atomicArgsScalar", string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar("XYZ", { id: G.$$ }),
                     `query XYZ($id:ID){atomicArgsScalar(id:$id)}`
                 )
             })
 
             test("queryAtomicArgsScalar 1", () => {
-                testQuery<string | null | undefined, never>(
+                testQuery<"atomicArgsScalar", string | null | undefined, never>(
                     G.queryAtomicArgsScalar("Atomic", { id: "1" }),
                     `query Atomic{atomicArgsScalar(id:"1")}`
                 )
             })
 
             test("queryAtomicArgsScalar $", () => {
-                testQuery<string | null | undefined, { id: string }>(
+                testQuery<"atomicArgsScalar", string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar("Atomic", G.$$),
                     `query Atomic($id:ID){atomicArgsScalar(id:$id)}`
                 )
             })
 
             test("queryAtomicArgsScalar {id:$}", () => {
-                testQuery<string | null | undefined, { id: string }>(
+                testQuery<"atomicArgsScalar", string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar("Atomic", { id: G.$$ }),
                     `query Atomic($id:ID){atomicArgsScalar(id:$id)}`
                 )
             })
 
             test("queryAtomicArgsScalar {id:$} - name", () => {
-                testQuery<string | null | undefined, { id: string }>(
+                testQuery<"atomicArgsScalar", string | null | undefined, { id: string }>(
                     G.queryAtomicArgsScalar({ id: G.$$ }),
                     `query($id:ID){atomicArgsScalar(id:$id)}`
                 )
@@ -119,29 +122,39 @@ describe("runtime", () => {
 
             describe("all args optional & omit", () => {
                 test("type without name", () => {
-                    testQuery<Array<{ __typename: "AFC"; id: string }>, never>(
+                    testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, never>(
                         G.queryFilterAfc(q => q.id),
                         `query{filterAfc{__typename,id}}`
                     )
                 })
 
                 test("type with name", () => {
-                    testQuery<Array<{ __typename: "AFC"; id: string }>, never>(
+                    testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, never>(
                         G.queryFilterAfc("qAFC", q => q.id),
                         `query qAFC{filterAfc{__typename,id}}`
                     )
                 })
 
                 test("scalar without name", () => {
-                    testQuery<string | null, never>(G.queryAtomicArgsScalar(), `query{atomicArgsScalar}`)
+                    testQuery<"atomicArgsScalar", string | null, never>(
+                        G.queryAtomicArgsScalar(),
+                        `query{atomicArgsScalar}`
+                    )
                 })
 
                 test("scalar with name", () => {
-                    testQuery<string | null, never>(G.queryAtomicArgsScalar("XYZ"), `query XYZ{atomicArgsScalar}`)
+                    testQuery<"atomicArgsScalar", string | null, never>(
+                        G.queryAtomicArgsScalar("XYZ"),
+                        `query XYZ{atomicArgsScalar}`
+                    )
                 })
 
                 test("field", () => {
-                    testQuery<Array<{ __typename: "AFC"; id: string; allOptional?: string | null }>, never>(
+                    testQuery<
+                        "filterAfc",
+                        Array<{ __typename: "AFC"; id: string; allOptional?: string | null }>,
+                        never
+                    >(
                         G.queryFilterAfc("qAFC", q => q.id.allOptional()),
                         `query qAFC{filterAfc{__typename,id,allOptional}}`
                     )
@@ -150,32 +163,33 @@ describe("runtime", () => {
         })
 
         test("variables", () => {
-            testQuery<{ __typename: string; id: string; name: string | undefined } | null | undefined, never>(
+            testQuery<"user", { __typename: string; id: string; name: string | undefined } | null | undefined, never>(
                 G.queryUser({ id: "1" }, q => q.id.name),
                 `query{user(id:"1"){__typename,id,name}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null | undefined, { id: string }>(
+            testQuery<"user", { __typename: string; id: string } | null | undefined, { id: string }>(
                 G.queryUser({ id: G.$$ }, q => q.id),
                 `query($id:ID!){user(id:$id){__typename,id}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null | undefined, { id: string }>(
+            testQuery<"user", { __typename: string; id: string } | null | undefined, { id: string }>(
                 G.queryUser(G.$$, q => q.id),
                 `query($id:ID!){user(id:$id){__typename,id}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null | undefined, { prefix__id: string }>(
+            testQuery<"user", { __typename: string; id: string } | null | undefined, { prefix__id: string }>(
                 G.queryUser(G.$("prefix"), q => q.id),
                 `query($prefix__id:ID!){user(id:$prefix__id){__typename,id}}`
             )
 
-            testQuery<{ __typename: string; id: string } | null | undefined, { userId: string }>(
+            testQuery<"user", { __typename: string; id: string } | null | undefined, { userId: string }>(
                 G.queryUser({ id: G.$("userId") }, q => q.id),
                 `query($userId:ID!){user(id:$userId){__typename,id}}`
             )
 
             testQuery<
+                "user",
                 { __typename: string; articles: Array<{ __typename: string; id: string }> } | null | undefined,
                 { id: string }
             >(
@@ -184,6 +198,7 @@ describe("runtime", () => {
             )
 
             testQuery<
+                "user",
                 { __typename: string; articles: Array<{ __typename: string }> } | null | undefined,
                 { id: string; articles__count: number }
             >(
@@ -192,6 +207,7 @@ describe("runtime", () => {
             )
 
             testQuery<
+                "user",
                 { __typename: string; articles: Array<{ __typename: string }> } | null | undefined,
                 { id: string; articles__count: number }
             >(
@@ -200,6 +216,7 @@ describe("runtime", () => {
             )
 
             testQuery<
+                "user",
                 { __typename: string; articles: Array<{ __typename: "Article"; id: string }> } | null | undefined,
                 { id: string; articleCount: number }
             >(
@@ -207,14 +224,17 @@ describe("runtime", () => {
                 `query($id:ID!,$articleCount:Int!){user(id:$id){__typename,articles(count:$articleCount){__typename,id}}}`
             )
 
-            testQuery<Array<{ __typename: string; id: string; name: string | undefined }>, never>(
+            testQuery<"users", Array<{ __typename: string; id: string; name: string | undefined }>, never>(
                 G.queryUsers({ filter: {} }, q => q.id.name),
                 `query{users(filter:{}){__typename,id,name}}`
             )
 
-            // TODO: optionlly allow paramters
-            testQuery<Array<{ __typename: string; id: string; name: string | undefined }>, never>(
-                G.queryUsersOptionalFilter({}, q => q.id.name),
+            testQuery<
+                "usersOptionalFilter",
+                Array<{ __typename: string; id: string; name: string | undefined }>,
+                never
+            >(
+                G.queryUsersOptionalFilter(q => q.id.name),
                 `query{usersOptionalFilter{__typename,id,name}}`
             )
         })
@@ -224,14 +244,14 @@ describe("runtime", () => {
             type AFCKind = import("./__generated__/runtime").AFCKind
 
             test("by const id", () => {
-                testQuery<Array<{ __typename: "AFC"; id: string }>, never>(
+                testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, never>(
                     G.queryFilterAfc({ filter: { id: "idOfUser" } }, q => q.id),
                     `query{filterAfc(filter:{id:"idOfUser"}){__typename,id}}`
                 )
             })
 
             test("by id default filter", () => {
-                testQuery<Array<{ __typename: "AFC"; id: string }>, { filter__id: string }>(
+                testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, { filter__id: string }>(
                     G.queryFilterAfc({ filter: { id: G.$$ } }, q => q.id),
                     `query($filter__id:ID){filterAfc(filter:{id:$filter__id}){__typename,id}}`
                 )
@@ -239,6 +259,7 @@ describe("runtime", () => {
 
             test("by id defaults", () => {
                 testQuery<
+                    "filterAfc",
                     Array<{ __typename: "AFC"; id: string }>,
                     { filter__id: string; order__kind: OrderDirection; limit: number; offset: number }
                 >(
@@ -251,35 +272,39 @@ describe("runtime", () => {
             })
 
             test("by id fixed var", () => {
-                testQuery<Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
+                testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
                     G.queryFilterAfc({ filter: { id: G.$("afcId") } }, q => q.id),
                     `query($afcId:ID){filterAfc(filter:{id:$afcId}){__typename,id}}`
                 )
             })
 
             test("mixed", () => {
-                testQuery<Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
+                testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
                     G.queryFilterAfc({ filter: { id: G.$("afcId"), kind: "EXTENDED" } }, q => q.id),
                     `query($afcId:ID){filterAfc(filter:{id:$afcId,kind:"EXTENDED"}){__typename,id}}`
                 )
             })
 
             test("mixed2", () => {
-                testQuery<Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
+                testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, { afcId: string }>(
                     G.queryFilterAfc({ filter: { id: G.$("afcId") }, order: { kind: "ASC" } }, q => q.id),
                     `query($afcId:ID){filterAfc(filter:{id:$afcId},order:{kind:"ASC"}){__typename,id}}`
                 )
             })
 
             test("array", () => {
-                testQuery<Array<{ __typename: "AFC"; id: string }>, { filter__and__id: string }>(
+                testQuery<"filterAfc", Array<{ __typename: "AFC"; id: string }>, { filter__and__id: string }>(
                     G.queryFilterAfc({ filter: { and: [{ id: G.$$, kind: "EXTENDED" }] } }, q => q.id),
                     `query($filter__and__id:ID){filterAfc(filter:{and:[{id:$filter__and__id,kind:"EXTENDED"}]}){__typename,id}}`
                 )
             })
 
             test("array2", () => {
-                testQuery<Array<{ __typename: "AFC"; id: string }>, { filter__and__id: string; notKind: AFCKind }>(
+                testQuery<
+                    "filterAfc",
+                    Array<{ __typename: "AFC"; id: string }>,
+                    { filter__and__id: string; notKind: AFCKind }
+                >(
                     G.queryFilterAfc({ filter: { and: [{ id: G.$$, not: [{ kind: G.$("notKind") }] }] } }, q => q.id),
                     `query($filter__and__id:ID,$notKind:AFCKind){filterAfc(filter:{and:[{id:$filter__and__id,not:[{kind:$notKind}]}]}){__typename,id}}`
                 )
@@ -289,6 +314,7 @@ describe("runtime", () => {
         test("union", () => {
             type AFCKind = import("./__generated__/runtime").AFCKind
             testQuery<
+                "search",
                 Array<
                     | { __typename: "AFC"; id: string; kind: AFCKind }
                     | { __typename: "SelfRecursive"; parent: { id: string } }
@@ -304,6 +330,7 @@ describe("runtime", () => {
             const fragment = G.SelfRecursive.fragment("someName", q => q.id.parent(q => q.id))
 
             testQuery<
+                "search",
                 Array<{ __typename: "AFC"; id: string } | { __typename: "SelfRecursive"; parent: { id: string } }>,
                 never
             >(
@@ -313,6 +340,7 @@ describe("runtime", () => {
 
             const fragment2 = G.SelfRecursive("someName", q => q.id.parent(q => q.id))
             testQuery<
+                "search",
                 Array<{ __typename: "AFC"; id: string } | { __typename: "SelfRecursive"; parent: { id: string } }>,
                 never
             >(
@@ -322,13 +350,14 @@ describe("runtime", () => {
         })
 
         test("scalar operation return", () => {
-            testQuery<{ __typename: string; distance: number } | null | undefined, { id: string }>(
+            testQuery<"location", { __typename: string; distance: number } | null | undefined, { id: string }>(
                 G.queryLocation(G.$$, q => q.distance({ lat: 1, lng: 2, unit: G.DistanceUnit.METRIC })),
                 'query($id:ID!){location(id:$id){__typename,distance(lat:1,lng:2,unit:"METRIC")}}'
             )
 
             type DistanceUnit = import("./__generated__/runtime").DistanceUnit
             testQuery<
+                "location",
                 { __typename: string; distance: number } | null | undefined,
                 { id: string; distance__unit: DistanceUnit }
             >(
@@ -338,11 +367,11 @@ describe("runtime", () => {
         })
 
         test("query scalar opertaion return w/o parameters", () => {
-            testQuery<string | null | undefined, never>(G.queryCurrentUserId(), `query{currentUserId}`)
+            testQuery<"currentUserId", string | null | undefined, never>(G.queryCurrentUserId(), `query{currentUserId}`)
         })
 
         test("some fields", () => {
-            testQuery<{ __typename: string; id: string; name: string } | null | undefined, { id: string }>(
+            testQuery<"user", { __typename: string; id: string; name: string } | null | undefined, { id: string }>(
                 G.queryUser(G.$$, q => q.id.name),
                 `query($id:ID!){user(id:$id){__typename,id,name}}`
             )
@@ -352,6 +381,7 @@ describe("runtime", () => {
             type ArticleFilter = import("./__generated__/runtime").ArticleFilter
 
             testQuery<
+                "articles",
                 Array<{
                     __typename: "Article"
                     id: string
@@ -384,6 +414,7 @@ describe("runtime", () => {
 
         test("self recursive 1/1", () => {
             testQuery<
+                "afc",
                 {
                     __typename: "AFC"
                     id: string
@@ -399,6 +430,7 @@ describe("runtime", () => {
 
         test("self recursive 1/2", () => {
             testQuery<
+                "afc",
                 {
                     __typename: string
                     id: string
@@ -414,6 +446,7 @@ describe("runtime", () => {
 
         test("self recursive 1/3", () => {
             testQuery<
+                "afc",
                 {
                     __typename: "AFC"
                     id: string
@@ -429,6 +462,7 @@ describe("runtime", () => {
 
         test("self recursive 2", () => {
             testQuery<
+                "afc",
                 {
                     __typename: string
                     id: string
@@ -450,6 +484,7 @@ describe("runtime", () => {
         describe("$on", () => {
             test("type", () => {
                 testQuery<
+                    "node",
                     | { __typename: "Article"; id: string }
                     | { __typename: "Tag"; id: string }
                     | { __typename: "User"; id: string; name: string }
@@ -464,6 +499,7 @@ describe("runtime", () => {
 
             test("type", () => {
                 testQuery<
+                    "node",
                     | { __typename: "Article" }
                     | { __typename: "Tag" }
                     | { __typename: "User"; name: string }
@@ -478,6 +514,7 @@ describe("runtime", () => {
 
             test("fragment 1", () => {
                 testQuery<
+                    "node",
                     | { __typename: "Article"; id: string }
                     | { __typename: "Tag"; id: string }
                     | { __typename: "User"; id: string; name: string }
@@ -503,7 +540,7 @@ describe("runtime", () => {
                 | undefined
 
             test("fragment 2", () => {
-                testQuery<NodeRes, { id: string }>(
+                testQuery<"node", NodeRes, { id: string }>(
                     G.queryNode(G.$$, q =>
                         q.id
                             .$on(G.User("userFragment", q => q.name))
@@ -542,13 +579,13 @@ describe("runtime", () => {
                     )
             )
             test("fragment 2", () => {
-                testQuery<NodeRes2[], never>(
+                testQuery<"nodes", NodeRes2[], never>(
                     queryNodeRes2,
                     `query{nodes{__typename,id,...userFragment,...articleFragment}} fragment userFragment on User{name} fragment articleFragment on Article{title,tags{id,tag},events{... on ArticleChangeEvent{curr{id}}}}`
                 )
             })
 
-            type QueryNodeRes2 = TypeOf<typeof queryNodeRes2>
+            type QueryNodeRes2 = TypeOf<typeof queryNodeRes2>["nodes"]
             test("is", () => {
                 const articles: QueryNodeRes2 = [{ __typename: "Article", id: "id", title: "title", events: [] }]
                 const article = articles[0]
@@ -574,6 +611,7 @@ describe("runtime", () => {
                     q.distance({ lat: G.$("lat"), lng: G.$("lng"), unit: G.$$ })
                 )
                 testQuery<
+                    "location",
                     { __typename: "Location"; id: string; distance: number } | null | undefined,
                     { lat: number; lng: number; distance__unit: DistanceUnit }
                 >(
@@ -586,7 +624,11 @@ describe("runtime", () => {
                 const distance = G.Location("fragmentName", q =>
                     q.distance({ lat: 1, lng: 2, unit: "METRIC" as DistanceUnit })
                 )
-                testQuery<{ __typename: "Location"; id: string; distance: number } | null | undefined, never>(
+                testQuery<
+                    "location",
+                    { __typename: "Location"; id: string; distance: number } | null | undefined,
+                    never
+                >(
                     G.queryLocation({ id: "1" }, s => s.$on(distance).id),
                     'query{location(id:"1"){__typename,id,...fragmentName}} fragment fragmentName on Location{distance(lat:1,lng:2,unit:"METRIC")}'
                 )
@@ -594,6 +636,7 @@ describe("runtime", () => {
 
             test("on type variable", () => {
                 testQuery<
+                    "location",
                     { __typename: "Location"; id: string; distance: number } | null | undefined,
                     { lat: number; lng: number; distance__unit: DistanceUnit }
                 >(
@@ -607,6 +650,7 @@ describe("runtime", () => {
 
             test("type variable", () => {
                 testQuery<
+                    "location",
                     { __typename: "Location"; id: string; distance: number } | null | undefined,
                     { lat: number; lng: number; distance__unit: DistanceUnit }
                 >(
@@ -619,7 +663,7 @@ describe("runtime", () => {
 
     describe("mutation", () => {
         test("scalar opertaion return w parameters", () => {
-            testQuery<number | null, { something?: string }>(
+            testQuery<"doSomething", number | null, { something?: string }>(
                 G.doSomething(G.$$),
                 `mutation($something:String){doSomething(something:$something)}`
             )
@@ -661,7 +705,7 @@ describe("runtime", () => {
             // type S4 = ExtendSelection<S3, ["articles"], "id">
             // type S4U = Selected<User, S4>
 
-            testQuery<{ id: string }, { id: string; params: ArticleUpdate }>(
+            testQuery<"updateArticle", { id: string }, { id: string; params: ArticleUpdate }>(
                 G.updateArticle(G.$$, q => q.id),
                 `mutation($id:ID!,$params:ArticleUpdate!){updateArticle(id:$id,params:$params){__typename,id}}`
             )
@@ -671,7 +715,7 @@ describe("runtime", () => {
     describe("builder", () => {
         test("basic", () => {
             const builder = G.queryUser.builder({ id: G.$$ }).id.name
-            testQuery<{ __typename: "User"; id: string; name: string } | null | undefined, { id: string }>(
+            testQuery<"user", { __typename: "User"; id: string; name: string } | null | undefined, { id: string }>(
                 builder.$build(),
                 `query($id:ID!){user(id:$id){__typename,id,name}}`
             )
@@ -679,7 +723,7 @@ describe("runtime", () => {
 
         test("omit optional args", () => {
             const builder = G.queryArticles.builder().id
-            testQuery<Array<{ __typename: "Article"; id: string }> | null, never>(
+            testQuery<"articles", Array<{ __typename: "Article"; id: string }> | null, never>(
                 builder.$build(),
                 `query{articles{__typename,id}}`
             )
@@ -687,7 +731,7 @@ describe("runtime", () => {
 
         test("with name", () => {
             const builder = G.queryUser.builder("QueryName", { id: G.$$ }).id.name
-            testQuery<{ __typename: "User"; id: string; name: string } | null, { id: string }>(
+            testQuery<"user", { __typename: "User"; id: string; name: string } | null, { id: string }>(
                 builder.$build(),
                 `query QueryName($id:ID!){user(id:$id){__typename,id,name}}`
             )
@@ -695,7 +739,7 @@ describe("runtime", () => {
 
         test("omit optional args with name", () => {
             const builder = G.queryArticles.builder("QueryArticles").id
-            testQuery<Array<{ __typename: "Article"; id: string }> | null, never>(
+            testQuery<"articles", Array<{ __typename: "Article"; id: string }> | null, never>(
                 builder.$build(),
                 `query QueryArticles{articles{__typename,id}}`
             )
@@ -704,6 +748,7 @@ describe("runtime", () => {
         test("with articles", () => {
             const builder = G.queryUser.builder({ id: G.$$ }).id.name.articles({ count: 10 }, q => q.id)
             testQuery<
+                "user",
                 {
                     __typename: "User"
                     id: string
@@ -717,7 +762,7 @@ describe("runtime", () => {
         test("later on", () => {
             const queryNode = G.queryNode.builder(G.$$).id
             const whenUser = queryNode.$on(G.User(q => q.name))
-            testQuery<{ id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
+            testQuery<"node", { id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
                 whenUser.$build(),
                 `query($id:ID!){node(id:$id){__typename,id,... on User{name}}}`
             )
@@ -727,7 +772,7 @@ describe("runtime", () => {
         test("later on 2", () => {
             const queryNode = G.queryNode.builder(G.$$).id
             const whenUser = queryNode.$on(G.User(q => q.name.id))
-            testQuery<{ id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
+            testQuery<"node", { id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
                 whenUser.$build(),
                 `query($id:ID!){node(id:$id){__typename,id,... on User{name,id}}}`
             )
@@ -737,6 +782,7 @@ describe("runtime", () => {
             const queryNode = G.queryNode.builder(G.$$).id
             const when = queryNode.$on(G.User(q => q.name)).$on(G.Tag(q => q.tag))
             testQuery<
+                "node",
                 | { id: string }
                 | { __typename: "User"; id: string; name: string }
                 | { __typename: "Tag"; id: string; tag: string }
@@ -749,7 +795,7 @@ describe("runtime", () => {
             const userFragment = G.User("userFragment", q => q.name)
             const queryNode = G.queryNode.builder(G.$$).id
             const when = queryNode.$on(userFragment)
-            testQuery<{ id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
+            testQuery<"node", { id: string } | { __typename: "User"; id: string; name: string } | null, { id: string }>(
                 when.$build(),
                 `query($id:ID!){node(id:$id){__typename,id,...userFragment}} fragment userFragment on User{name}`
             )

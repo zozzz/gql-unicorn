@@ -28,13 +28,13 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     /**
      * Build the typed document node
      */
-    $build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
-type AsBuilder = { input: Input, output: any }
+type AsBuilder = { input: Input; output: any; operation: string }
 /**
  * Curent user
  */
-export const queryCurrentUser = queryBuilder("currentUser", User) as (<SS extends SelectionDef, SV extends Vars, >(...args: [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>])=> BuildReturn<User | null, SS, SV>) & { builder: undefined }
+export const queryCurrentUser = queryBuilder("currentUser", User) as (<SS extends SelectionDef, SV extends Vars, >(...args: [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>])=> BuildReturn<"currentUser", User | null, SS, SV>)
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -73,10 +73,10 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     /**
      * Build the typed document node
      */
-    $build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
-type AsBuilder = { input: Input, output: any }
-export const queryUser = queryBuilder("user", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null }, never> }
+type AsBuilder = { input: Input; output: any; operation: string }
+export const queryUser = queryBuilder("user", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"user", User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null, operation: "user" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -88,8 +88,8 @@ exports[`codegen mutation without parameters 1`] = `
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
 import { mutationBuilder, type BuildReturn, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
-type AsBuilder = { input: Input, output: any }
-export const someMutaionThing = mutationBuilder("someMutaionThing") as ((name?: string) => BuildReturn<string, never, never>) & { builder: undefined }
+type AsBuilder = { input: Input; output: any; operation: string }
+export const someMutaionThing = mutationBuilder("someMutaionThing") as ((name?: string) => BuildReturn<"someMutaionThing", string, never, never>)
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -130,10 +130,10 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     /**
      * Build the typed document node
      */
-    $build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
-type AsBuilder = { input: Input, output: any }
-export const queryUpdateUser = queryBuilder("updateUser", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null }, never> }
+type AsBuilder = { input: Input; output: any; operation: string }
+export const queryUpdateUser = queryBuilder("updateUser", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"updateUser", User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null, operation: "updateUser" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -145,8 +145,8 @@ exports[`codegen subscription without parameters 1`] = `
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
 import { subscriptionBuilder, type BuildReturn, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
-type AsBuilder = { input: Input, output: any }
-export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething") as ((name?: string) => BuildReturn<string, never, never>) & { builder: undefined }
+type AsBuilder = { input: Input; output: any; operation: string }
+export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething") as ((name?: string) => BuildReturn<"onChangeSomething", string, never, never>)
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -177,10 +177,10 @@ export interface SomeEventSelect<R extends SelectionDef, V extends Vars, P exten
     /**
      * Build the typed document node
      */
-    $build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
-type AsBuilder = { input: Input, output: any }
-export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething", [__ArgumentInfo0, SomeEvent]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<SomeEvent, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => SomeEventSelect<["__typename"], AA, [], { input: Arguments0, output: SomeEvent }, never> }
+type AsBuilder = { input: Input; output: any; operation: string }
+export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething", [__ArgumentInfo0, SomeEvent]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"onChangeSomething", SomeEvent, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => SomeEventSelect<["__typename"], AA, [], { input: Arguments0, output: SomeEvent, operation: "onChangeSomething" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -211,7 +211,7 @@ export interface UserFilterSelect<R extends SelectionDef, V extends Vars, P exte
     /**
      * Build the typed document node
      */
-    $build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
 export type User = {
     __typename: "User"
@@ -227,10 +227,10 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     /**
      * Build the typed document node
      */
-    $build: B extends { input: infer BI, output: infer BO } ? () => BuildReturn<BO, R, ToVars<BI, P, V>> : never
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
-type AsBuilder = { input: Input, output: any }
-export const queryUsers = queryBuilder("users", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<Array<User>, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>] | [string] | []) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: Array<User> }, never> }
+type AsBuilder = { input: Input; output: any; operation: string }
+export const queryUsers = queryBuilder("users", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"users", Array<User>, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>] | [string] | []) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: Array<User>, operation: "users" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"

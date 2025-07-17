@@ -227,8 +227,8 @@ import type { Vars } from "./var"
 //     FlagInclude<F, Flag.Buildable> extends true ? (T extends { $build: () => any } ? T : T & Buildable<R, V>) : T
 
 // TODO: rename to GQL
-export type BuildReturn<T, S extends SelectionDef, V extends Vars> = TypedDocumentNode<
-    Selected<T, S>,
+export type BuildReturn<OP extends string, T, S extends SelectionDef, V extends Vars> = TypedDocumentNode<
+    Record<OP, Selected<T, S>>,
     V extends Record<string, any> ? ExcludeEmpty<V> : V
 >
 
