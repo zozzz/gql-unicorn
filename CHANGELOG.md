@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.6](https://github.com/zozzz/gql-unicorn/compare/0.4.5...0.4.6) (2025-07-17)
+
+
+* missing operetaion name in BuildReturn ([d852148](https://github.com/zozzz/gql-unicorn/commit/d8521486c6a5028a057d8946207a23557ac2e2db))
+
 ## [0.4.5](https://github.com/zozzz/gql-unicorn/compare/0.4.4...0.4.5) (2025-07-16)
 
 
