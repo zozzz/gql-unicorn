@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.7](https://github.com/zozzz/gql-unicorn/compare/0.4.6...0.4.7) (2025-08-22)
+
+
+* in transform config now can handle import types from other packages for scalar configs ([7fe4a6c](https://github.com/zozzz/gql-unicorn/commit/7fe4a6cde75e557c75af6abd3825915fa20db245))
+
 ## [0.4.6](https://github.com/zozzz/gql-unicorn/compare/0.4.5...0.4.6) (2025-07-17)
 
 
