@@ -235,3 +235,67 @@ export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
 `;
+
+exports[`codegen import scalar 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import * as __runtime from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { type JsonType } from "some-package-name"
+export type User = {
+    __typename: "User"
+    id: string
+    data: JsonType
+}
+export const User = typeBuilder("User") as TypeBuilder<UserSelect<["__typename"], {}, [], never, never>, "User">
+export interface UserSelect<R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never> extends Selection<User, R, V> {
+    id: Omit<UserSelect<ExtendSelection<R, "id">, V, P, B, E>, SelectedFields<R> | "id" | E>
+    data: Omit<UserSelect<ExtendSelection<R, "data">, V, P, B, E>, SelectedFields<R> | "data" | E>
+    /**
+     * Constraint type selection
+     */
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<User, SR, SV>): Omit<UserSelect<MergeSelection<R, ExtendSelection<SR, "__typename">>, V & SV, P, B, E>, SelectedFields<R> | E>
+    /**
+     * Build the typed document node
+     */
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
+}
+type AsBuilder = { input: Input; output: any; operation: string }
+export const queryUser = queryBuilder("user", User) as (<SS extends SelectionDef, SV extends Vars, >(...args: [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>])=> BuildReturn<"user", User | null, SS, SV>)
+export const $ = __runtime.$
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
+`;
+
+exports[`codegen import scalar with alias 1`] = `
+"/* eslint-disable */
+/* prettier-ignore */
+/* !!! GENERATED FILE DO NOT EDIT !!! */
+import * as __runtime from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { type JsonType as SomeJsonTypeAlias } from "some-package-name"
+export type User = {
+    __typename: "User"
+    id: string
+    data: SomeJsonTypeAlias
+}
+export const User = typeBuilder("User") as TypeBuilder<UserSelect<["__typename"], {}, [], never, never>, "User">
+export interface UserSelect<R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never> extends Selection<User, R, V> {
+    id: Omit<UserSelect<ExtendSelection<R, "id">, V, P, B, E>, SelectedFields<R> | "id" | E>
+    data: Omit<UserSelect<ExtendSelection<R, "data">, V, P, B, E>, SelectedFields<R> | "data" | E>
+    /**
+     * Constraint type selection
+     */
+    $on<SR extends SelectionDef, SV extends Vars>(fragment: Selection<User, SR, SV>): Omit<UserSelect<MergeSelection<R, ExtendSelection<SR, "__typename">>, V & SV, P, B, E>, SelectedFields<R> | E>
+    /**
+     * Build the typed document node
+     */
+    $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
+}
+type AsBuilder = { input: Input; output: any; operation: string }
+export const queryUser = queryBuilder("user", User) as (<SS extends SelectionDef, SV extends Vars, >(...args: [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>])=> BuildReturn<"user", User | null, SS, SV>)
+export const $ = __runtime.$
+export const $$ = __runtime.$$
+export type { TypeOf, VarOf, Selected }"
+`;

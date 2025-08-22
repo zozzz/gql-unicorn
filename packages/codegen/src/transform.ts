@@ -12,7 +12,6 @@ import {
     type GraphQLNamedType,
     type GraphQLNonNull,
     type GraphQLObjectType,
-    type GraphQLScalarType,
     type GraphQLSchema,
     type GraphQLType,
     type GraphQLUnionType,
@@ -54,7 +53,7 @@ export function transform(schema: GraphQLSchema, config?: TransformConfig) {
 const SelectTypeArgs = `R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never`
 
 class Transformer {
-    readonly #scalarMap: Record<string, string>
+    readonly #scalarMap: ScalarMap
     readonly #typeMap: Record<string, string> = {}
     readonly #parts: string[] = []
     readonly #indent = "    "
@@ -129,9 +128,16 @@ class Transformer {
                 throw new Error(`Unknown scalar type: ${type.name}`)
             }
             const name = this.#scalarMap[type.name]
-            this.#typeMap[type.name] = name
-            this.#parts.push(...this.#generateScalar(type, name))
-            return name
+
+            if (typeof name === "string") {
+                this.#typeMap[type.name] = name
+                return name
+            } else {
+                const result = name.alias ?? name.import
+                this.#typeMap[type.name] = result
+                this.#import(name.from, name.import, true, name.alias)
+                return result
+            }
         } else {
             const name = this.#bareType(type).name
             this.#typeMap[type.name] = name
@@ -182,10 +188,6 @@ class Transformer {
 
     #typenameOfNonNull(type: GraphQLNonNull<GraphQLType>): string {
         return this.#typename(type.ofType, false)
-    }
-
-    #generateScalar(_type: GraphQLScalarType, _name: string): string[] {
-        return []
     }
 
     #generateEnum(type: GraphQLEnumType, name: string): string[] {
@@ -710,12 +712,16 @@ class Transformer {
         return result.length === 2 ? [] : result
     }
 
-    #import(_from: string, what: string, isType: boolean) {
+    #import(_from: string, what: string, isType: boolean, alias?: string) {
         if (!(_from in this.#imports)) {
             this.#imports[_from] = {}
         }
 
-        this.#imports[_from][what] = isType
+        if (alias != null) {
+            this.#imports[_from][`${what} as ${alias}`] = isType
+        } else {
+            this.#imports[_from][what] = isType
+        }
     }
 }
 

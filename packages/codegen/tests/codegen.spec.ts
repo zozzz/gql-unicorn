@@ -97,4 +97,42 @@ describe("codegen", () => {
         `)
         expect(transform(schema)).toMatchSnapshot()
     })
+
+    test("import scalar", () => {
+        const schema = buildSchema(/* GraphQL */ `
+            scalar JSON
+
+            type Query {
+                user: User
+            }
+
+            type User {
+                id: ID!
+                data: JSON!
+            }
+        `)
+        const scalars = {
+            JSON: { import: "JsonType", from: "some-package-name" }
+        }
+        expect(transform(schema, { scalars })).toMatchSnapshot()
+    })
+
+    test("import scalar with alias", () => {
+        const schema = buildSchema(/* GraphQL */ `
+            scalar JSON
+
+            type Query {
+                user: User
+            }
+
+            type User {
+                id: ID!
+                data: JSON!
+            }
+        `)
+        const scalars = {
+            JSON: { import: "JsonType", from: "some-package-name", alias: "SomeJsonTypeAlias" }
+        }
+        expect(transform(schema, { scalars })).toMatchSnapshot()
+    })
 })

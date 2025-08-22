@@ -5,8 +5,8 @@ export interface UnicornConfig {
 
 export type ScalarFromPackage = {
     import: string
+    from: string
     alias?: string
-    package: string
 }
 
 export type ScalarAlias = string
