@@ -1,6 +1,5 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
-import { type Primitive } from "utility-types"
 
 import type { ExcludeEmpty } from "./common"
 import { type ALIAS, SELECTION } from "./symbols"
@@ -227,9 +226,19 @@ import type { Vars } from "./var"
 // export type MaybeBuildable<T, R, V extends Vars, F extends Flag> =
 //     FlagInclude<F, Flag.Buildable> extends true ? (T extends { $build: () => any } ? T : T & Buildable<R, V>) : T
 
+type Scalar = string | number | boolean | bigint | symbol | Date
+
 // TODO: rename to GQL
 export type BuildReturn<OP extends string, T, S extends SelectionDef, V extends Vars> = TypedDocumentNode<
-    T extends Primitive ? T : Record<OP, Selected<T, S>>,
+    // T extends Primitive ? T : Record<OP, Selected<T, S>>,
+    // T extends null | undefined
+    //     ? T extends Scalar
+    //         ? T | null | undefined
+    //         : Record<OP, Selected<T, S>>
+    //     : T extends Scalar
+    //       ? T
+    //       : Record<OP, Selected<T, S>>,
+    Record<OP, Selected<T, S>>,
     V extends Record<string, any> ? ExcludeEmpty<V> : V
 >
 
@@ -329,7 +338,7 @@ export type Selected<T, S extends SelectionDef> = T extends null
         ? T extends { __typename: infer TN extends string }
             ? /*{ __typename: TN } &*/ _Selected<T, _SelectionByType<TN, S>>
             : never
-        : never
+        : T
 
 type _SelectionByType<TN extends string, S extends SelectionDef> = S extends [
     ...infer S1 extends SelectionDef,

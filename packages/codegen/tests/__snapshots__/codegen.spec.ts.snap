@@ -193,7 +193,7 @@ exports[`codegen Optional array 1`] = `
 import * as __runtime from "@gql-unicorn/runtime"
 import { queryBuilder, type BuildReturn, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type SelectionDef, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
 export type Arguments0 = {
-    filter?: UserFilter
+    filter?: UserFilter | null
 }
 const __ArgumentInfo1 = { tn: "UserFilter" }
 const __ArgumentInfo0 = { filter: __ArgumentInfo1, }

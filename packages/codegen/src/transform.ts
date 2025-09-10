@@ -611,7 +611,7 @@ class Transformer {
                     allOptional = false
                     fieldType = `: ${this.#typename(type.ofType, false)}`
                 } else {
-                    fieldType = `?: ${this.#typename(type, false)}`
+                    fieldType = `?: ${this.#typename(type, false)} | null`
                 }
 
                 result.push(

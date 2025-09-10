@@ -55,15 +55,18 @@ describe("runtime", () => {
             )
 
             testQuery<
-                Array<{
-                    __typename: "Org_Section"
-                    id: string
-                    title: string
-                    children?: Array<
-                        | { __typename: "Org_CareType"; kind: string; is_active: boolean }
-                        | { __typename: Exclude<Unit["__typename"], "Org_CareType"> }
-                    > | null
-                }>,
+                Record<
+                    "orgSection",
+                    Array<{
+                        __typename: "Org_Section"
+                        id: string
+                        title: string
+                        children?: Array<
+                            | { __typename: "Org_CareType"; kind: string; is_active: boolean }
+                            | { __typename: Exclude<Unit["__typename"], "Org_CareType"> }
+                        > | null
+                    }>
+                >,
                 { sectionId: string }
             >(
                 querySection,
@@ -75,6 +78,6 @@ describe("runtime", () => {
     test("saveFlow", () => {
         const save = G.saveFlow({ id: "id", title: "Test", model: "" })
 
-        testQuery<string, never>(save, `mutation{saveFlow(id:"id",title:"Test",model:"")}`)
+        testQuery<Record<"saveFlow", string>, never>(save, `mutation{saveFlow(id:"id",title:"Test",model:"")}`)
     })
 })
