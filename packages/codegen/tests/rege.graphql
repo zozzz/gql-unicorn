@@ -6,14 +6,15 @@ type AttributeImpl implements Eav_Attribute {
 
 input AuditLogKindFilter @oneOf {
 	eq: Audit_AuditLogKind
+	ne: Audit_AuditLogKind
 }
 
 type Audit_AuditLog {
 	id: UUID!
 	author: Auth_User!
-	correlationId: UUID
+	correlation_id: UUID
 	kind: Audit_AuditLogKind!
-	objectId: UUID!
+	object_id: UUID!
 	old: JSON
 	timestamp: Zoned!
 	new: JSON
@@ -54,7 +55,6 @@ input Audit_AuditLogLinkInput {
 
 input Audit_AuditLogOrder {
 	id: OrderDirection
-	author: OrderDirection
 	correlationId: OrderDirection
 	kind: OrderDirection
 	objectId: OrderDirection
@@ -83,6 +83,7 @@ input Auth_AccountFilter {
 	and: [Auth_AccountFilter!]
 	or: [Auth_AccountFilter!]
 	not: [Auth_AccountFilter!]
+	is: Auth_AccountTypes
 	id: StdUuidFilter
 	provider: Auth_ProviderFilter
 }
@@ -96,7 +97,6 @@ input Auth_AccountMultiLinkInput {
 
 input Auth_AccountOrder {
 	id: OrderDirection
-	provider: OrderDirection
 }
 
 input Auth_AccountPatch {
@@ -104,11 +104,16 @@ input Auth_AccountPatch {
 	provider: Auth_ProviderLinkInput
 }
 
+enum Auth_AccountTypes {
+	EMAIL_ACCOUNT
+	O_AUTH_ACCOUNT
+}
+
 type Auth_EmailAccount implements Auth_Account {
 	id: UUID!
 	provider: Auth_EmailProvider!
 	email: String!
-	isVerified: Boolean!
+	is_verified: Boolean!
 }
 
 input Auth_EmailAccountFilter {
@@ -129,7 +134,6 @@ input Auth_EmailAccountInput {
 
 input Auth_EmailAccountOrder {
 	id: OrderDirection
-	provider: OrderDirection
 	email: OrderDirection
 	isVerified: OrderDirection
 }
@@ -192,7 +196,6 @@ input Auth_OAuthAccountInput {
 
 input Auth_OAuthAccountOrder {
 	id: OrderDirection
-	provider: OrderDirection
 }
 
 input Auth_OAuthAccountPatch {
@@ -203,9 +206,9 @@ input Auth_OAuthAccountPatch {
 type Auth_OAuthProvider implements Auth_Provider {
 	name: String!
 	id: UUID!
-	clientId: String!
-	clientSecret: String!
-	redirectUri: String!
+	client_id: String!
+	client_secret: String!
+	redirect_uri: String!
 }
 
 input Auth_OAuthProviderFilter {
@@ -284,7 +287,6 @@ input Auth_PermissionMultiLinkInput {
 
 input Auth_PermissionOrder {
 	id: OrderDirection
-	parent: OrderDirection
 	name: OrderDirection
 	title: OrderDirection
 }
@@ -305,6 +307,7 @@ input Auth_ProviderFilter {
 	and: [Auth_ProviderFilter!]
 	or: [Auth_ProviderFilter!]
 	not: [Auth_ProviderFilter!]
+	is: Auth_ProviderTypes
 	id: StdUuidFilter
 	name: StdStrFilter
 }
@@ -317,6 +320,11 @@ input Auth_ProviderLinkInput {
 input Auth_ProviderPatch {
 	id: UUID!
 	name: String
+}
+
+enum Auth_ProviderTypes {
+	EMAIL_PROVIDER
+	O_AUTH_PROVIDER
 }
 
 type Auth_Role {
@@ -361,15 +369,15 @@ type Auth_User {
 	title: String
 	given: String
 	family: String
-	fullName: String!
+	full_name: String!
 	id: UUID!
 	accounts(filter: Auth_AccountFilter = null, order: Auth_AccountOrder = null, offset: Int = null, limit: Int = null): [Auth_Account!]!
 	roles(filter: Auth_RoleFilter = null, order: Auth_RoleOrder = null, offset: Int = null, limit: Int = null): [Auth_Role!]
-	isActive: Boolean!
-	isInternal: Boolean!
+	is_active: Boolean!
+	is_internal: Boolean!
+	password_expire_at: Zoned!
 	phones: [String!]
 	username: String!
-	passwordExpireAt: Zoned!
 }
 
 input Auth_UserFilter {
@@ -385,9 +393,9 @@ input Auth_UserFilter {
 	roles: Auth_RoleFilter
 	isActive: StdBoolFilter
 	isInternal: StdBoolFilter
+	passwordExpireAt: StdDatetimeFilter
 	phones: StdStrFilter
 	username: StdStrFilter
-	passwordExpireAt: StdDatetimeFilter
 }
 
 input Auth_UserInput {
@@ -401,9 +409,9 @@ input Auth_UserInput {
 	roles: Auth_RoleMultiLinkInput
 	isActive: Boolean!
 	isInternal: Boolean!
+	passwordExpireAt: Zoned!
 	phones: [String!]
 	username: String!
-	passwordExpireAt: Zoned!
 }
 
 input Auth_UserLinkInput {
@@ -421,9 +429,9 @@ input Auth_UserOrder {
 	secret: OrderDirection
 	isActive: OrderDirection
 	isInternal: OrderDirection
+	passwordExpireAt: OrderDirection
 	phones: OrderDirection
 	username: OrderDirection
-	passwordExpireAt: OrderDirection
 }
 
 input Auth_UserPatch {
@@ -438,9 +446,9 @@ input Auth_UserPatch {
 	roles: Auth_RoleMultiLinkInput
 	isActive: Boolean
 	isInternal: Boolean
+	passwordExpireAt: Zoned
 	phones: [String!]
 	username: String
-	passwordExpireAt: Zoned
 }
 
 type Calendar_Recurring {
@@ -479,6 +487,7 @@ input Calendar_RecurringPatch {
 
 input CareTypeKindFilter @oneOf {
 	eq: Org_CareTypeKind
+	ne: Org_CareTypeKind
 }
 
 interface Care_Service {
@@ -496,6 +505,7 @@ input Care_ServiceFilter {
 	and: [Care_ServiceFilter!]
 	or: [Care_ServiceFilter!]
 	not: [Care_ServiceFilter!]
+	is: Care_ServiceTypes
 	orgVisibility: Org_UnitFilter
 	id: StdUuidFilter
 	createdIn: Org_UnitFilter
@@ -523,11 +533,8 @@ input Care_ServiceLinkInput {
 
 input Care_ServiceOrder {
 	id: OrderDirection
-	createdIn: OrderDirection
 	date: OrderDirection
 	span: OrderDirection
-	client: OrderDirection
-	duty: OrderDirection
 }
 
 input Care_ServicePatch {
@@ -539,6 +546,10 @@ input Care_ServicePatch {
 	client: Client_ClientLinkInput
 	duty: Org_DutyLinkInput
 	services: Care_ServiceUsageMultiLinkInput
+}
+
+enum Care_ServiceTypes {
+	STREET_SERVICE
 }
 
 type Care_ServiceUsage {
@@ -570,8 +581,6 @@ input Care_ServiceUsageMultiLinkInput {
 
 input Care_ServiceUsageOrder {
 	id: OrderDirection
-	care: OrderDirection
-	service: OrderDirection
 }
 
 input Care_ServiceUsagePatch {
@@ -581,20 +590,21 @@ input Care_ServiceUsagePatch {
 }
 
 type Care_StreetActivity {
-	placeExtra: String
+	duty: Org_Duty!
+	place_extra: String
 	place: Place_POI!
 	span: CivilDateTimeRange!
 	date: CivilDate!
-	createdIn: Org_Unit!
+	created_in: Org_Unit!
 	id: UUID!
-	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
-	duty: Org_Duty!
+	org_visibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
 }
 
 input Care_StreetActivityFilter {
 	and: [Care_StreetActivityFilter!]
 	or: [Care_StreetActivityFilter!]
 	not: [Care_StreetActivityFilter!]
+	duty: Org_DutyFilter
 	placeExtra: StdStrFilter
 	place: Place_POIFilter
 	span: CivilDateTimeRangeFilter
@@ -602,30 +612,27 @@ input Care_StreetActivityFilter {
 	createdIn: Org_UnitFilter
 	id: StdUuidFilter
 	orgVisibility: Org_UnitFilter
-	duty: Org_DutyFilter
 }
 
 input Care_StreetActivityInput {
+	duty: Org_DutyLinkInput!
 	placeExtra: String
 	place: Place_POILinkInput!
 	span: CivilDateTimeRange!
 	date: CivilDate!
 	createdIn: Org_UnitLinkInput!
 	orgVisibility: Org_UnitMultiLinkInput!
-	duty: Org_DutyLinkInput!
 }
 
 input Care_StreetActivityOrder {
 	placeExtra: OrderDirection
-	place: OrderDirection
 	span: OrderDirection
 	date: OrderDirection
-	createdIn: OrderDirection
 	id: OrderDirection
-	duty: OrderDirection
 }
 
 input Care_StreetActivityPatch {
+	duty: Org_DutyLinkInput
 	placeExtra: String
 	place: Place_POILinkInput
 	span: CivilDateTimeRange
@@ -633,17 +640,16 @@ input Care_StreetActivityPatch {
 	createdIn: Org_UnitLinkInput
 	id: UUID!
 	orgVisibility: Org_UnitMultiLinkInput
-	duty: Org_DutyLinkInput
 }
 
 type Care_StreetService implements Care_Service {
-	placeExtra: String
+	place_extra: String
 	place: Place_POI!
 	span: CivilDateTimeRange!
 	date: CivilDate!
-	createdIn: Org_Unit!
+	created_in: Org_Unit!
 	id: UUID!
-	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	org_visibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
 	client: Client_Client!
 	duty: Org_Duty!
 	services(filter: Care_ServiceUsageFilter = null, order: Care_ServiceUsageOrder = null, offset: Int = null, limit: Int = null): [Care_ServiceUsage!]
@@ -679,13 +685,9 @@ input Care_StreetServiceInput {
 
 input Care_StreetServiceOrder {
 	placeExtra: OrderDirection
-	place: OrderDirection
 	span: OrderDirection
 	date: OrderDirection
-	createdIn: OrderDirection
 	id: OrderDirection
-	client: OrderDirection
-	duty: OrderDirection
 }
 
 input Care_StreetServicePatch {
@@ -715,6 +717,7 @@ input Care_TextFilter {
 	and: [Care_TextFilter!]
 	or: [Care_TextFilter!]
 	not: [Care_TextFilter!]
+	is: Care_TextTypes
 	span: CivilDateTimeRangeFilter
 	date: StdCalLocalDateFilter
 	createdIn: Org_UnitFilter
@@ -736,10 +739,7 @@ input Care_TextInput {
 input Care_TextOrder {
 	span: OrderDirection
 	date: OrderDirection
-	createdIn: OrderDirection
 	id: OrderDirection
-	client: OrderDirection
-	content: OrderDirection
 }
 
 input Care_TextPatch {
@@ -752,18 +752,24 @@ input Care_TextPatch {
 	content: Richtext_RichtextLinkInput
 }
 
+enum Care_TextTypes {
+	CLIENT_DATA_CHANGE
+}
+
 scalar CivilDate
 
 scalar CivilDateRange
 
 input CivilDateRangeFilter @oneOf {
 	eq: CivilDateRange
+	ne: CivilDateRange
 }
 
 scalar CivilDateTimeRange
 
 input CivilDateTimeRangeFilter @oneOf {
 	eq: CivilDateTimeRange
+	ne: CivilDateTimeRange
 }
 
 scalar CivilTime
@@ -776,9 +782,9 @@ type Client_Client implements Eav_Entity {
 
 type Client_ClientDataChange implements Care_Text {
 	client: Client_Client!
-	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	org_visibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
 	id: UUID!
-	createdIn: Org_Unit!
+	created_in: Org_Unit!
 	date: CivilDate!
 	span: CivilDateTimeRange!
 	log: Audit_AuditLog!
@@ -810,13 +816,9 @@ input Client_ClientDataChangeInput {
 }
 
 input Client_ClientDataChangeOrder {
-	client: OrderDirection
 	id: OrderDirection
-	createdIn: OrderDirection
 	date: OrderDirection
 	span: OrderDirection
-	log: OrderDirection
-	content: OrderDirection
 }
 
 input Client_ClientDataChangePatch {
@@ -858,7 +860,6 @@ input Client_ClientMultiLinkInput {
 
 input Client_ClientOrder {
 	id: OrderDirection
-	kenyszi: OrderDirection
 }
 
 input Client_ClientPatch {
@@ -891,6 +892,7 @@ input Eav_AttributeFilter {
 	and: [Eav_AttributeFilter!]
 	or: [Eav_AttributeFilter!]
 	not: [Eav_AttributeFilter!]
+	is: Eav_AttributeTypes
 	id: StdUuidFilter
 	name: StdStrFilter
 	entity: Eav_EntityFilter
@@ -906,13 +908,20 @@ input Eav_AttributeMultiLinkInput {
 input Eav_AttributeOrder {
 	id: OrderDirection
 	name: OrderDirection
-	entity: OrderDirection
 }
 
 input Eav_AttributePatch {
 	id: UUID!
 	name: String
 	entity: Eav_EntityLinkInput
+}
+
+enum Eav_AttributeTypes {
+	DECIMAL
+	DICT
+	INT
+	NAME
+	RICHTEXT
 }
 
 type Eav_Decimal implements Eav_Attribute {
@@ -938,6 +947,7 @@ input Eav_EntityFilter {
 	and: [Eav_EntityFilter!]
 	or: [Eav_EntityFilter!]
 	not: [Eav_EntityFilter!]
+	is: Eav_EntityTypes
 	id: StdUuidFilter
 	attributes: Eav_AttributeFilter
 }
@@ -950,6 +960,11 @@ input Eav_EntityLinkInput {
 input Eav_EntityPatch {
 	id: UUID!
 	attributes: Eav_AttributeMultiLinkInput
+}
+
+enum Eav_EntityTypes {
+	CLIENT
+	DICT
 }
 
 type Eav_Int implements Eav_Attribute {
@@ -966,7 +981,7 @@ type Eav_Name implements Eav_Attribute {
 	title: String
 	given: String
 	family: String
-	fullName: String!
+	full_name: String!
 }
 
 type Eav_Richtext implements Eav_Attribute {
@@ -978,10 +993,12 @@ type Eav_Richtext implements Eav_Attribute {
 
 input EntryActionFilter @oneOf {
 	eq: Kenyszi_EntryAction
+	ne: Kenyszi_EntryAction
 }
 
 input EntryStatusFilter @oneOf {
 	eq: Kenyszi_EntryStatus
+	ne: Kenyszi_EntryStatus
 }
 
 type FileImpl implements Fs_File {
@@ -990,6 +1007,58 @@ type FileImpl implements Fs_File {
 	name: String!
 	path: String!
 	size: Int!
+}
+
+type Flow_Blueprint {
+	id: UUID!
+	subflow: Flow_Flow
+	is_active: Boolean
+	kind: JSON!
+	title: String!
+	children: JSON
+	slots: JSON
+}
+
+input Flow_BlueprintFilter {
+	and: [Flow_BlueprintFilter!]
+	or: [Flow_BlueprintFilter!]
+	not: [Flow_BlueprintFilter!]
+	id: StdUuidFilter
+	subflow: Flow_FlowFilter
+	isActive: StdBoolFilter
+	title: StdStrFilter
+}
+
+input Flow_BlueprintOrder {
+	id: OrderDirection
+	isActive: OrderDirection
+	kind: OrderDirection
+	title: OrderDirection
+	children: OrderDirection
+	slots: OrderDirection
+}
+
+type Flow_Flow {
+	id: UUID!
+	title: String!
+	is_active: Boolean!
+	model: JSON!
+}
+
+input Flow_FlowFilter {
+	and: [Flow_FlowFilter!]
+	or: [Flow_FlowFilter!]
+	not: [Flow_FlowFilter!]
+	id: StdUuidFilter
+	title: StdStrFilter
+	isActive: StdBoolFilter
+}
+
+input Flow_FlowOrder {
+	id: OrderDirection
+	title: OrderDirection
+	isActive: OrderDirection
+	model: OrderDirection
 }
 
 interface Fs_File {
@@ -1004,6 +1073,7 @@ input Fs_FileFilter {
 	and: [Fs_FileFilter!]
 	or: [Fs_FileFilter!]
 	not: [Fs_FileFilter!]
+	is: Fs_FileTypes
 	id: StdUuidFilter
 	mime: StdStrFilter
 	name: StdStrFilter
@@ -1037,6 +1107,12 @@ input Fs_FilePatch {
 	name: String
 	path: String
 	size: Int
+}
+
+enum Fs_FileTypes {
+	IMAGE
+	MODIFIED
+	TEMPLATE
 }
 
 type Fs_Image implements Fs_File {
@@ -1129,7 +1205,6 @@ input Fs_ModifiedOrder {
 	mime: OrderDirection
 	id: OrderDirection
 	path: OrderDirection
-	original: OrderDirection
 }
 
 input Fs_ModifiedPatch {
@@ -1213,18 +1288,18 @@ enum Kenyszi_EntryStatus {
 }
 
 type Kenyszi_KenysziActivity {
-	id: UUID!
-	title: String!
 	value: String!
+	title: String!
+	id: UUID!
 }
 
 input Kenyszi_KenysziActivityFilter {
 	and: [Kenyszi_KenysziActivityFilter!]
 	or: [Kenyszi_KenysziActivityFilter!]
 	not: [Kenyszi_KenysziActivityFilter!]
-	id: StdUuidFilter
-	title: StdStrFilter
 	value: StdStrFilter
+	title: StdStrFilter
+	id: StdUuidFilter
 }
 
 input Kenyszi_KenysziActivityLinkInput {
@@ -1233,20 +1308,20 @@ input Kenyszi_KenysziActivityLinkInput {
 }
 
 input Kenyszi_KenysziActivityOrder {
-	id: OrderDirection
-	title: OrderDirection
 	value: OrderDirection
+	title: OrderDirection
+	id: OrderDirection
 }
 
 input Kenyszi_KenysziActivityPatch {
-	id: UUID!
-	title: String
 	value: String
+	title: String
+	id: UUID!
 }
 
 type Kenyszi_KenysziClient {
 	id: UUID!
-	idTevadminIgenybevevo: Int!
+	id_tevadmin_igenybevevo: Int!
 	previouse: [Int!]
 	client(filter: Client_ClientFilter = null, order: Client_ClientOrder = null, offset: Int = null, limit: Int = null): [Client_Client!]
 }
@@ -1289,7 +1364,7 @@ type Kenyszi_KenysziContract {
 	id: UUID!
 	kenyszi: Kenyszi_KenysziOrg!
 	duration: CivilDateRange!
-	idTevadminJog: Int!
+	id_tevadmin_jog: Int!
 }
 
 input Kenyszi_KenysziContractFilter {
@@ -1310,7 +1385,6 @@ input Kenyszi_KenysziContractInput {
 
 input Kenyszi_KenysziContractOrder {
 	id: OrderDirection
-	kenyszi: OrderDirection
 	duration: OrderDirection
 	idTevadminJog: OrderDirection
 }
@@ -1323,18 +1397,18 @@ input Kenyszi_KenysziContractPatch {
 }
 
 type Kenyszi_KenysziKind {
-	id: UUID!
-	title: String!
 	value: String!
+	title: String!
+	id: UUID!
 }
 
 input Kenyszi_KenysziKindFilter {
 	and: [Kenyszi_KenysziKindFilter!]
 	or: [Kenyszi_KenysziKindFilter!]
 	not: [Kenyszi_KenysziKindFilter!]
-	id: StdUuidFilter
-	title: StdStrFilter
 	value: StdStrFilter
+	title: StdStrFilter
+	id: StdUuidFilter
 }
 
 input Kenyszi_KenysziKindLinkInput {
@@ -1343,22 +1417,22 @@ input Kenyszi_KenysziKindLinkInput {
 }
 
 input Kenyszi_KenysziKindOrder {
-	id: OrderDirection
-	title: OrderDirection
 	value: OrderDirection
+	title: OrderDirection
+	id: OrderDirection
 }
 
 input Kenyszi_KenysziKindPatch {
-	id: UUID!
-	title: String
 	value: String
+	title: String
+	id: UUID!
 }
 
 type Kenyszi_KenysziOrg {
 	id: UUID!
-	loginName: String!
-	loginPass: String!
-	nrszhId: String!
+	login_name: String!
+	login_pass: String!
+	nrszh_id: String!
 	kind: Kenyszi_KenysziKind!
 }
 
@@ -1390,7 +1464,6 @@ input Kenyszi_KenysziOrgOrder {
 	loginName: OrderDirection
 	loginPass: OrderDirection
 	nrszhId: OrderDirection
-	kind: OrderDirection
 }
 
 input Kenyszi_KenysziOrgPatch {
@@ -1413,7 +1486,7 @@ type Kenyszi_KenysziReportEntry {
 	client: Client_Client!
 	action: Kenyszi_EntryAction!
 	error: String
-	manualEntry: Boolean!
+	manual_entry: Boolean!
 	status: Kenyszi_EntryStatus!
 }
 
@@ -1446,7 +1519,6 @@ input Kenyszi_KenysziReportEntryMultiLinkInput {
 
 input Kenyszi_KenysziReportEntryOrder {
 	id: OrderDirection
-	client: OrderDirection
 	action: OrderDirection
 	error: OrderDirection
 	manualEntry: OrderDirection
@@ -1485,7 +1557,6 @@ input Kenyszi_KenysziReportLinkInput {
 
 input Kenyszi_KenysziReportOrder {
 	id: OrderDirection
-	kenyszi: OrderDirection
 	date: OrderDirection
 }
 
@@ -1515,7 +1586,6 @@ input Kenyszi_KenysziUtalizationInput {
 
 input Kenyszi_KenysziUtalizationOrder {
 	id: OrderDirection
-	client: OrderDirection
 }
 
 input Kenyszi_KenysziUtalizationPatch {
@@ -1526,8 +1596,8 @@ input Kenyszi_KenysziUtalizationPatch {
 type Kenyszi_TransactionLog {
 	id: UUID!
 	report: Kenyszi_KenysziReport!
-	careType: Org_CareType!
-	batchId: UUID!
+	care_type: Org_CareType!
+	batch_id: UUID!
 	error: String
 	method: String!
 	recv: String
@@ -1563,8 +1633,6 @@ input Kenyszi_TransactionLogInput {
 
 input Kenyszi_TransactionLogOrder {
 	id: OrderDirection
-	report: OrderDirection
-	careType: OrderDirection
 	batchId: OrderDirection
 	error: OrderDirection
 	method: OrderDirection
@@ -1587,6 +1655,7 @@ input Kenyszi_TransactionLogPatch {
 
 input LeaveReasonKSHFilter @oneOf {
 	eq: Service_LeaveReasonKSH
+	ne: Service_LeaveReasonKSH
 }
 
 type Mutation {
@@ -1629,6 +1698,9 @@ type Mutation {
 	patchServiceLeaveReason(data: Service_LeaveReasonPatch!): Service_LeaveReason!
 	insertServiceLeaveReason(data: Service_LeaveReasonInput!): Service_LeaveReason!
 	deleteServiceLeaveReason(id: UUID!): Boolean!
+	patchOrgSection(data: Org_SectionPatch!): Org_Section!
+	insertOrgSection(data: Org_SectionInput!): Org_Section!
+	deleteOrgSection(id: UUID!): Boolean!
 	patchOrgRoot(data: Org_RootPatch!): Org_Root!
 	insertOrgRoot(data: Org_RootInput!): Org_Root!
 	deleteOrgRoot(id: UUID!): Boolean!
@@ -1644,33 +1716,27 @@ type Mutation {
 	patchOrgHeadquarter(data: Org_HeadquarterPatch!): Org_Headquarter!
 	insertOrgHeadquarter(data: Org_HeadquarterInput!): Org_Headquarter!
 	deleteOrgHeadquarter(id: UUID!): Boolean!
-	patchOrgSection(data: Org_SectionPatch!): Org_Section!
-	insertOrgSection(data: Org_SectionInput!): Org_Section!
-	deleteOrgSection(id: UUID!): Boolean!
-	patchOrgVehicle(data: Org_VehiclePatch!): Org_Vehicle!
-	insertOrgVehicle(data: Org_VehicleInput!): Org_Vehicle!
-	deleteOrgVehicle(id: UUID!): Boolean!
-	patchCareText(data: Care_TextPatch!): Care_Text!
-	insertCareText(data: Care_TextInput!): Care_Text!
-	deleteCareText(id: UUID!): Boolean!
-	patchClientClientDataChange(data: Client_ClientDataChangePatch!): Client_ClientDataChange!
-	insertClientClientDataChange(data: Client_ClientDataChangeInput!): Client_ClientDataChange!
-	deleteClientClientDataChange(id: UUID!): Boolean!
-	patchCareService(data: Care_ServicePatch!): Care_Service!
-	insertCareService(data: Care_ServiceInput!): Care_Service!
-	deleteCareService(id: UUID!): Boolean!
 	patchPlacePoi(data: Place_POIPatch!): Place_POI!
 	insertPlacePoi(data: Place_POIInput!): Place_POI!
 	deletePlacePoi(id: UUID!): Boolean!
-	patchCareStreetActivity(data: Care_StreetActivityPatch!): Care_StreetActivity!
-	insertCareStreetActivity(data: Care_StreetActivityInput!): Care_StreetActivity!
-	deleteCareStreetActivity(id: UUID!): Boolean!
+	patchCareService(data: Care_ServicePatch!): Care_Service!
+	insertCareService(data: Care_ServiceInput!): Care_Service!
+	deleteCareService(id: UUID!): Boolean!
 	patchCareStreetService(data: Care_StreetServicePatch!): Care_StreetService!
 	insertCareStreetService(data: Care_StreetServiceInput!): Care_StreetService!
 	deleteCareStreetService(id: UUID!): Boolean!
 	patchOrgDuty(data: Org_DutyPatch!): Org_Duty!
 	insertOrgDuty(data: Org_DutyInput!): Org_Duty!
 	deleteOrgDuty(id: UUID!): Boolean!
+	patchCareText(data: Care_TextPatch!): Care_Text!
+	insertCareText(data: Care_TextInput!): Care_Text!
+	deleteCareText(id: UUID!): Boolean!
+	patchClientClientDataChange(data: Client_ClientDataChangePatch!): Client_ClientDataChange!
+	insertClientClientDataChange(data: Client_ClientDataChangeInput!): Client_ClientDataChange!
+	deleteClientClientDataChange(id: UUID!): Boolean!
+	patchCareStreetActivity(data: Care_StreetActivityPatch!): Care_StreetActivity!
+	insertCareStreetActivity(data: Care_StreetActivityInput!): Care_StreetActivity!
+	deleteCareStreetActivity(id: UUID!): Boolean!
 	patchAuthEmailProvider(data: Auth_EmailProviderPatch!): Auth_EmailProvider!
 	insertAuthEmailProvider(data: Auth_EmailProviderInput!): Auth_EmailProvider!
 	deleteAuthEmailProvider(id: UUID!): Boolean!
@@ -1707,6 +1773,9 @@ type Mutation {
 	patchServiceReservation(data: Service_ReservationPatch!): Service_Reservation!
 	insertServiceReservation(data: Service_ReservationInput!): Service_Reservation!
 	deleteServiceReservation(id: UUID!): Boolean!
+	patchOrgVehicle(data: Org_VehiclePatch!): Org_Vehicle!
+	insertOrgVehicle(data: Org_VehicleInput!): Org_Vehicle!
+	deleteOrgVehicle(id: UUID!): Boolean!
 	patchOrgCareType(data: Org_CareTypePatch!): Org_CareType!
 	insertOrgCareType(data: Org_CareTypeInput!): Org_CareType!
 	deleteOrgCareType(id: UUID!): Boolean!
@@ -1732,6 +1801,7 @@ type Mutation {
 	insertServiceDailyResource(data: Service_DailyResourceInput!): Service_DailyResource!
 	deleteServiceDailyResource(id: UUID!): Boolean!
 	anyMutationHere: ID!
+	saveFlow(id: ID, title: String!, model: JSON!): ID!
 }
 
 enum OrderDirection {
@@ -1741,17 +1811,17 @@ enum OrderDirection {
 
 type Org_CareType implements Org_Unit {
 	title: String!
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
 	id: UUID!
-	kenysziActivity: Kenyszi_KenysziActivity
+	kenyszi_activity: Kenyszi_KenysziActivity
 	kenyszi: Kenyszi_KenysziOrg
+	parent: Org_Section!
+	full_title: String!
+	vehicles(filter: Org_VehicleFilter = null, order: Org_VehicleOrder = null, offset: Int = null, limit: Int = null): [Org_Vehicle!]
 	duties: [Common_Tuple0!]
-	isActive: Boolean!
+	is_active: Boolean!
 	kind: Org_CareTypeKind!
 	services(filter: Service_AssignedServiceFilter = null, order: Service_AssignedServiceOrder = null, offset: Int = null, limit: Int = null): [Service_AssignedService!]
-	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
-	parent: Org_Section!
-	vehicles(filter: Org_VehicleFilter = null, order: Org_VehicleOrder = null, offset: Int = null, limit: Int = null): [Org_Vehicle!]
-	fullTitle: String!
 }
 
 input Org_CareTypeFilter {
@@ -1759,31 +1829,31 @@ input Org_CareTypeFilter {
 	or: [Org_CareTypeFilter!]
 	not: [Org_CareTypeFilter!]
 	title: StdStrFilter
+	children: Org_UnitFilter
 	id: StdUuidFilter
 	kenysziActivity: Kenyszi_KenysziActivityFilter
 	kenyszi: Kenyszi_KenysziOrgFilter
+	parent: Org_SectionFilter
+	fullTitle: StdStrFilter
+	vehicles: Org_VehicleFilter
 	duties: Tuple0Filter
 	isActive: StdBoolFilter
 	kind: CareTypeKindFilter
 	services: Service_AssignedServiceFilter
-	children: Org_UnitFilter
-	parent: Org_SectionFilter
-	vehicles: Org_VehicleFilter
-	fullTitle: StdStrFilter
 }
 
 input Org_CareTypeInput {
 	title: String!
+	children: Org_UnitMultiLinkInput
 	kenysziActivity: Kenyszi_KenysziActivityLinkInput
 	kenyszi: Kenyszi_KenysziOrgLinkInput
+	parent: Org_SectionLinkInput!
+	fullTitle: String!
+	vehicles: Org_VehicleMultiLinkInput
 	duties: [Common_Tuple0Input!]
 	isActive: Boolean!
 	kind: Org_CareTypeKind!
 	services: Service_AssignedServiceMultiLinkInput
-	children: Org_UnitMultiLinkInput
-	parent: Org_SectionLinkInput!
-	vehicles: Org_VehicleMultiLinkInput
-	fullTitle: String!
 }
 
 enum Org_CareTypeKind {
@@ -1803,37 +1873,34 @@ input Org_CareTypeLinkInput {
 input Org_CareTypeOrder {
 	title: OrderDirection
 	id: OrderDirection
-	kenysziActivity: OrderDirection
-	kenyszi: OrderDirection
+	fullTitle: OrderDirection
 	duties: OrderDirection
 	isActive: OrderDirection
 	kind: OrderDirection
-	parent: OrderDirection
-	fullTitle: OrderDirection
 }
 
 input Org_CareTypePatch {
 	title: String
+	children: Org_UnitMultiLinkInput
 	id: UUID!
 	kenysziActivity: Kenyszi_KenysziActivityLinkInput
 	kenyszi: Kenyszi_KenysziOrgLinkInput
+	parent: Org_SectionLinkInput
+	fullTitle: String
+	vehicles: Org_VehicleMultiLinkInput
 	duties: [Common_Tuple0Input!]
 	isActive: Boolean
 	kind: Org_CareTypeKind
 	services: Service_AssignedServiceMultiLinkInput
-	children: Org_UnitMultiLinkInput
-	parent: Org_SectionLinkInput
-	vehicles: Org_VehicleMultiLinkInput
-	fullTitle: String
 }
 
 type Org_Duty {
 	span: CivilDateTimeRange!
 	date: CivilDate!
-	createdIn: Org_Unit!
+	created_in: Org_Unit!
 	id: UUID!
-	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
-	careType: Org_CareType!
+	org_visibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	care_type: Org_CareType!
 }
 
 input Org_DutyFilter {
@@ -1864,9 +1931,7 @@ input Org_DutyLinkInput {
 input Org_DutyOrder {
 	span: OrderDirection
 	date: OrderDirection
-	createdIn: OrderDirection
 	id: OrderDirection
-	careType: OrderDirection
 }
 
 input Org_DutyPatch {
@@ -1880,8 +1945,8 @@ input Org_DutyPatch {
 
 type Org_External implements Org_Unit {
 	title: String!
-	id: UUID!
 	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	id: UUID!
 	parent: Org_Root!
 }
 
@@ -1890,8 +1955,8 @@ input Org_ExternalFilter {
 	or: [Org_ExternalFilter!]
 	not: [Org_ExternalFilter!]
 	title: StdStrFilter
-	id: StdUuidFilter
 	children: Org_UnitFilter
+	id: StdUuidFilter
 	parent: Org_RootFilter
 }
 
@@ -1904,24 +1969,23 @@ input Org_ExternalInput {
 input Org_ExternalOrder {
 	title: OrderDirection
 	id: OrderDirection
-	parent: OrderDirection
 }
 
 input Org_ExternalPatch {
 	title: String
-	id: UUID!
 	children: Org_UnitMultiLinkInput
+	id: UUID!
 	parent: Org_RootLinkInput
 }
 
 type Org_Headquarter implements Org_Unit {
 	title: String!
+	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
 	id: UUID!
+	parent: Org_Institution!
 	boss: Auth_User
 	place: Place_Place
 	phones: [String!]
-	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
-	parent: Org_Institution!
 }
 
 input Org_HeadquarterFilter {
@@ -1929,46 +1993,43 @@ input Org_HeadquarterFilter {
 	or: [Org_HeadquarterFilter!]
 	not: [Org_HeadquarterFilter!]
 	title: StdStrFilter
+	children: Org_UnitFilter
 	id: StdUuidFilter
+	parent: Org_InstitutionFilter
 	boss: Auth_UserFilter
 	place: Place_PlaceFilter
 	phones: StdStrFilter
-	children: Org_UnitFilter
-	parent: Org_InstitutionFilter
 }
 
 input Org_HeadquarterInput {
 	title: String!
+	children: Org_UnitMultiLinkInput
+	parent: Org_InstitutionLinkInput!
 	boss: Auth_UserLinkInput
 	place: Place_PlaceLinkInput
 	phones: [String!]
-	children: Org_UnitMultiLinkInput
-	parent: Org_InstitutionLinkInput!
 }
 
 input Org_HeadquarterOrder {
 	title: OrderDirection
 	id: OrderDirection
-	boss: OrderDirection
-	place: OrderDirection
 	phones: OrderDirection
-	parent: OrderDirection
 }
 
 input Org_HeadquarterPatch {
 	title: String
+	children: Org_UnitMultiLinkInput
 	id: UUID!
+	parent: Org_InstitutionLinkInput
 	boss: Auth_UserLinkInput
 	place: Place_PlaceLinkInput
 	phones: [String!]
-	children: Org_UnitMultiLinkInput
-	parent: Org_InstitutionLinkInput
 }
 
 type Org_Institution implements Org_Unit {
 	title: String!
-	id: UUID!
 	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	id: UUID!
 	parent: Org_Region!
 }
 
@@ -1977,8 +2038,8 @@ input Org_InstitutionFilter {
 	or: [Org_InstitutionFilter!]
 	not: [Org_InstitutionFilter!]
 	title: StdStrFilter
-	id: StdUuidFilter
 	children: Org_UnitFilter
+	id: StdUuidFilter
 	parent: Org_RegionFilter
 }
 
@@ -1996,20 +2057,19 @@ input Org_InstitutionLinkInput {
 input Org_InstitutionOrder {
 	title: OrderDirection
 	id: OrderDirection
-	parent: OrderDirection
 }
 
 input Org_InstitutionPatch {
 	title: String
-	id: UUID!
 	children: Org_UnitMultiLinkInput
+	id: UUID!
 	parent: Org_RegionLinkInput
 }
 
 type Org_Maintainer implements Org_Unit {
 	title: String!
-	id: UUID!
 	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	id: UUID!
 	logo: Fs_Image
 	parent: Org_Root!
 }
@@ -2019,8 +2079,8 @@ input Org_MaintainerFilter {
 	or: [Org_MaintainerFilter!]
 	not: [Org_MaintainerFilter!]
 	title: StdStrFilter
-	id: StdUuidFilter
 	children: Org_UnitFilter
+	id: StdUuidFilter
 	logo: Fs_ImageFilter
 	parent: Org_RootFilter
 }
@@ -2040,22 +2100,20 @@ input Org_MaintainerLinkInput {
 input Org_MaintainerOrder {
 	title: OrderDirection
 	id: OrderDirection
-	logo: OrderDirection
-	parent: OrderDirection
 }
 
 input Org_MaintainerPatch {
 	title: String
-	id: UUID!
 	children: Org_UnitMultiLinkInput
+	id: UUID!
 	logo: Fs_ImageLinkInput
 	parent: Org_RootLinkInput
 }
 
 type Org_Region implements Org_Unit {
 	title: String!
-	id: UUID!
 	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	id: UUID!
 	parent: Org_Maintainer!
 }
 
@@ -2064,8 +2122,8 @@ input Org_RegionFilter {
 	or: [Org_RegionFilter!]
 	not: [Org_RegionFilter!]
 	title: StdStrFilter
-	id: StdUuidFilter
 	children: Org_UnitFilter
+	id: StdUuidFilter
 	parent: Org_MaintainerFilter
 }
 
@@ -2083,21 +2141,20 @@ input Org_RegionLinkInput {
 input Org_RegionOrder {
 	title: OrderDirection
 	id: OrderDirection
-	parent: OrderDirection
 }
 
 input Org_RegionPatch {
 	title: String
-	id: UUID!
 	children: Org_UnitMultiLinkInput
+	id: UUID!
 	parent: Org_MaintainerLinkInput
 }
 
 type Org_Root implements Org_Unit {
 	title: String!
 	parent: Org_Unit
-	id: UUID!
 	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	id: UUID!
 }
 
 input Org_RootFilter {
@@ -2106,8 +2163,8 @@ input Org_RootFilter {
 	not: [Org_RootFilter!]
 	title: StdStrFilter
 	parent: Org_UnitFilter
-	id: StdUuidFilter
 	children: Org_UnitFilter
+	id: StdUuidFilter
 }
 
 input Org_RootInput {
@@ -2123,24 +2180,23 @@ input Org_RootLinkInput {
 
 input Org_RootOrder {
 	title: OrderDirection
-	parent: OrderDirection
 	id: OrderDirection
 }
 
 input Org_RootPatch {
 	title: String
 	parent: Org_UnitLinkInput
-	id: UUID!
 	children: Org_UnitMultiLinkInput
+	id: UUID!
 }
 
 type Org_Section implements Org_Unit {
 	title: String!
-	id: UUID!
-	maintainer: Org_Maintainer
-	officialTitle: String
 	children(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]
+	id: UUID!
 	parent: Org_Unit!
+	official_title: String
+	maintainer: Org_Maintainer
 }
 
 input Org_SectionFilter {
@@ -2148,19 +2204,19 @@ input Org_SectionFilter {
 	or: [Org_SectionFilter!]
 	not: [Org_SectionFilter!]
 	title: StdStrFilter
-	id: StdUuidFilter
-	maintainer: Org_MaintainerFilter
-	officialTitle: StdStrFilter
 	children: Org_UnitFilter
+	id: StdUuidFilter
 	parent: Org_UnitFilter
+	officialTitle: StdStrFilter
+	maintainer: Org_MaintainerFilter
 }
 
 input Org_SectionInput {
 	title: String!
-	maintainer: Org_MaintainerLinkInput
-	officialTitle: String
 	children: Org_UnitMultiLinkInput
 	parent: Org_UnitLinkInput!
+	officialTitle: String
+	maintainer: Org_MaintainerLinkInput
 }
 
 input Org_SectionLinkInput {
@@ -2171,35 +2227,34 @@ input Org_SectionLinkInput {
 input Org_SectionOrder {
 	title: OrderDirection
 	id: OrderDirection
-	maintainer: OrderDirection
 	officialTitle: OrderDirection
-	parent: OrderDirection
 }
 
 input Org_SectionPatch {
 	title: String
-	id: UUID!
-	maintainer: Org_MaintainerLinkInput
-	officialTitle: String
 	children: Org_UnitMultiLinkInput
+	id: UUID!
 	parent: Org_UnitLinkInput
+	officialTitle: String
+	maintainer: Org_MaintainerLinkInput
 }
 
 interface Org_Unit {
 	id: UUID!
 	parent: Org_Unit
-	title: String!
 	children(filter: Org_UnitFilter, order: Org_UnitOrder, offset: Int, limit: Int): [Org_Unit!]
+	title: String!
 }
 
 input Org_UnitFilter {
 	and: [Org_UnitFilter!]
 	or: [Org_UnitFilter!]
 	not: [Org_UnitFilter!]
+	is: Org_UnitTypes
 	id: StdUuidFilter
 	parent: Org_UnitFilter
-	title: StdStrFilter
 	children: Org_UnitFilter
+	title: StdStrFilter
 }
 
 input Org_UnitLinkInput {
@@ -2216,20 +2271,30 @@ input Org_UnitMultiLinkInput {
 
 input Org_UnitOrder {
 	id: OrderDirection
-	parent: OrderDirection
 	title: OrderDirection
 }
 
 input Org_UnitPatch {
 	id: UUID!
 	parent: Org_UnitLinkInput
-	title: String
 	children: Org_UnitMultiLinkInput
+	title: String
+}
+
+enum Org_UnitTypes {
+	SECTION
+	ROOT
+	MAINTAINER
+	REGION
+	INSTITUTION
+	HEADQUARTER
+	CARE_TYPE
+	EXTERNAL
 }
 
 type Org_Vehicle {
 	id: UUID!
-	isActive: Boolean!
+	is_active: Boolean!
 	title: String!
 }
 
@@ -2270,9 +2335,9 @@ type Place_Address implements Place_Place {
 	country: String!
 	id: UUID!
 	city: String!
-	postalCode: String!
-	publicPlace: String!
-	streetNumber: String!
+	postal_code: String!
+	public_place: String!
+	street_number: String!
 	address: String!
 	description: String!
 }
@@ -2324,14 +2389,14 @@ input Place_AddressPatch {
 }
 
 type Place_POI implements Place_Place {
-	streetNumber: String
-	publicPlace: String
-	postalCode: String
+	street_number: String
+	public_place: String
+	postal_code: String
 	country: String!
 	id: UUID!
-	externalId: String!
+	external_id: String!
 	city: String!
-	subLocality: String
+	sub_locality: String
 	address: String!
 	name: String
 	description: String!
@@ -2419,6 +2484,7 @@ input Place_PlaceFilter {
 	and: [Place_PlaceFilter!]
 	or: [Place_PlaceFilter!]
 	not: [Place_PlaceFilter!]
+	is: Place_PlaceTypes
 	id: StdUuidFilter
 	address: StdStrFilter
 	city: StdStrFilter
@@ -2445,6 +2511,11 @@ input Place_PlacePatch {
 	streetNumber: String
 }
 
+enum Place_PlaceTypes {
+	POI
+	ADDRESS
+}
+
 type Query {
 	authPermission(filter: Auth_PermissionFilter = null, order: Auth_PermissionOrder = null, offset: Int = null, limit: Int = null): [Auth_Permission!]!
 	authRole(filter: Auth_RoleFilter = null, order: Auth_RoleOrder = null, offset: Int = null, limit: Int = null): [Auth_Role!]!
@@ -2460,21 +2531,20 @@ type Query {
 	clientClient(filter: Client_ClientFilter = null, order: Client_ClientOrder = null, offset: Int = null, limit: Int = null): [Client_Client!]!
 	kenysziKenysziReportEntry(filter: Kenyszi_KenysziReportEntryFilter = null, order: Kenyszi_KenysziReportEntryOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziReportEntry!]!
 	serviceLeaveReason(filter: Service_LeaveReasonFilter = null, order: Service_LeaveReasonOrder = null, offset: Int = null, limit: Int = null): [Service_LeaveReason!]!
+	orgSection(filter: Org_SectionFilter = null, order: Org_SectionOrder = null, offset: Int = null, limit: Int = null): [Org_Section!]!
 	orgRoot(filter: Org_RootFilter = null, order: Org_RootOrder = null, offset: Int = null, limit: Int = null): [Org_Root!]!
 	orgMaintainer(filter: Org_MaintainerFilter = null, order: Org_MaintainerOrder = null, offset: Int = null, limit: Int = null): [Org_Maintainer!]!
 	orgRegion(filter: Org_RegionFilter = null, order: Org_RegionOrder = null, offset: Int = null, limit: Int = null): [Org_Region!]!
 	orgInstitution(filter: Org_InstitutionFilter = null, order: Org_InstitutionOrder = null, offset: Int = null, limit: Int = null): [Org_Institution!]!
 	orgHeadquarter(filter: Org_HeadquarterFilter = null, order: Org_HeadquarterOrder = null, offset: Int = null, limit: Int = null): [Org_Headquarter!]!
-	orgSection(filter: Org_SectionFilter = null, order: Org_SectionOrder = null, offset: Int = null, limit: Int = null): [Org_Section!]!
 	kenysziKenysziActivity(filter: Kenyszi_KenysziActivityFilter = null, order: Kenyszi_KenysziActivityOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziActivity!]!
-	orgVehicle(filter: Org_VehicleFilter = null, order: Org_VehicleOrder = null, offset: Int = null, limit: Int = null): [Org_Vehicle!]!
-	careText(filter: Care_TextFilter = null, order: Care_TextOrder = null, offset: Int = null, limit: Int = null): [Care_Text!]!
-	clientClientDataChange(filter: Client_ClientDataChangeFilter = null, order: Client_ClientDataChangeOrder = null, offset: Int = null, limit: Int = null): [Client_ClientDataChange!]!
-	careService(filter: Care_ServiceFilter = null, order: Care_ServiceOrder = null, offset: Int = null, limit: Int = null): [Care_Service!]!
 	placePoi(filter: Place_POIFilter = null, order: Place_POIOrder = null, offset: Int = null, limit: Int = null): [Place_POI!]!
-	careStreetActivity(filter: Care_StreetActivityFilter = null, order: Care_StreetActivityOrder = null, offset: Int = null, limit: Int = null): [Care_StreetActivity!]!
+	careService(filter: Care_ServiceFilter = null, order: Care_ServiceOrder = null, offset: Int = null, limit: Int = null): [Care_Service!]!
 	careStreetService(filter: Care_StreetServiceFilter = null, order: Care_StreetServiceOrder = null, offset: Int = null, limit: Int = null): [Care_StreetService!]!
 	orgDuty(filter: Org_DutyFilter = null, order: Org_DutyOrder = null, offset: Int = null, limit: Int = null): [Org_Duty!]!
+	careText(filter: Care_TextFilter = null, order: Care_TextOrder = null, offset: Int = null, limit: Int = null): [Care_Text!]!
+	clientClientDataChange(filter: Client_ClientDataChangeFilter = null, order: Client_ClientDataChangeOrder = null, offset: Int = null, limit: Int = null): [Client_ClientDataChange!]!
+	careStreetActivity(filter: Care_StreetActivityFilter = null, order: Care_StreetActivityOrder = null, offset: Int = null, limit: Int = null): [Care_StreetActivity!]!
 	authEmailProvider(filter: Auth_EmailProviderFilter = null, order: Auth_EmailProviderOrder = null, offset: Int = null, limit: Int = null): [Auth_EmailProvider!]!
 	authEmailAccount(filter: Auth_EmailAccountFilter = null, order: Auth_EmailAccountOrder = null, offset: Int = null, limit: Int = null): [Auth_EmailAccount!]!
 	authOAuthProvider(filter: Auth_OAuthProviderFilter = null, order: Auth_OAuthProviderOrder = null, offset: Int = null, limit: Int = null): [Auth_OAuthProvider!]!
@@ -2487,6 +2557,9 @@ type Query {
 	kenysziKenysziClient(filter: Kenyszi_KenysziClientFilter = null, order: Kenyszi_KenysziClientOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziClient!]!
 	serviceResourceVariant(filter: Service_ResourceVariantFilter = null, order: Service_ResourceVariantOrder = null, offset: Int = null, limit: Int = null): [Service_ResourceVariant!]!
 	serviceReservation(filter: Service_ReservationFilter = null, order: Service_ReservationOrder = null, offset: Int = null, limit: Int = null): [Service_Reservation!]!
+	flowFlow(filter: Flow_FlowFilter = null, order: Flow_FlowOrder = null, offset: Int = null, limit: Int = null): [Flow_Flow!]!
+	flowBlueprint(filter: Flow_BlueprintFilter = null, order: Flow_BlueprintOrder = null, offset: Int = null, limit: Int = null): [Flow_Blueprint!]!
+	orgVehicle(filter: Org_VehicleFilter = null, order: Org_VehicleOrder = null, offset: Int = null, limit: Int = null): [Org_Vehicle!]!
 	orgCareType(filter: Org_CareTypeFilter = null, order: Org_CareTypeOrder = null, offset: Int = null, limit: Int = null): [Org_CareType!]!
 	kenysziKenysziUtalization(filter: Kenyszi_KenysziUtalizationFilter = null, order: Kenyszi_KenysziUtalizationOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziUtalization!]!
 	kenysziKenysziReport(filter: Kenyszi_KenysziReportFilter = null, order: Kenyszi_KenysziReportOrder = null, offset: Int = null, limit: Int = null): [Kenyszi_KenysziReport!]!
@@ -2501,13 +2574,14 @@ type Query {
 
 type ResourceImpl implements Service_Resource {
 	id: UUID!
-	isRemoved: Boolean!
+	is_removed: Boolean!
 	title: String!
 	service: Service_AssignedService!
 }
 
 input ResourceVariantKindFilter @oneOf {
 	eq: Service_ResourceVariantKind
+	ne: Service_ResourceVariantKind
 }
 
 type Richtext_ClientRef implements Richtext_Component {
@@ -2525,6 +2599,7 @@ input Richtext_ComponentFilter {
 	and: [Richtext_ComponentFilter!]
 	or: [Richtext_ComponentFilter!]
 	not: [Richtext_ComponentFilter!]
+	is: Richtext_ComponentTypes
 	id: StdUuidFilter
 	richtext: Richtext_RichtextFilter
 }
@@ -2538,12 +2613,22 @@ input Richtext_ComponentMultiLinkInput {
 
 input Richtext_ComponentOrder {
 	id: OrderDirection
-	richtext: OrderDirection
 }
 
 input Richtext_ComponentPatch {
 	id: UUID!
 	richtext: Richtext_RichtextLinkInput
+}
+
+enum Richtext_ComponentTypes {
+	USER_REF
+	CLIENT_REF
+	HOUSING
+	MEDICAL_EXAM
+	TRANSPORT
+	HASTAG_REF
+	PUBLIC_SERVICE
+	SERVICE_REF
 }
 
 type Richtext_Hastag {
@@ -2589,19 +2674,19 @@ type Richtext_MedicalExam implements Richtext_Component {
 	richtext: Richtext_Richtext!
 	id: UUID!
 	section: Org_Section
-	contactName: String
-	contactTel: String
+	contact_name: String
+	contact_tel: String
 	diagnosis: String
 }
 
 type Richtext_PublicService implements Richtext_Component {
 	richtext: Richtext_Richtext!
 	id: UUID!
-	contactId: String
-	contactName: String
+	contact_id: String
+	contact_name: String
 	description: String
 	kind: Richtext_PublicServiceKind
-	plateNumber: String
+	plate_number: String
 	transport: String
 }
 
@@ -2672,9 +2757,9 @@ type Richtext_UserRef implements Richtext_Component {
 }
 
 type ServiceImpl implements Care_Service {
-	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	org_visibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
 	id: UUID!
-	createdIn: Org_Unit!
+	created_in: Org_Unit!
 	date: CivilDate!
 	span: CivilDateTimeRange!
 	client: Client_Client!
@@ -2684,19 +2769,21 @@ type ServiceImpl implements Care_Service {
 
 input ServiceKindFilter @oneOf {
 	eq: Service_ServiceKind
+	ne: Service_ServiceKind
 }
 
 input ServiceTickBehaviorFilter @oneOf {
 	eq: Service_ServiceTickBehavior
+	ne: Service_ServiceTickBehavior
 }
 
 type Service_AssignedService {
 	id: UUID!
 	service: Service_Service!
-	isPinned: Boolean!
-	isPrimary: Boolean!
-	tickBehavior: Service_ServiceTickBehavior!
-	careType: Org_CareType!
+	is_pinned: Boolean!
+	is_primary: Boolean!
+	tick_behavior: Service_ServiceTickBehavior!
+	care_type: Org_CareType!
 }
 
 input Service_AssignedServiceFilter {
@@ -2733,11 +2820,9 @@ input Service_AssignedServiceMultiLinkInput {
 
 input Service_AssignedServiceOrder {
 	id: OrderDirection
-	service: OrderDirection
 	isPinned: OrderDirection
 	isPrimary: OrderDirection
 	tickBehavior: OrderDirection
-	careType: OrderDirection
 }
 
 input Service_AssignedServicePatch {
@@ -2752,7 +2837,7 @@ input Service_AssignedServicePatch {
 type Service_DailyResource implements Service_Resource {
 	service: Service_AssignedService!
 	title: String!
-	isRemoved: Boolean!
+	is_removed: Boolean!
 	id: UUID!
 	variants(filter: Service_ResourceVariantFilter = null, order: Service_ResourceVariantOrder = null, offset: Int = null, limit: Int = null): [Service_ResourceVariant!]
 }
@@ -2776,7 +2861,6 @@ input Service_DailyResourceInput {
 }
 
 input Service_DailyResourceOrder {
-	service: OrderDirection
 	title: OrderDirection
 	isRemoved: OrderDirection
 	id: OrderDirection
@@ -2834,7 +2918,7 @@ type Service_Reservation {
 	client: Client_Client!
 	service: Service_AssignedService!
 	resource: Service_Resource!
-	resourceVariant: Service_ResourceVariant
+	resource_variant: Service_ResourceVariant
 	span: CivilDateTimeRange!
 }
 
@@ -2860,10 +2944,6 @@ input Service_ReservationInput {
 
 input Service_ReservationOrder {
 	id: OrderDirection
-	client: OrderDirection
-	service: OrderDirection
-	resource: OrderDirection
-	resourceVariant: OrderDirection
 	span: OrderDirection
 }
 
@@ -2887,6 +2967,7 @@ input Service_ResourceFilter {
 	and: [Service_ResourceFilter!]
 	or: [Service_ResourceFilter!]
 	not: [Service_ResourceFilter!]
+	is: Service_ResourceTypes
 	id: StdUuidFilter
 	isRemoved: StdBoolFilter
 	title: StdStrFilter
@@ -2908,7 +2989,6 @@ input Service_ResourceOrder {
 	id: OrderDirection
 	isRemoved: OrderDirection
 	title: OrderDirection
-	service: OrderDirection
 }
 
 input Service_ResourcePatch {
@@ -2916,6 +2996,11 @@ input Service_ResourcePatch {
 	isRemoved: Boolean
 	title: String
 	service: Service_AssignedServiceLinkInput
+}
+
+enum Service_ResourceTypes {
+	TIME_SLOT_RESOURCE
+	DAILY_RESOURCE
 }
 
 type Service_ResourceVariant {
@@ -2962,7 +3047,6 @@ input Service_ResourceVariantMultiLinkInput {
 
 input Service_ResourceVariantOrder {
 	id: OrderDirection
-	resource: OrderDirection
 	kind: OrderDirection
 	title: OrderDirection
 }
@@ -2976,7 +3060,7 @@ input Service_ResourceVariantPatch {
 
 type Service_Service {
 	id: UUID!
-	clientRequired: Boolean!
+	client_required: Boolean!
 	kind: Service_ServiceKind!
 	title: String!
 }
@@ -3022,7 +3106,7 @@ enum Service_ServiceTickBehavior {
 
 type Service_TimeSlotResource implements Service_Resource {
 	title: String!
-	isRemoved: Boolean!
+	is_removed: Boolean!
 	id: UUID!
 	recurring(filter: Calendar_RecurringFilter = null, order: Calendar_RecurringOrder = null, offset: Int = null, limit: Int = null): [Calendar_Recurring!]!
 	service: Service_AssignedService!
@@ -3050,7 +3134,6 @@ input Service_TimeSlotResourceOrder {
 	title: OrderDirection
 	isRemoved: OrderDirection
 	id: OrderDirection
-	service: OrderDirection
 }
 
 input Service_TimeSlotResourcePatch {
@@ -3063,48 +3146,61 @@ input Service_TimeSlotResourcePatch {
 
 input StdBoolFilter @oneOf {
 	eq: Boolean
+	ne: Boolean
 }
 
 input StdCalLocalDateFilter @oneOf {
 	eq: CivilDate
+	ne: CivilDate
 }
 
 input StdCalRelativeDurationFilter @oneOf {
 	eq: Duration
+	ne: Duration
 }
 
 input StdDatetimeFilter @oneOf {
 	eq: Zoned
+	ne: Zoned
 }
 
 input StdInt32Filter @oneOf {
 	eq: Int
+	ne: Int
 }
 
 input StdInt64Filter @oneOf {
 	eq: Int
+	ne: Int
 }
 
 input StdStrFilter @oneOf {
 	eq: String
+	ne: String
+	similarity: String
+	startsWith: String
+	endsWith: String
+	includes: String
 }
 
 input StdUuidFilter @oneOf {
 	eq: UUID
+	ne: UUID
 }
 
 type TextImpl implements Care_Text {
 	span: CivilDateTimeRange!
 	date: CivilDate!
-	createdIn: Org_Unit!
+	created_in: Org_Unit!
 	id: UUID!
-	orgVisibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
+	org_visibility(filter: Org_UnitFilter = null, order: Org_UnitOrder = null, offset: Int = null, limit: Int = null): [Org_Unit!]!
 	client: Client_Client!
 	content: Richtext_Richtext
 }
 
 input Tuple0Filter @oneOf {
 	eq: Common_Tuple0Input
+	ne: Common_Tuple0Input
 }
 
 """

@@ -1,5 +1,6 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
+import { type Primitive } from "utility-types"
 
 import type { ExcludeEmpty } from "./common"
 import { type ALIAS, SELECTION } from "./symbols"
@@ -228,7 +229,7 @@ import type { Vars } from "./var"
 
 // TODO: rename to GQL
 export type BuildReturn<OP extends string, T, S extends SelectionDef, V extends Vars> = TypedDocumentNode<
-    Record<OP, Selected<T, S>>,
+    T extends Primitive ? T : Record<OP, Selected<T, S>>,
     V extends Record<string, any> ? ExcludeEmpty<V> : V
 >
 

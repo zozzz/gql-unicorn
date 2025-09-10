@@ -51,7 +51,7 @@ describe("runtime", () => {
         test("query section", () => {
             const querySection = G.queryOrgSection(
                 { filter: { id: { eq: G.$("sectionId") } }, offset: 0, limit: 1 },
-                q => q.id.title.children(q => q.id.title.$on(G.Org_CareType(q => q.kind.isActive)))
+                q => q.id.title.children(q => q.id.title.$on(G.Org_CareType(q => q.kind.is_active)))
             )
 
             testQuery<
@@ -60,15 +60,21 @@ describe("runtime", () => {
                     id: string
                     title: string
                     children?: Array<
-                        | { __typename: "Org_CareType"; kind: string; isActive: boolean }
+                        | { __typename: "Org_CareType"; kind: string; is_active: boolean }
                         | { __typename: Exclude<Unit["__typename"], "Org_CareType"> }
                     > | null
                 }>,
                 { sectionId: string }
             >(
                 querySection,
-                `query($sectionId:UUID){orgSection(filter:{id:{eq:$sectionId}},offset:0,limit:1){__typename,id,title,children{__typename,id,title,... on Org_CareType{kind,isActive}}}}`
+                `query($sectionId:UUID){orgSection(filter:{id:{eq:$sectionId}},offset:0,limit:1){__typename,id,title,children{__typename,id,title,... on Org_CareType{kind,is_active}}}}`
             )
         })
+    })
+
+    test("saveFlow", () => {
+        const save = G.saveFlow({ id: "id", title: "Test", model: "" })
+
+        testQuery<string, never>(save, `mutation{saveFlow(id:"id",title:"Test",model:"")}`)
     })
 })
