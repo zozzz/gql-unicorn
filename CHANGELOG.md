@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.8](https://github.com/zozzz/gql-unicorn/compare/0.4.7...0.4.8) (2025-09-10)
+
+
+* BuildReturn when returns with a primitive value ([7cedbca](https://github.com/zozzz/gql-unicorn/commit/7cedbcab7b0ae316d2ba3d3d5d3581c578ad7057))
+* Optional argument can be null ([0f552f9](https://github.com/zozzz/gql-unicorn/commit/0f552f998cc2e5792f7d79a1597fd207510e424d))
+
 ## [0.4.7](https://github.com/zozzz/gql-unicorn/compare/0.4.6...0.4.7) (2025-08-22)
 
 
