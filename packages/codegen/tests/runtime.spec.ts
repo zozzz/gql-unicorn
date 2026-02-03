@@ -77,12 +77,10 @@ describe("runtime", () => {
             })
 
             test("scalar + name", () => {
-                test("scalar", () => {
-                    testQuery<"currentUserId", string | null | undefined, never>(
-                        G.queryCurrentUserId("GetCurrentUserId"),
-                        `query GetCurrentUserId{currentUserId}`
-                    )
-                })
+                testQuery<"currentUserId", string | null | undefined, never>(
+                    G.queryCurrentUserId("GetCurrentUserId"),
+                    `query GetCurrentUserId{currentUserId}`
+                )
             })
 
             test("scalar + name + arg", () => {
