@@ -24,7 +24,7 @@ npm install @gql-unicorn/runtime --save
 ```typescript
 import { queryArticles, Blog, News $ } from "genrated-pacakge-name"
 
-const fragment = News.$fragment("fragmentName", q => q.author(q => q.id.name))
+const fragment = News(q => q.author(q => q.id.name))
 
 const articlesQuery = queryArticles({filter: { title "..." }}, q => q.id
     .name
@@ -55,7 +55,7 @@ import { queryUsers } from "genrated-pacakge-name"
 const GetUserBuilder = queryUsers.builder().id
 
 const GetUsersWithName = GetUserBuilder.name.$build()
-const PFragment = Pagination.fragment(q => q.offset.limit)
+const PFragment = Pagination(q => q.offset.limit)
 const GetUsersWithPganination = GetUserBuilder.$on(PFragment).$build()
 ```
 
