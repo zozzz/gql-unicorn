@@ -23,8 +23,15 @@ export type FieldDefinitions = Record<
 type ContextType = "Query" | "Mutation" | "Subscription" | "Fragment" | "Type" | "Operation" | "Conditional"
 
 export type BuilderInfo = Record<string, BuilderInfoEntry>
-type ArgsType = Record<string, ArgType>
-type ArgType = { tn: string; fields?: () => ArgsType; items?: () => ArgType }
+type ArgsType = Record<string, TypeInfo>
+// type ArgType = { tn: string; fields?: () => ArgsType; items?: () => ArgType }
+export interface TypeInfo {
+    tn: string
+    items?: TypeInfo
+    fields?: Record<string, TypeInfo>
+    enum?: Record<string, string | number>
+    union?: TypeInfo[]
+}
 type BuilderInfoEntry = [ArgsType, TypeBuilder<any, any>] | TypeBuilder<any, any> | ArgsType
 
 class Context {
@@ -153,11 +160,11 @@ class Context {
         return this.args
     }
 
-    _handleArg(input: any, argType: ArgType, path: string[]): string {
+    _handleArg(input: any, argType: TypeInfo, path: string[]): string {
         const varName = (this.varPrefix ? [this.varPrefix, ...path] : path).join("__")
 
         if (Array.isArray(input)) {
-            const items = input.map(value => this._handleArg(value, argType.items!(), path))
+            const items = input.map(value => this._handleArg(value, argType.items!, path))
             return `[${items.join(",")}]`
         } else if (isVariable(input)) {
             const fixName = variableName(input)
@@ -166,7 +173,7 @@ class Context {
             return name
         } else if (isPlainObject(input)) {
             const fields = Object.entries(input)
-                .map(([k, v]) => `${k}:${this._handleArg(v, argType.fields!()[k], [...path, k])}`)
+                .map(([k, v]) => `${k}:${this._handleArg(v, argType.fields![k], [...path, k])}`)
                 .join(",")
             return `{${fields}}`
         }

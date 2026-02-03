@@ -7,7 +7,6 @@ import {
     type GraphQLFieldMap,
     type GraphQLInputFieldMap,
     type GraphQLInputObjectType,
-    type GraphQLInputType,
     type GraphQLInterfaceType,
     type GraphQLNamedType,
     type GraphQLNonNull,
@@ -47,7 +46,7 @@ const Banner = [
 ]
 
 export function transform(schema: GraphQLSchema, config?: TransformConfig) {
-    return new Transformer(schema, config || {}).transform()
+    return new Transformer(schema, { typeinfo: true, ...(config || {}) }).transform()
 }
 
 const SelectTypeArgs = `R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never`
@@ -58,9 +57,13 @@ class Transformer {
     readonly #parts: string[] = []
     readonly #indent = "    "
     readonly #imports: Record<string, Record<string, boolean>> = {}
-    readonly #argumentTypes: Record<string, string> = {}
-    readonly #argumentInfosName: Record<string, string> = {}
-    readonly #argumentInfos: string[] = []
+
+    readonly #enums: string[] = []
+
+    readonly #typeInfos: Record<string, { name: string; code: string }> = {}
+    readonly #argTypes: Record<string, { name: string; code: string }> = {}
+    readonly #argInfoVar: Record<string, { name: string; code: string }> = {}
+    readonly #typeInfoVar: Record<string, string> = {}
 
     constructor(
         readonly schema: GraphQLSchema,
@@ -99,8 +102,37 @@ class Transformer {
         this.#import(RuntimeLib, "VarOf", true)
         this.#import(RuntimeLib, "Selected", true)
         this.#import(RuntimeLib, "Input", true)
+        this.#import(RuntimeLib, "TypeInfo", true)
 
-        this.#parts.unshift(...Banner, ...this.#generateImports(), ...this.#argumentInfos)
+        const tiFowardDefs: string[] = []
+        const tiDefs: string[] = []
+        const argTypes: string[] = []
+        const tiTypes: string[] = []
+
+        for (const { name, code } of Object.values(this.#typeInfos)) {
+            tiFowardDefs.push(`const ${name} = {} as TypeInfo`)
+            tiDefs.push(`assign(${name}, ${code})`)
+        }
+
+        for (const [key, { code }] of Object.entries(this.#argTypes)) {
+            argTypes.push(code)
+            argTypes.push(`const ${this.#argInfoVar[key].name} = ${this.#argInfoVar[key].code} as const`)
+        }
+
+        for (const [name, v] of Object.entries(this.#typeInfoVar)) {
+            tiTypes.push(`    "${name}": ${v},`)
+        }
+        if (tiTypes.length > 0) {
+            tiTypes.unshift(`export const __TypeInfo = {`)
+            tiTypes.push(`} as const`)
+        }
+
+        const typeInfos =
+            argTypes.length > 0 || tiTypes.length > 0
+                ? [...tiFowardDefs, `const assign = Object.assign`, ...tiDefs, ...argTypes, ...tiTypes]
+                : []
+
+        this.#parts.unshift(...Banner, ...this.#generateImports(), ...this.#enums, ...typeInfos)
         return [
             ...this.#parts,
             ...builders,
@@ -142,7 +174,7 @@ class Transformer {
             const name = this.#bareType(type).name
             this.#typeMap[type.name] = name
             if (isEnumType(type)) {
-                this.#parts.push(...this.#generateEnum(type, name))
+                this.#enums.push(...this.#generateEnum(type, name))
             } else if (isInputObjectType(type)) {
                 this.#parts.push(...this.#generateInput(type, name))
             } else if (isInterfaceType(type)) {
@@ -214,6 +246,10 @@ class Transformer {
     }
 
     #generateObject(type: GraphQLObjectType, name: string): string[] {
+        if (this.config.typeinfo) {
+            this.#typeInfoVar[type.name] = this.#typeInfo(type).name
+        }
+
         return [
             ...this.#comment(type.description),
             `export type ${name} = {`,
@@ -245,7 +281,7 @@ class Transformer {
         if (!isUnionType(context)) {
             for (const { name, type, args } of Object.values(context.getFields())) {
                 if (args.length > 0) {
-                    const [_, ai] = this.#argumentsType(args)
+                    const [_, ai] = this.#argInfoType(args)
 
                     if (bareIsScalar(type)) {
                         info.push(`${name}: ${ai}`)
@@ -340,7 +376,7 @@ class Transformer {
             this.#import(RuntimeLib, "BuildReturn", true)
 
             if (args.length > 0) {
-                ;[argType, argInfo, argOptional] = this.#argumentsType(args)
+                ;[argType, argInfo, argOptional] = this.#argInfoType(args)
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
                     const args = `ArgsParam<${argType}, AA>`
@@ -456,7 +492,7 @@ class Transformer {
             this.#import(RuntimeLib, "Arguments", true)
             this.#import(RuntimeLib, "ArgsParam", true)
             this.#import(RuntimeLib, "ToVars", true)
-            const [argumentType, _, argOptional] = this.#argumentsType(args)
+            const [argumentType, _, argOptional] = this.#argInfoType(args)
             const VP = `[...P, ${JSON.stringify(name)}]`
 
             if (bareIsScalar(type)) {
@@ -592,17 +628,15 @@ class Transformer {
         return this.#selectType(name, R, V, P, "never", `"$build"`)
     }
 
-    #argumentsType(args: ReadonlyArray<GraphQLArgument>): [string, string, boolean] {
+    #argInfoType(args: ReadonlyArray<GraphQLArgument>): [string, string, boolean] {
         let allOptional = true
         const argKey = args
             .toSorted((a, b) => a.name.localeCompare(b.name))
             .map(v => `${v.name}:${v.type.toString()}`)
             .join(",")
 
-        if (!(argKey in this.#argumentTypes)) {
-            const argName = `Arguments${Object.values(this.#argumentTypes).length}`
-            this.#argumentTypes[argKey] = argName
-
+        if (!(argKey in this.#argTypes)) {
+            const argName = `Arguments${Object.values(this.#argTypes).length}`
             const result: string[] = [`export type ${argName} = {`]
 
             for (const { name, type, description, deprecationReason, defaultValue } of args) {
@@ -619,66 +653,150 @@ class Transformer {
                     `${this.#indent}${name}${fieldType}`
                 )
             }
-
             result.push("}")
-
-            this.#argumentInfos.push(result.join("\n"))
+            this.#argTypes[argKey] = { name: argName, code: result.join("\n") }
         }
 
-        const argInfoName = this.#argsInfo(argKey, args)
-        return [this.#argumentTypes[argKey], argInfoName, allOptional] as const
+        const argName = this.#argTypes[argKey].name
+        const argInfoName = `__${argName}`
+
+        if (!(argKey in this.#argInfoVar)) {
+            const vars = args.map(arg => `${arg.name}: ${this.#typeInfo(arg.type).name}`).join(", ")
+            this.#argInfoVar[argKey] = { name: argInfoName, code: `{ ${vars} }` }
+        }
+
+        return [argName, argInfoName, allOptional]
     }
 
-    #argsInfo(key: string, type: ReadonlyArray<GraphQLArgument>): string {
-        // const key = type.map(v => `${v.name}:${v.type.toString()}`).join(",")
-        if (this.#argumentInfosName[key]) {
-            return this.#argumentInfosName[key]
+    #typeInfo(type: GraphQLType, realTypename?: string) {
+        realTypename ??= type.toString()
+        if (realTypename in this.#typeInfos) {
+            return this.#typeInfos[realTypename]
         }
-
-        const selfName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
-        this.#argumentInfosName[key] = selfName
-        const result = [`const ${selfName} = { `]
-
-        for (const arg of type) {
-            const name = this.#argInfo(arg.type)
-            result.push(`${arg.name}: ${name},`)
-        }
-
-        result.push(" }")
-        this.#argumentInfos.push(result.join(""))
-
-        return selfName
+        const varName = `__TypeInfo${Object.keys(this.#typeInfos).length}`
+        this.#typeInfos[realTypename] = { name: varName, code: "" }
+        const code = this.#typeInfoCode(type, realTypename)
+        this.#typeInfos[realTypename].code = code
+        return this.#typeInfos[realTypename]
     }
 
-    #argInfo(type: GraphQLInputType): string {
-        const typename = type.toString()
-        if (this.#argumentInfosName[typename]) {
-            return this.#argumentInfosName[typename]
-        }
-        const varName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
-        this.#argumentInfosName[typename] = varName
-
-        this.#argumentInfos.push(`const ${varName} = ${this.#argInfoCode(type)}`)
-
-        return varName
-    }
-
-    #argInfoCode(type: GraphQLInputType, realTypename?: string): string {
+    #typeInfoCode(type: GraphQLType, realTypename?: string): string {
         realTypename ??= type.toString()
         if (isListType(type)) {
-            return `{ tn: ${JSON.stringify(realTypename)}, items: () => ${this.#argInfo(type.ofType)} }`
+            return `{ tn: ${JSON.stringify(realTypename)}, items: ${this.#typeInfo(type.ofType).name} }`
         } else if (isNonNullType(type)) {
-            return this.#argInfoCode(type.ofType, type.toString())
+            return this.#typeInfoCode(type.ofType, realTypename)
         } else if (isInputObjectType(type)) {
             const fields = Object.entries(type.getFields()).reduce<string[]>((acc, [name, field]) => {
-                acc.push(`${name}: ${this.#argInfo(field.type)}`)
+                acc.push(`${name}: ${this.#typeInfo(field.type).name}`)
                 return acc
             }, [])
-            return `{ tn: ${JSON.stringify(realTypename)}, fields: () => ({ ${fields.join(", ")} }) }`
+            return `{ tn: ${JSON.stringify(realTypename)}, fields: { ${fields.join(", ")} } }`
+        } else if (isEnumType(type)) {
+            return `{ tn: ${JSON.stringify(realTypename)}, enum: ${this.#bareType(type).name} }`
+        } else if (isScalarType(type)) {
+            return `{ tn: ${JSON.stringify(realTypename)} }`
+        } else if (isObjectType(type) || isInterfaceType(type)) {
+            const fields = Object.entries(type.getFields()).reduce<string[]>((acc, [name, field]) => {
+                acc.push(`${name}: ${this.#typeInfo(field.type).name}`)
+                return acc
+            }, [])
+            return `{ tn: ${JSON.stringify(realTypename)}, fields: { ${fields.join(", ")} } }`
+        } else if (isUnionType(type)) {
+            const types = type.getTypes().map(t => this.#typeInfo(t).name)
+            return `{ tn: ${JSON.stringify(realTypename)}, union: [ ${types.join(", ")} ] }`
         } else {
             return `{ tn: ${JSON.stringify(realTypename)} }`
         }
     }
+
+    // #argumentsType(args: ReadonlyArray<GraphQLArgument>): [string, string, boolean] {
+    //     let allOptional = true
+    //     const argKey = args
+    //         .toSorted((a, b) => a.name.localeCompare(b.name))
+    //         .map(v => `${v.name}:${v.type.toString()}`)
+    //         .join(",")
+
+    //     if (!(argKey in this.#argumentTypes)) {
+    //         const argName = `Arguments${Object.values(this.#argumentTypes).length}`
+    //         this.#argumentTypes[argKey] = argName
+
+    //         const result: string[] = [`export type ${argName} = {`]
+
+    //         for (const { name, type, description, deprecationReason, defaultValue } of args) {
+    //             let fieldType: string
+    //             if (isNonNullType(type)) {
+    //                 allOptional = false
+    //                 fieldType = `: ${this.#typename(type.ofType, false)}`
+    //             } else {
+    //                 fieldType = `?: ${this.#typename(type, false)} | null`
+    //             }
+
+    //             result.push(
+    //                 ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`),
+    //                 `${this.#indent}${name}${fieldType}`
+    //             )
+    //         }
+
+    //         result.push("}")
+
+    //         this.#argumentInfos.push(result.join("\n"))
+    //     }
+
+    //     const argInfoName = this.#argsInfo(argKey, args)
+    //     return [this.#argumentTypes[argKey], argInfoName, allOptional] as const
+    // }
+
+    // #argsInfo(key: string, type: ReadonlyArray<GraphQLArgument>): string {
+    //     // const key = type.map(v => `${v.name}:${v.type.toString()}`).join(",")
+    //     if (this.#argumentInfosName[key]) {
+    //         return this.#argumentInfosName[key]
+    //     }
+
+    //     const selfName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
+    //     this.#argumentInfosName[key] = selfName
+    //     const result = [`const ${selfName} = { `]
+
+    //     for (const arg of type) {
+    //         const name = this.#argInfo(arg.type)
+    //         result.push(`${arg.name}: ${name},`)
+    //     }
+
+    //     result.push(" }")
+    //     this.#argumentInfos.push(result.join(""))
+
+    //     return selfName
+    // }
+
+    // #argInfo(type: GraphQLInputType): string {
+    //     const typename = type.toString()
+    //     if (this.#argumentInfosName[typename]) {
+    //         return this.#argumentInfosName[typename]
+    //     }
+    //     const varName = `__ArgumentInfo${Object.keys(this.#argumentInfosName).length}`
+    //     this.#argumentInfosName[typename] = varName
+
+    //     this.#argumentInfos.push(`const ${varName} = ${this.#argInfoCode(type)}`)
+
+    //     return varName
+    // }
+
+    // #argInfoCode(type: GraphQLInputType, realTypename?: string): string {
+    //     realTypename ??= type.toString()
+    //     if (isListType(type)) {
+    //         return `{ tn: ${JSON.stringify(realTypename)}, items: () => ${this.#argInfo(type.ofType)} }`
+    //     } else if (isNonNullType(type)) {
+    //         return this.#argInfoCode(type.ofType, type.toString())
+    //     } else if (isInputObjectType(type)) {
+    //         const fields = Object.entries(type.getFields()).reduce<string[]>((acc, [name, field]) => {
+    //             acc.push(`${name}: ${this.#argInfo(field.type)}`)
+    //             return acc
+    //         }, [])
+    //         return `{ tn: ${JSON.stringify(realTypename)}, fields: () => ({ ${fields.join(", ")} }) }`
+    //     } else {
+    //         return `{ tn: ${JSON.stringify(realTypename)} }`
+    //     }
+    // }
 
     #omit(t: string, field?: string): string {
         this.#import(RuntimeLib, "SelectedFields", true)

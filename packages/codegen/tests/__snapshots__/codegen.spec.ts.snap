@@ -5,7 +5,17 @@ exports[`codegen query without parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
+const __TypeInfo0 = {} as TypeInfo
+const __TypeInfo1 = {} as TypeInfo
+const __TypeInfo2 = {} as TypeInfo
+const assign = Object.assign
+assign(__TypeInfo0, { tn: "User", fields: { id: __TypeInfo1, name: __TypeInfo2 } })
+assign(__TypeInfo1, { tn: "ID!" })
+assign(__TypeInfo2, { tn: "String!" })
+export const __TypeInfo = {
+    "User": __TypeInfo0,
+} as const
 export type User = {
     __typename: "User"
     /**
@@ -45,12 +55,21 @@ exports[`codegen query with parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
+const __TypeInfo0 = {} as TypeInfo
+const __TypeInfo1 = {} as TypeInfo
+const __TypeInfo2 = {} as TypeInfo
+const assign = Object.assign
+assign(__TypeInfo0, { tn: "ID!" })
+assign(__TypeInfo1, { tn: "User", fields: { id: __TypeInfo0, name: __TypeInfo2 } })
+assign(__TypeInfo2, { tn: "String!" })
 export type Arguments0 = {
     id: string
 }
-const __ArgumentInfo1 = { tn: "ID!" }
-const __ArgumentInfo0 = { id: __ArgumentInfo1, }
+const __Arguments0 = { id: __TypeInfo0 } as const
+export const __TypeInfo = {
+    "User": __TypeInfo1,
+} as const
 export type User = {
     __typename: "User"
     /**
@@ -76,7 +95,7 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
 type AsBuilder = { input: Input; output: any; operation: string }
-export const queryUser = queryBuilder("user", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"user", User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null, operation: "user" }, never> }
+export const queryUser = queryBuilder("user", [__Arguments0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"user", User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null, operation: "user" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -87,7 +106,7 @@ exports[`codegen mutation without parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { mutationBuilder, type BuildReturn, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { mutationBuilder, type BuildReturn, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
 type AsBuilder = { input: Input; output: any; operation: string }
 export const someMutaionThing = mutationBuilder("someMutaionThing") as ((name?: string) => BuildReturn<"someMutaionThing", string, never, never>)
 export const $ = __runtime.$
@@ -100,14 +119,22 @@ exports[`codegen mutation with parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
+const __TypeInfo0 = {} as TypeInfo
+const __TypeInfo1 = {} as TypeInfo
+const __TypeInfo2 = {} as TypeInfo
+const assign = Object.assign
+assign(__TypeInfo0, { tn: "ID!" })
+assign(__TypeInfo1, { tn: "String!" })
+assign(__TypeInfo2, { tn: "User", fields: { id: __TypeInfo0, name: __TypeInfo1 } })
 export type Arguments0 = {
     id: string
     name: string
 }
-const __ArgumentInfo1 = { tn: "ID!" }
-const __ArgumentInfo2 = { tn: "String!" }
-const __ArgumentInfo0 = { id: __ArgumentInfo1,name: __ArgumentInfo2, }
+const __Arguments0 = { id: __TypeInfo0, name: __TypeInfo1 } as const
+export const __TypeInfo = {
+    "User": __TypeInfo2,
+} as const
 export type User = {
     __typename: "User"
     /**
@@ -133,7 +160,7 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
 type AsBuilder = { input: Input; output: any; operation: string }
-export const queryUpdateUser = queryBuilder("updateUser", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"updateUser", User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null, operation: "updateUser" }, never> }
+export const queryUpdateUser = queryBuilder("updateUser", [__Arguments0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"updateUser", User | null, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: User | null, operation: "updateUser" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -144,7 +171,7 @@ exports[`codegen subscription without parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { subscriptionBuilder, type BuildReturn, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { subscriptionBuilder, type BuildReturn, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
 type AsBuilder = { input: Input; output: any; operation: string }
 export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething") as ((name?: string) => BuildReturn<"onChangeSomething", string, never, never>)
 export const $ = __runtime.$
@@ -157,12 +184,21 @@ exports[`codegen subscription with parameters 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { subscriptionBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { subscriptionBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
+const __TypeInfo0 = {} as TypeInfo
+const __TypeInfo1 = {} as TypeInfo
+const __TypeInfo2 = {} as TypeInfo
+const assign = Object.assign
+assign(__TypeInfo0, { tn: "String!" })
+assign(__TypeInfo1, { tn: "SomeEvent", fields: { id: __TypeInfo2 } })
+assign(__TypeInfo2, { tn: "ID!" })
 export type Arguments0 = {
     type: string
 }
-const __ArgumentInfo1 = { tn: "String!" }
-const __ArgumentInfo0 = { type: __ArgumentInfo1, }
+const __Arguments0 = { type: __TypeInfo0 } as const
+export const __TypeInfo = {
+    "SomeEvent": __TypeInfo1,
+} as const
 export type SomeEvent = {
     __typename: "SomeEvent"
     id: string
@@ -180,7 +216,7 @@ export interface SomeEventSelect<R extends SelectionDef, V extends Vars, P exten
     $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
 type AsBuilder = { input: Input; output: any; operation: string }
-export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething", [__ArgumentInfo0, SomeEvent]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"onChangeSomething", SomeEvent, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => SomeEventSelect<["__typename"], AA, [], { input: Arguments0, output: SomeEvent, operation: "onChangeSomething" }, never> }
+export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething", [__Arguments0, SomeEvent]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: SomeEventSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"onChangeSomething", SomeEvent, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>]) => SomeEventSelect<["__typename"], AA, [], { input: Arguments0, output: SomeEvent, operation: "onChangeSomething" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -191,12 +227,24 @@ exports[`codegen Optional array 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { queryBuilder, type BuildReturn, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type SelectionDef, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type SelectionDef, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
+const __TypeInfo0 = {} as TypeInfo
+const __TypeInfo1 = {} as TypeInfo
+const __TypeInfo2 = {} as TypeInfo
+const __TypeInfo3 = {} as TypeInfo
+const assign = Object.assign
+assign(__TypeInfo0, { tn: "UserFilter", fields: { ids: __TypeInfo1 } })
+assign(__TypeInfo1, { tn: "[ID!]", items: __TypeInfo2 })
+assign(__TypeInfo2, { tn: "ID!" })
+assign(__TypeInfo3, { tn: "User", fields: { id: __TypeInfo2 } })
 export type Arguments0 = {
     filter?: UserFilter | null
 }
-const __ArgumentInfo1 = { tn: "UserFilter" }
-const __ArgumentInfo0 = { filter: __ArgumentInfo1, }
+const __Arguments0 = { filter: __TypeInfo0 } as const
+export const __TypeInfo = {
+    "UserFilter": __TypeInfo0,
+    "User": __TypeInfo3,
+} as const
 export type UserFilter = {
     __typename: "UserFilter"
     ids?: Array<string> | null
@@ -230,7 +278,7 @@ export interface UserSelect<R extends SelectionDef, V extends Vars, P extends st
     $build: B extends { input: infer BI, output: infer BO, operation: infer OP extends string } ? () => BuildReturn<OP, BO, R, ToVars<BI, P, V>> : never
 }
 type AsBuilder = { input: Input; output: any; operation: string }
-export const queryUsers = queryBuilder("users", [__ArgumentInfo0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"users", Array<User>, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>] | [string] | []) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: Array<User>, operation: "users" }, never> }
+export const queryUsers = queryBuilder("users", [__Arguments0, User]) as (<SS extends SelectionDef, SV extends Vars, AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [ArgsParam<Arguments0, AA>, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [string, (select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>] | [(select: UserSelect<["__typename"], {}, [], never, "$build">) => Selection<any, SS, SV>]) => BuildReturn<"users", Array<User>, SS, SV & ToVars<Arguments0, [], AA>>) & { builder: <AA extends Arguments<Arguments0>>(...args: [string, ArgsParam<Arguments0, AA>] | [ArgsParam<Arguments0, AA>] | [string] | []) => UserSelect<["__typename"], AA, [], { input: Arguments0, output: Array<User>, operation: "users" }, never> }
 export const $ = __runtime.$
 export const $$ = __runtime.$$
 export type { TypeOf, VarOf, Selected }"
@@ -241,8 +289,18 @@ exports[`codegen import scalar 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
 import { type JsonType } from "some-package-name"
+const __TypeInfo0 = {} as TypeInfo
+const __TypeInfo1 = {} as TypeInfo
+const __TypeInfo2 = {} as TypeInfo
+const assign = Object.assign
+assign(__TypeInfo0, { tn: "User", fields: { id: __TypeInfo1, data: __TypeInfo2 } })
+assign(__TypeInfo1, { tn: "ID!" })
+assign(__TypeInfo2, { tn: "JSON!" })
+export const __TypeInfo = {
+    "User": __TypeInfo0,
+} as const
 export type User = {
     __typename: "User"
     id: string
@@ -273,8 +331,18 @@ exports[`codegen import scalar with alias 1`] = `
 /* prettier-ignore */
 /* !!! GENERATED FILE DO NOT EDIT !!! */
 import * as __runtime from "@gql-unicorn/runtime"
-import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input } from "@gql-unicorn/runtime"
+import { queryBuilder, type BuildReturn, type SelectionDef, type TypeBuilder, type BuilderInfo, typeBuilder, type Vars, type Selection, type ExtendSelection, type SelectedFields, type MergeSelection, type TypeOf, type VarOf, type Selected, type Input, type TypeInfo } from "@gql-unicorn/runtime"
 import { type JsonType as SomeJsonTypeAlias } from "some-package-name"
+const __TypeInfo0 = {} as TypeInfo
+const __TypeInfo1 = {} as TypeInfo
+const __TypeInfo2 = {} as TypeInfo
+const assign = Object.assign
+assign(__TypeInfo0, { tn: "User", fields: { id: __TypeInfo1, data: __TypeInfo2 } })
+assign(__TypeInfo1, { tn: "ID!" })
+assign(__TypeInfo2, { tn: "JSON!" })
+export const __TypeInfo = {
+    "User": __TypeInfo0,
+} as const
 export type User = {
     __typename: "User"
     id: string
