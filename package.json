@@ -57,6 +57,10 @@
     "github": {
       "release": true
     },
+    "hooks": {
+      "after:bump": "bun run build",
+      "after:git:release": "bun run publish"
+    },
     "plugins": {
       "@release-it/bumper": {
         "out": {
