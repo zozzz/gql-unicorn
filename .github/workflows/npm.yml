@@ -18,6 +18,8 @@ jobs:
       - run: cd dist && bun install
 
       - name: Publish
-        run: bun run publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > dist/.npmrc
+          bun run publish --tolerate-republish --auth-type legacy
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
