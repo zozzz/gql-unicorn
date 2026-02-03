@@ -1,5 +1,10 @@
 # Changelog
 
+# [0.5.0](https://github.com/zozzz/gql-unicorn/compare/0.4.8...0.5.0) (2026-02-03)
+
+
+* The generated file export __TypeInfo const ([21879f1](https://github.com/zozzz/gql-unicorn/commit/21879f1e743966497eae19b5f9ae7090800b1f94))
+
 ## [0.4.8](https://github.com/zozzz/gql-unicorn/compare/0.4.7...0.4.8) (2025-09-10)
 
 
