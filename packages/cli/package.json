@@ -6,6 +6,9 @@
     "url": "https://github.com/zozzz"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "gql",
     "graphql",
