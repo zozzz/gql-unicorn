@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.1](https://github.com/zozzz/gql-unicorn/compare/0.5.0...0.5.1) (2026-02-03)
+
+
+* fix test ([efaccd1](https://github.com/zozzz/gql-unicorn/commit/efaccd174ae8ebce8112c94ed3d146bf9deb6fdd))
+
 # [0.5.0](https://github.com/zozzz/gql-unicorn/compare/0.4.8...0.5.0) (2026-02-03)
 
 
