@@ -29,7 +29,7 @@ describe("runtime", () => {
         const outPath = path.join(__dirname, "__generated__", "runtime.ts")
         await mkdir(path.dirname(outPath), { recursive: true })
         await Bun.file(outPath).write(result)
-        G = await import("./__generated__/runtime")
+        G = await import(`${outPath}?t=${Date.now()}`)
     })
 
     describe("query", () => {
@@ -567,24 +567,38 @@ describe("runtime", () => {
                 | null
                 | undefined
 
-            const queryNodeRes2 = G.queryNodes(q =>
-                q.id
-                    .$on(G.User("userFragment", q => q.name))
-                    .$on(
-                        G.Article("articleFragment", q =>
-                            q.title.tags(q => q.id.tag).events(q => q.$on(G.ArticleChangeEvent(q => q.curr(q => q.id))))
-                        )
-                    )
-            )
             test("fragment 2", () => {
+                const queryNodeRes2 = G.queryNodes(q =>
+                    q.id
+                        .$on(G.User("userFragment", q => q.name))
+                        .$on(
+                            G.Article("articleFragment", q =>
+                                q.title
+                                    .tags(q => q.id.tag)
+                                    .events(q => q.$on(G.ArticleChangeEvent(q => q.curr(q => q.id))))
+                            )
+                        )
+                )
                 testQuery<"nodes", NodeRes2[], never>(
                     queryNodeRes2,
                     `query{nodes{__typename,id,...userFragment,...articleFragment}} fragment userFragment on User{name} fragment articleFragment on Article{title,tags{id,tag},events{... on ArticleChangeEvent{curr{id}}}}`
                 )
             })
 
-            type QueryNodeRes2 = TypeOf<typeof queryNodeRes2>["nodes"]
             test("is", () => {
+                // eslint-disable-next-line unused-imports/no-unused-vars
+                const queryNodeRes2 = G.queryNodes(q =>
+                    q.id
+                        .$on(G.User("userFragment", q => q.name))
+                        .$on(
+                            G.Article("articleFragment", q =>
+                                q.title
+                                    .tags(q => q.id.tag)
+                                    .events(q => q.$on(G.ArticleChangeEvent(q => q.curr(q => q.id))))
+                            )
+                        )
+                )
+                type QueryNodeRes2 = TypeOf<typeof queryNodeRes2>["nodes"]
                 const articles: QueryNodeRes2 = [{ __typename: "Article", id: "id", title: "title", events: [] }]
                 const article = articles[0]
                 if (G.Article.is(article)) {
