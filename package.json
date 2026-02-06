@@ -59,7 +59,7 @@
     },
     "hooks": {
       "after:bump": "bun run build",
-      "after:git:release": "bun run publish"
+      "after:git:release": "bun run publish --auth-type legacy"
     },
     "plugins": {
       "@release-it/bumper": {
