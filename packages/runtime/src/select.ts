@@ -238,7 +238,12 @@ export type BuildReturn<OP extends string, T, S extends SelectionDef, V extends 
 //         : T extends BuildReturn<infer BT, infer BS, any>
 //           ? Selected<BT, BS>
 //           : unknown
-export type TypeOf<T> = T extends TypedDocumentNode<infer R, never> ? R : unknown
+export type TypeOf<T> =
+    T extends TypedDocumentNode<infer R, never>
+        ? R
+        : T extends Selection<infer R, infer S, any>
+          ? Selected<R, S>
+          : unknown
 // export type TypeOf<T> = ReturnType<<R, V>(x: TypedDocumentNode<R, V>) => R>
 // export type TypeOf<T> = T extends BuildReturn<infer BT, infer BS, any> ? Selected<BT, BS> : unknown
 export type VarOf<T> = T extends TypedDocumentNode<any, infer V> ? V : unknown
