@@ -6,9 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "release:major": "bun run release.pre && dotenv release-it -i major --ci",
-    "release:minor": "bun run release.pre && dotenv release-it -i minor --ci",
-    "release:patch": "bun run release.pre && dotenv release-it -i patch --ci",
+    "release:major": "bun run release.pre && dotenv release-it -i major --ci && bun run publish",
+    "release:minor": "bun run release.pre && dotenv release-it -i minor --ci && bun run publish",
+    "release:patch": "bun run release.pre && dotenv release-it -i patch --ci && bun run publish",
     "release.pre": "bun sync-pack && bun run build && bun test",
     "sync-pack": "bun syncpack fix-mismatches",
     "build": "bun build:cli && bun build:codegen && bun build:runtime && cp package.json dist/package.json && cp bun.lockb dist/bun.lockb",
@@ -58,8 +58,7 @@
       "release": true
     },
     "hooks": {
-      "after:bump": "bun run build",
-      "after:git:release": "bun run publish --auth-type legacy"
+      "after:bump": "bun run build"
     },
     "plugins": {
       "@release-it/bumper": {
