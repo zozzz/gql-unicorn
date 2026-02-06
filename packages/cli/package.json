@@ -25,7 +25,7 @@
     "url": "https://github.com/zozzz/gql-unicorn"
   },
   "bin": {
-    "gql-unicorn": "./cli.js"
+    "gql-unicorn": "./cli.mjs"
   },
   "dependencies": {
     "@gql-unicorn/codegen": "workspace:*",
