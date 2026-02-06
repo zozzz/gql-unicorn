@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.7](https://github.com/zozzz/gql-unicorn/compare/0.5.6...0.5.7) (2026-02-06)
+
+
+* TypeOf<typeof Fragment> returns the selected fragmant type ([74fb97c](https://github.com/zozzz/gql-unicorn/commit/74fb97c59780bab4a3159d246891013960f1017d))
+
 ## [0.5.6](https://github.com/zozzz/gql-unicorn/compare/0.5.5...0.5.6) (2026-02-03)
 
 ## [0.5.5](https://github.com/zozzz/gql-unicorn/compare/0.5.4...0.5.5) (2026-02-03)
