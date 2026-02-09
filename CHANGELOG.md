@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.13](https://github.com/zozzz/gql-unicorn/compare/0.5.12...0.5.13) (2026-02-09)
+
+
+* missing default __typename selection on union and interface types ([60ecdbd](https://github.com/zozzz/gql-unicorn/commit/60ecdbd0eb372e2871f2249e4b5e10bb7bede439))
+
 ## [0.5.12](https://github.com/zozzz/gql-unicorn/compare/0.5.11...0.5.12) (2026-02-06)
 
 ## [0.5.11](https://github.com/zozzz/gql-unicorn/compare/0.5.10...0.5.11) (2026-02-06)
