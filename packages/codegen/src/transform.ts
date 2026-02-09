@@ -616,9 +616,10 @@ class Transformer {
     #selectR(type: GraphQLType): string {
         const bare = this.#bareType(type)
         if (isUnionType(bare)) {
-            return "[]"
+            const allScalars = bare.getTypes().every(t => bareIsScalar(t))
+            return allScalars ? "[]" : `["__typename"]`
         } else if (isInterfaceType(bare)) {
-            return "[]"
+            return `["__typename"]`
         } else {
             return `["__typename"]`
         }
