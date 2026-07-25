@@ -410,6 +410,21 @@ describe("runtime", () => {
             // )
         })
 
+        test("articles2", () => {
+            testQuery<
+                "articles2",
+                Array<{
+                    __typename: "Article"
+                    id: string
+                    tags?: Array<{ __typename: string; tag: string }> | null
+                }>,
+                never
+            >(
+                G.queryArticles2({ filter: { title: { eq: "example" } } }, q => q.id.tags(q => q.tag)),
+                `query{articles2(filter:{title:{eq:"example"}}){__typename,id,tags{__typename,tag}}}`
+            )
+        })
+
         test("self recursive 1/1", () => {
             testQuery<
                 "afc",

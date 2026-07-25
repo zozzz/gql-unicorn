@@ -6,6 +6,7 @@ type Query {
     users(filter: UserFilter!): [User!]!
     usersOptionalFilter(filter: UserFilter): [User!]!
     articles(filter: ArticleFilter): [Article!]!
+    articles2(filter: ArticleFilter2): [Article!]!
     location(id: ID!): Location
     currentUserId: ID
     selfRecursive(id: ID!): SelfRecursive
@@ -69,6 +70,10 @@ type Article implements Node {
 
 input ArticleFilter {
     title: String!
+}
+
+input ArticleFilter2 {
+    title: StringFilter!
 }
 
 input ArticleUpdate {
@@ -151,4 +156,16 @@ input AFCFilter {
 input AFCOrder {
     id: OrderDirection
     kind: OrderDirection
+}
+
+input StringFilter @oneOf {
+	and: [StringFilter!]
+	or: [StringFilter!]
+	not: StringFilter
+	eq: String
+	gt: String
+	gte: String
+	lt: String
+	lte: String
+	in: [String!]
 }

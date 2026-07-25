@@ -305,22 +305,30 @@ class Transformer {
     }
 
     #generateInput(type: GraphQLInputObjectType, name: string): string[] {
-        return [
+        const fname = type.isOneOf ? `${name}OneOf` : name
+        const result = [
             ...this.#comment(type.description),
-            `export type ${name} = {`,
-            ...this.#generateInputFields(type.getFields()),
+            `export type ${fname} = {`,
+            ...this.#generateInputFields(type.getFields(), type.isOneOf),
             `}`
         ]
+
+        if (type.isOneOf) {
+            this.#import(RuntimeLib, "ExactlyOne", true)
+            result.push(`export type ${name} = ExactlyOne<${fname}>`)
+        }
+
+        return result
     }
 
-    #generateInputFields(fields: GraphQLInputFieldMap): string[] {
+    #generateInputFields(fields: GraphQLInputFieldMap, isOneOf: boolean): string[] {
         const result: string[] = []
         for (const [name, { type, description, deprecationReason, defaultValue }] of Object.entries(fields)) {
             if (name === "__typename") {
                 continue
             }
             result.push(
-                ...this.#generateField(null, name, type, description, deprecationReason, defaultValue).map(
+                ...this.#generateField(null, name, type, description, deprecationReason, defaultValue, isOneOf).map(
                     v => `${this.#indent}${v}`
                 )
             )
@@ -334,13 +342,16 @@ class Transformer {
         type: GraphQLType,
         description?: string | null,
         deprecationReason?: string | null,
-        defaultValue?: unknown
+        defaultValue?: unknown,
+        isOneOf: boolean = false
     ): string[] {
         const result: string[] = []
         result.push(...this.#comment(description, deprecationReason, defaultValue))
         const ft = isNonNullType(type)
             ? `: ${this.#typename(type.ofType, false)}`
-            : `?: ${this.#typename(type, false)} | null`
+            : isOneOf
+              ? `: ${this.#typename(type, false)}`
+              : `?: ${this.#typename(type, false)} | null`
         result.push(`${name}${ft}`)
         return result
     }
