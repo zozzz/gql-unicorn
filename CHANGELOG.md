@@ -1,5 +1,10 @@
 # Changelog
 
+# [0.6.0](https://github.com/zozzz/gql-unicorn/compare/0.5.14...0.6.0) (2026-07-25)
+
+
+* add oneOf input support ([47b3201](https://github.com/zozzz/gql-unicorn/commit/47b3201efe239297e436464930cd86df406df7ee))
+
 ## [0.5.14](https://github.com/zozzz/gql-unicorn/compare/0.5.13...0.5.14) (2026-02-09)
 
 ## [0.5.13](https://github.com/zozzz/gql-unicorn/compare/0.5.12...0.5.13) (2026-02-09)
