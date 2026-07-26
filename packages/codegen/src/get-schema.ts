@@ -19,7 +19,7 @@ async function introspectionQuery(url: string, headers: Record<string, string>) 
         headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify({
             operationName: "IntrospectionQuery",
-            query: gq.getIntrospectionQuery()
+            query: gq.getIntrospectionQuery({ oneOf: true })
         })
     })
 
