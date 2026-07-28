@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.2](https://github.com/zozzz/gql-unicorn/compare/0.6.1...0.6.2) (2026-07-28)
+
+
+* arguments infinite type ([24b3f45](https://github.com/zozzz/gql-unicorn/commit/24b3f45f2b26508f7761315fa1355efaa3f9a83a))
+
 ## [0.6.1](https://github.com/zozzz/gql-unicorn/compare/0.6.0...0.6.1) (2026-07-26)
 
 # [0.6.0](https://github.com/zozzz/gql-unicorn/compare/0.5.14...0.6.0) (2026-07-25)
