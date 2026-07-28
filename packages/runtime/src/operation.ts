@@ -2,16 +2,23 @@ import type { Concat, Eval, MergeUnion } from "./common"
 import type { Input } from "./type"
 import { type Variable } from "./var"
 
-export type Arguments<I> =
-    I extends Array<infer V>
-        ? Array<Arguments<V>> | Variable
-        : I extends Record<string, any>
-          ?
-                | {
-                      [K in keyof I]: K extends string ? Arguments<I[K]> : never
-                  }
-                | Variable
-          : I | Variable
+// type Arguments<I, D extends unknown[] = []> = D["length"] extends 10 ? I | Variable
+// +     : I extends Array<infer V> ? Array<Arguments<V, D>> | Variable
+// +     : I extends Record<string, any> ? {
+// +         [K in keyof I]: K extends string ? Arguments<I[K], [...D, unknown]> : never;
+// +     } | Variable : I | Variable;
+
+export type Arguments<I, D extends unknown[] = []> = D["length"] extends 5
+    ? never
+    : I extends Array<infer V>
+      ? Array<Arguments<V, [...D, unknown]>> | Variable
+      : I extends Record<string, any>
+        ?
+              | {
+                    [K in keyof I]: K extends string ? Arguments<I[K], [...D, unknown]> : never
+                }
+              | Variable
+        : I | Variable
 
 // export type Arguments<I extends Input> = _Arguments<I>
 // export type ArgsParam<I extends Input, A extends object> = {
