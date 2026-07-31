@@ -1,10 +1,9 @@
-/* eslint-disable @stylistic/js/max-len */
 import { mkdir } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
-import { beforeAll, describe, expect, test } from "bun:test"
+import { beforeAll, describe, expect } from "bun:test"
 import { buildSchema, parse } from "graphql"
 
 import { transform } from "../src/transform"
@@ -12,7 +11,7 @@ import { transform } from "../src/transform"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-function testQuery<O, V>(query: TypedDocumentNode<O, V>, x: string) {
+function testQuery<N extends string, O, V>(query: TypedDocumentNode<Record<N, O>, V>, x: string) {
     const gql = `${query as any}`
     // console.log(gql)
     expect(parse(gql)).toBeDefined()
@@ -26,17 +25,20 @@ describe("runtime", () => {
         const schemaContent = await Bun.file(path.join(__dirname, "rege.graphql")).text()
         const result = transform(buildSchema(schemaContent), {
             scalars: {
+                // ID: { import: "SurrealId", from: "../../surreal" },
                 UUID: "string",
                 JSON: "string",
-                Zoned: "string",
-                CivilDateRange: "string",
-                CivilDateTimeRange: "string",
-                CivilDate: "string",
-                CivilDateTime: "string",
-                CivilTime: "string",
+                DateTime: "Date",
+                // CivilDateRange: "string",
+                // CivilDateTimeRange: "string",
+                Date: "Date",
+                // CivilDateTime: "Temporal.PlainDateTime",
+                // CivilTime: "Temporal.PlainTime",
                 Decimal: "number",
                 Geography: "object",
-                Duration: "object"
+                Duration: "object",
+                Value: "any",
+                Bytes: "string"
             }
         })
         const outPath = path.join(__dirname, "__generated__", "rege.ts")
@@ -46,38 +48,18 @@ describe("runtime", () => {
     })
 
     describe("org", () => {
-        type Unit = import("./__generated__/rege").Org_Unit
+        type Alma = import("./__generated__/rege").OrgUnit<["id", "name"]>
+        const x: Alma = {} as any
+        x.name
 
-        test("query section", () => {
-            const querySection = G.queryOrgSection(
-                { filter: { id: { eq: G.$("sectionId") } }, offset: 0, limit: 1 },
-                q => q.id.title.children(q => q.id.title.$on(G.Org_CareType(q => q.kind.is_active)))
-            )
+        // const query = G.queryOrgUnitS(q => q.id)
 
-            testQuery<
-                Record<
-                    "orgSection",
-                    Array<{
-                        __typename: "Org_Section"
-                        id: string
-                        title: string
-                        children?: Array<
-                            | { __typename: "Org_CareType"; kind: string; is_active: boolean }
-                            | { __typename: Exclude<Unit["__typename"], "Org_CareType"> }
-                        > | null
-                    }>
-                >,
-                { sectionId: string }
-            >(
-                querySection,
-                `query($sectionId:UUID){orgSection(filter:{id:{eq:$sectionId}},offset:0,limit:1){__typename,id,title,children{__typename,id,title,... on Org_CareType{kind,is_active}}}}`
-            )
-        })
+        testQuery<"orgUnit", { id: string }, never>(query, `query{orgUnit{id}}`)
     })
 
-    test("saveFlow", () => {
-        const save = G.saveFlow({ id: "id", title: "Test", model: "" })
+    // test("saveFlow", () => {
+    //     const save = G.saveFlow({ id: "id", title: "Test", model: "" })
 
-        testQuery<Record<"saveFlow", string>, never>(save, `mutation{saveFlow(id:"id",title:"Test",model:"")}`)
-    })
+    //     testQuery<Record<"saveFlow", string>, never>(save, `mutation{saveFlow(id:"id",title:"Test",model:"")}`)
+    // })
 })

@@ -8,7 +8,7 @@ import { type Variable } from "./var"
 // +         [K in keyof I]: K extends string ? Arguments<I[K], [...D, unknown]> : never;
 // +     } | Variable : I | Variable;
 
-export type Arguments<I, D extends unknown[] = []> = D["length"] extends 5
+export type Arguments<I, D extends unknown[] = []> = D["length"] extends 10
     ? never
     : I extends Array<infer V>
       ? Array<Arguments<V, [...D, unknown]>> | Variable

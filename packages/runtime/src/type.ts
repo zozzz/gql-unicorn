@@ -84,3 +84,5 @@ export type IsAtomic<T> =
           : T extends { __typename: string }
             ? false
             : true
+
+export type GetTypeName<T> = T extends { __typename: infer N extends string } ? N : "__UNKNOWN__"

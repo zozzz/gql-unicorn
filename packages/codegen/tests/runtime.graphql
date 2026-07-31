@@ -38,6 +38,7 @@ type Subscription {
 
 interface Node {
     id: ID!
+    parent: Node
 }
 
 type User implements Node {
@@ -47,6 +48,7 @@ type User implements Node {
     name: String!
     "Articles created by user"
     articles(count: Int!): [Article!]!
+    parent: Node
 }
 
 input UserFilter {
@@ -66,6 +68,7 @@ type Article implements Node {
     tags: [Tag!]
     "Events..."
     events: [Event!]!
+    parent: Node
 }
 
 input ArticleFilter {
@@ -83,6 +86,7 @@ input ArticleUpdate {
 type Tag implements Node {
     id: ID!
     tag: String!
+    parent: Node
 }
 
 
@@ -91,11 +95,13 @@ interface Event {
 }
 
 type UserChangeEvent implements Event {
+    source: String!
     prev: User!
     curr: User!
 }
 
 type ArticleChangeEvent implements Event {
+    source: String!
     "Previous values of Article"
     prev: Article!
     "Current values of Article"

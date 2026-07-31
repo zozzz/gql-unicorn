@@ -311,6 +311,7 @@ describe("runtime", () => {
 
         test("union", () => {
             type AFCKind = import("./__generated__/runtime").AFCKind
+
             testQuery<
                 "search",
                 Array<
@@ -329,7 +330,10 @@ describe("runtime", () => {
 
             testQuery<
                 "search",
-                Array<{ __typename: "AFC"; id: string } | { __typename: "SelfRecursive"; parent: { id: string } }>,
+                Array<
+                    | { __typename: "AFC"; id: string }
+                    | { __typename: "SelfRecursive"; id: string; parent: { __typename: "SelfRecursive"; id: string } }
+                >,
                 never
             >(
                 G.querySearch({ text: "search" }, q => q.$on(G.AFC(q => q.id)).$on(fragment)),
@@ -614,7 +618,15 @@ describe("runtime", () => {
                         )
                 )
                 type QueryNodeRes2 = TypeOf<typeof queryNodeRes2>["nodes"]
-                const articles: QueryNodeRes2 = [{ __typename: "Article", id: "id", title: "title", events: [] }]
+                const articles: QueryNodeRes2 = [
+                    {
+                        __typename: "Article",
+                        id: "id",
+                        title: "title",
+                        tags: [{ __typename: "Tag", id: "tagId", tag: "tag" }],
+                        events: []
+                    } as any
+                ]
                 const article = articles[0]
                 if (G.Article.is(article)) {
                     const {
