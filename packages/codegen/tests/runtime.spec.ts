@@ -167,19 +167,14 @@ describe("runtime", () => {
             )
 
             testQuery<"user", { __typename: string; id: string } | null | undefined, { id: string }>(
-                G.queryUser({ id: G.$$ }, q => q.id),
+                G.queryUser({ id: G.$("id") }, q => q.id),
                 `query($id:ID!){user(id:$id){__typename,id}}`
             )
 
-            testQuery<"user", { __typename: string; id: string } | null | undefined, { id: string }>(
-                G.queryUser(G.$$, q => q.id),
-                `query($id:ID!){user(id:$id){__typename,id}}`
-            )
-
-            testQuery<"user", { __typename: string; id: string } | null | undefined, { prefix__id: string }>(
-                G.queryUser(G.$("prefix"), q => q.id),
-                `query($prefix__id:ID!){user(id:$prefix__id){__typename,id}}`
-            )
+            // testQuery<"user", { __typename: string; id: string } | null | undefined, { varName: { id: string } }>(
+            //     G.queryUser(G.$("varName"), q => q.id),
+            //     `query($varName:ID!){user($varName){__typename,id}}`
+            // )
 
             testQuery<"user", { __typename: string; id: string } | null | undefined, { userId: string }>(
                 G.queryUser({ id: G.$("userId") }, q => q.id),
@@ -200,25 +195,25 @@ describe("runtime", () => {
                 { __typename: string; articles: Array<{ __typename: string }> } | null | undefined,
                 { id: string; articles__count: number }
             >(
-                G.queryUser(G.$$, q => q.articles({ count: G.$$ }, q => q.id)),
+                G.queryUser({ id: G.$("id") }, q => q.articles({ count: G.$$ }, q => q.id)),
                 `query($id:ID!,$articles__count:Int!){user(id:$id){__typename,articles(count:$articles__count){__typename,id}}}`
             )
 
-            testQuery<
-                "user",
-                { __typename: string; articles: Array<{ __typename: string }> } | null | undefined,
-                { id: string; articles__count: number }
-            >(
-                G.queryUser(G.$$, q => q.articles(G.$$, q => q.id)),
-                `query($id:ID!,$articles__count:Int!){user(id:$id){__typename,articles(count:$articles__count){__typename,id}}}`
-            )
+            // testQuery<
+            //     "user",
+            //     { __typename: string; articles: Array<{ __typename: string }> } | null | undefined,
+            //     { id: string; articles__count: number }
+            // >(
+            //     G.queryUser({ id: G.$("id") }, q => q.articles(G.$$, q => q.id)),
+            //     `query($id:ID!,$articles__count:Int!){user(id:$id){__typename,articles(count:$articles__count){__typename,id}}}`
+            // )
 
             testQuery<
                 "user",
                 { __typename: string; articles: Array<{ __typename: "Article"; id: string }> } | null | undefined,
                 { id: string; articleCount: number }
             >(
-                G.queryUser(G.$$, q => q.articles({ count: G.$("articleCount") }, q => q.id)),
+                G.queryUser({ id: G.$("id") }, q => q.articles({ count: G.$("articleCount") }, q => q.id)),
                 `query($id:ID!,$articleCount:Int!){user(id:$id){__typename,articles(count:$articleCount){__typename,id}}}`
             )
 

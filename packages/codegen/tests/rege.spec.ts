@@ -48,11 +48,10 @@ describe("runtime", () => {
     })
 
     describe("org", () => {
-        type Alma = import("./__generated__/rege").OrgUnit<["id", "name"]>
+        type Alma = import("./__generated__/rege").OrgUnit<["id", "name", "parent"]>
         const x: Alma = {} as any
-        x.name
 
-        // const query = G.queryOrgUnitS(q => q.id)
+        const query = G.queryOrgUnit(q => q.id.kind.name)
 
         testQuery<"orgUnit", { id: string }, never>(query, `query{orgUnit{id}}`)
     })

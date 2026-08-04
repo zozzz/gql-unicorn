@@ -6,6 +6,8 @@ export interface Variable<N extends string = string> {
     readonly [VARIABLE]: N
 }
 
+export type StripVariable<T> = T extends infer U ? (U extends Variable ? never : U) : never
+
 // export type VarRef<N> = { [VARIABLE]: N }
 
 export const isVariable = checker<Variable>(VARIABLE)
@@ -31,3 +33,5 @@ export const $ = <N extends string>(name: N) => ({ [VARIABLE]: name }) as Variab
 export const $$ = { [VARIABLE]: "$" } as const
 
 export type Vars = Record<string, any>
+
+export type MergeVars<V1, V2> = [keyof V2] extends [never] ? V1 : [keyof V1] extends [never] ? V2 : V1 & V2

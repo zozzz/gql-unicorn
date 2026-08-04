@@ -121,14 +121,12 @@ class Transformer {
         this.#import(RuntimeLib, "Input", true)
         this.#import(RuntimeLib, "TypeInfo", true)
 
-        const tiFowardDefs: string[] = []
         const tiDefs: string[] = []
         const argTypes: string[] = []
         const tiTypes: string[] = []
 
         for (const { name, code } of Object.values(this.#typeInfos)) {
-            tiFowardDefs.push(`const ${name} = {} as TypeInfo`)
-            tiDefs.push(`assign(${name}, ${code})`)
+            tiDefs.push(`const ${name} = ${code} as const`)
         }
 
         for (const [key, { code }] of Object.entries(this.#argTypes)) {
@@ -144,10 +142,7 @@ class Transformer {
             tiTypes.push(`} as const`)
         }
 
-        const typeInfos =
-            argTypes.length > 0 || tiTypes.length > 0
-                ? [...tiFowardDefs, `const assign = Object.assign`, ...tiDefs, ...argTypes, ...tiTypes]
-                : []
+        const typeInfos = argTypes.length > 0 || tiTypes.length > 0 ? [...tiDefs, ...argTypes, ...tiTypes] : []
 
         this.#parts.unshift(...Banner, ...this.#generateImports(), ...this.#enums, ...typeInfos)
         return [
@@ -381,6 +376,8 @@ class Transformer {
     }
 
     #generateInput(type: GraphQLInputObjectType, name: string): string[] {
+        this.#import(RuntimeLib, "Variable", true)
+
         const fname = type.isOneOf ? `${name}OneOf` : name
         const result = [
             ...this.#comment(type.description),
@@ -403,34 +400,44 @@ class Transformer {
             if (name === "__typename") {
                 continue
             }
-            result.push(
-                ...this.#generateField(null, name, type, description, deprecationReason, defaultValue, isOneOf).map(
-                    v => `${this.#indent}${v}`
-                )
+
+            const fieldDef = []
+            fieldDef.push(
+                ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`)
             )
+
+            if (isNonNullType(type)) {
+                fieldDef.push(`${this.#indent}${name}: ${this.#typename(type.ofType, false)} | Variable`)
+            } else {
+                fieldDef.push(
+                    `${this.#indent}${name}${isOneOf ? "" : "?"}: ${this.#typename(type, false)} | Variable | null`
+                )
+            }
+
+            result.push(...fieldDef)
         }
         return result
     }
 
-    #generateField(
-        context: GraphQLType | null,
-        name: string,
-        type: GraphQLType,
-        description?: string | null,
-        deprecationReason?: string | null,
-        defaultValue?: unknown,
-        isOneOf: boolean = false
-    ): string[] {
-        const result: string[] = []
-        result.push(...this.#comment(description, deprecationReason, defaultValue))
-        const ft = isNonNullType(type)
-            ? `: ${this.#typename(type.ofType, false)}`
-            : isOneOf
-              ? `: ${this.#typename(type, false)}`
-              : `?: ${this.#typename(type, false)} | null`
-        result.push(`${name}${ft}`)
-        return result
-    }
+    // #generateField(
+    //     context: GraphQLType | null,
+    //     name: string,
+    //     type: GraphQLType,
+    //     description?: string | null,
+    //     deprecationReason?: string | null,
+    //     defaultValue?: unknown,
+    //     isOneOf: boolean = false
+    // ): string[] {
+    //     const result: string[] = []
+    //     result.push(...this.#comment(description, deprecationReason, defaultValue))
+    //     const ft = isNonNullType(type)
+    //         ? `: ${this.#typename(type.ofType, false)}`
+    //         : isOneOf
+    //           ? `: ${this.#typename(type, false)}`
+    //           : `?: ${this.#typename(type, false)} | null`
+    //     result.push(`${name}${ft}`)
+    //     return result
+    // }
 
     #generateInterface(type: GraphQLInterfaceType, name: string): string[] {
         const types = this.#__typenames(type)
@@ -497,14 +504,14 @@ class Transformer {
             // console.log({ selectedType })
 
             if (args.length > 0) {
+                this.#import(RuntimeLib, "Arguments", true)
                 ;[argType, argInfo, argOptional] = this.#argInfoType(args)
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
-                    const args = `ArgsParam<${argType}, AA>`
                     const optArgs = argOptional ? " | [string] | []" : ""
                     // <AA extends Arguments<A>>(...args: [string, AA] | [AA]): BuildReturn<T, {} & ToVars<A, [], AA>>
                     builderT =
-                        `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]${optArgs}) `
+                        `<AA extends Arguments<AA, ${argType}>>(...args: [string, AA] | [AA]${optArgs}) `
                         + `=> BuildReturn<"${name}", ${typeValue}, {} & ToVars<${argType}, [], AA>>`
                 } else {
                     this.#import(RuntimeLib, "SelectionDef", true)
@@ -513,12 +520,11 @@ class Transformer {
                     typeValue = this.#subSelectType(this.#selectName(type), R, "{}", "[]")
                     argInfo = `[${argInfo}, ${this.#bareTypename(type)}]`
                     const sfn = `(select: ${typeValue}) => Selection<ST, SV>`
-                    const args = `ArgsParam<${argType}, AA>`
                     const optArgs = argOptional ? ` | [string, ${sfn}] | [${sfn}]` : ""
 
                     builderT =
-                        `<ST, SV extends Vars, AA extends Arguments<${argType}>>`
-                        + `(...args: [string, ${args}, ${sfn}] | [${args}, ${sfn}]${optArgs}) `
+                        `<ST, SV extends Vars, AA extends Arguments<AA, ${argType}>>`
+                        + `(...args: [string, AA, ${sfn}] | [AA, ${sfn}]${optArgs}) `
                         + `=> BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV & ToVars<${argType}, [], AA>>`
 
                     const outputFlags = this.#typeIntoBuilderOutputFlags(type)
@@ -530,7 +536,7 @@ class Transformer {
                         `{ input: ${argType}, output: ${JSON.stringify(outputFlags)}, operation: "${name}" }`
                     )
                     const builderFnOptArgs = argOptional ? ` | [string] | []` : ""
-                    builderFn = `<AA extends Arguments<${argType}>>(...args: [string, ${args}] | [${args}]${builderFnOptArgs}) => ${builderFnRet}`
+                    builderFn = `<AA extends Arguments<AA, ${argType}>>(...args: [string, AA] | [AA]${builderFnOptArgs}) => ${builderFnRet}`
                 }
             } else {
                 if (bareIsScalar(type)) {
@@ -598,14 +604,17 @@ class Transformer {
         this.#import(RuntimeLib, "Selection", true)
 
         const fields = isUnionType(type) ? [] : this.#selectFields(type, type.getFields())
+        const typeName = this.#selectName(type)
 
         fields.push(...this.#onFns(type))
         fields.push(...this.#buildFn(type))
 
         // const R = isObjectType(type) ? `[...R, "__typename"]` : "R"
+        // R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never
         result.push(
             ...this.#comment(type.description),
-            `export interface ${this.#selectName(type)}<${SelectTypeArgs}> `
+            `export type ${typeName}<${SelectTypeArgs}> = Omit<_${typeName}<R, V, P, B, E>, E>`,
+            `export interface _${typeName}<${SelectTypeArgs}> `
                 + `extends Selection<${this.#bareTypename(type)}<R>, V> {`,
             ...fields.map(v => `${this.#indent}${v}`),
             `}`
@@ -636,9 +645,9 @@ class Transformer {
 
         this.#import(RuntimeLib, "ExtendSelection", true)
         this.#import(RuntimeLib, "GetSelectionDef", true)
+
         if (args.length > 0) {
             this.#import(RuntimeLib, "Arguments", true)
-            this.#import(RuntimeLib, "ArgsParam", true)
             this.#import(RuntimeLib, "ToVars", true)
             const [argumentType, _, argOptional] = this.#argInfoType(args)
             const VP = `[...P, ${JSON.stringify(name)}]`
@@ -646,32 +655,34 @@ class Transformer {
             if (bareIsScalar(type)) {
                 const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
                 const V = `V & ToVars<${argumentType}, ${VP}, A>`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
-                const args = `ArgsParam<${argumentType}, A>`
+                const E = `E | ${JSON.stringify(name)}`
+                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
                 const qm = argOptional ? "?" : ""
-                result.push(`${name}<A extends Arguments<${argumentType}>>(args${qm}: ${args}): ${returnType}`)
+                result.push(`${name}<A extends Arguments<A, ${argumentType}>>(args${qm}: A): ${returnType}`)
             } else {
                 const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
                 const V = `V & SV & ToVars<${argumentType}, ${VP}, A>`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
+                const E = `E | ${JSON.stringify(name)}`
+                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SV>`
-                const args = `ArgsParam<${argumentType}, A>`
                 const optArgs = argOptional ? ` | [${subf}]` : ""
                 result.push(
-                    `${name}<A extends Arguments<${argumentType}>, ST, SV extends Vars>(...args: [${args}, ${subf}]${optArgs}): ${returnType}`
+                    `${name}<A extends Arguments<A, ${argumentType}>, ST, SV extends Vars>(...args: [A, ${subf}]${optArgs}): ${returnType}`
                 )
             }
         } else {
             if (bareIsScalar(type)) {
                 const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
                 const V = `V`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
+                const E = `E | ${JSON.stringify(name)}`
+                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
                 result.push(`${name}: ${returnType}`)
             } else {
                 const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
                 const V = `V & SV`
-                const returnType = this.#omit(this.#selectType(contextName, R, V, "P", "B", "E"), name)
+                const E = `E | ${JSON.stringify(name)}`
+                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SV>`
                 result.push(`${name}<ST, SV extends Vars>(select: ${subf}): ${returnType}`)
@@ -686,16 +697,15 @@ class Transformer {
         this.#import(RuntimeLib, "GetTypeName", true)
 
         // this.#import(RuntimeLib, "OnFnResult", true)
-        const selfT = this.#omit(
-            this.#selectType(
-                this.#selectName(type),
-                `ExtendSelection<R, { $on: Record<GetTypeName<ST>, GetSelectionDef<ST>> }>`,
-                "V & SV",
-                "P",
-                "B",
-                "E"
-            )
+        const selfT = this.#selectType(
+            this.#selectName(type),
+            `ExtendSelection<R, { $on: Record<GetTypeName<ST>, GetSelectionDef<ST>> }>`,
+            "V & SV",
+            "P",
+            "B",
+            "E"
         )
+
         const onSelf = `$on<ST, SV extends Vars>(fragment: Selection<ST, SV>): ${selfT}`
         const result: string[] = ["/**", " * Constraint type selection", " */", onSelf]
 
@@ -724,13 +734,14 @@ class Transformer {
         return result
     }
 
-    #buildFn(type: GraphQLType): string[] {
+    #buildFn(_type: GraphQLType): string[] {
         this.#import(RuntimeLib, "BuildReturn", true)
 
-        const typeName = this.#bareTypename(type)
+        // const typeName = this.#bareTypename(type)
         const result: string[] = ["/**", " * Build the typed document node", " */"]
         result.push(
-            `$build: B extends { input: infer BI, output: infer OF extends BuilderOutputFlags, operation: infer OP extends string } ? () => BuildReturn<OP, ResultByOutputFlags<${typeName}<R>, OF>, ToVars<BI, P, V>> : never`
+            // `$build: B extends { input: infer BI, output: infer OF extends BuilderOutputFlags, operation: infer OP extends string } ? () => BuildReturn<OP, ResultByOutputFlags<${typeName}<R>, OF>, ToVars<BI, P, V>> : never`
+            `$build: [B] extends [never] ? never : () => any`
         )
         // result.push(`$build(...args: any[]): any`)
 
@@ -784,6 +795,8 @@ class Transformer {
     }
 
     #argInfoType(args: ReadonlyArray<GraphQLArgument>): [string, string, boolean] {
+        this.#import(RuntimeLib, "Variable", true)
+
         let allOptional = true
         const argKey = args
             .toSorted((a, b) => a.name.localeCompare(b.name))
@@ -798,9 +811,9 @@ class Transformer {
                 let fieldType: string
                 if (isNonNullType(type)) {
                     allOptional = false
-                    fieldType = `: ${this.#typename(type.ofType, false)}`
+                    fieldType = `: ${this.#typename(type.ofType, false)} | Variable`
                 } else {
-                    fieldType = `?: ${this.#typename(type, false)} | null`
+                    fieldType = `?: ${this.#typename(type, false)} | Variable | null`
                 }
 
                 result.push(
@@ -838,7 +851,7 @@ class Transformer {
     #typeInfoCode(type: GraphQLType, realTypename?: string): string {
         realTypename ??= type.toString()
         if (isListType(type)) {
-            return `{ tn: ${JSON.stringify(realTypename)}, items: ${this.#typeInfo(type.ofType).name} }`
+            return `{ tn: ${JSON.stringify(realTypename)}, get items() { return ${this.#typeInfo(type.ofType).name} } }`
         } else if (isNonNullType(type)) {
             return this.#typeInfoCode(type.ofType, realTypename)
         } else if (isInputObjectType(type)) {
@@ -846,7 +859,7 @@ class Transformer {
                 acc.push(`${name}: ${this.#typeInfo(field.type).name}`)
                 return acc
             }, [])
-            return `{ tn: ${JSON.stringify(realTypename)}, fields: { ${fields.join(", ")} } }`
+            return `{ tn: ${JSON.stringify(realTypename)}, get fields() { return { ${fields.join(", ")} } } }`
         } else if (isEnumType(type)) {
             return `{ tn: ${JSON.stringify(realTypename)}, enum: ${this.#bareType(type).name} }`
         } else if (isScalarType(type)) {
@@ -856,10 +869,10 @@ class Transformer {
                 acc.push(`${name}: ${this.#typeInfo(field.type).name}`)
                 return acc
             }, [])
-            return `{ tn: ${JSON.stringify(realTypename)}, fields: { ${fields.join(", ")} } }`
+            return `{ tn: ${JSON.stringify(realTypename)}, get fields() { return { ${fields.join(", ")} } } }`
         } else if (isUnionType(type)) {
             const types = type.getTypes().map(t => this.#typeInfo(t).name)
-            return `{ tn: ${JSON.stringify(realTypename)}, union: [ ${types.join(", ")} ] }`
+            return `{ tn: ${JSON.stringify(realTypename)}, get union() { return [ ${types.join(", ")} ] } }`
         } else {
             return `{ tn: ${JSON.stringify(realTypename)} }`
         }
@@ -1022,11 +1035,11 @@ class Transformer {
     //     }
     // }
 
-    #omit(t: string, field?: string): string {
-        this.#import(RuntimeLib, "SelectedFields", true)
-        return `Omit<${t}, SelectedFields<R>${field ? ` | "${field}"` : ""} | E>`
-        // return `Omit<${t}, keyof R | "${field}" | "$build" | "$gql">`
-    }
+    // #omit(t: string, field?: string): string {
+    //     this.#import(RuntimeLib, "SelectedFields", true)
+    //     return `Omit<${t}, SelectedFields<R>${field ? ` | "${field}"` : ""} | E>`
+    //     // return `Omit<${t}, keyof R | "${field}" | "$build" | "$gql">`
+    // }
 
     #comment(
         text?: string | null,
