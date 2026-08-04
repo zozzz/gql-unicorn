@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.7.1](https://github.com/zozzz/gql-unicorn/compare/0.7.0...0.7.1) (2026-08-04)
+
 # [0.7.0](https://github.com/zozzz/gql-unicorn/compare/0.6.2...0.7.0) (2026-08-04)
 
 
