@@ -119,8 +119,6 @@ class Transformer {
         this.#import(RuntimeLib, "TypeOf", true)
         this.#import(RuntimeLib, "VarOf", true)
         this.#import(RuntimeLib, "Selected", true)
-        this.#import(RuntimeLib, "Input", true)
-        this.#import(RuntimeLib, "TypeInfo", true)
 
         const tiDefs: string[] = []
         const argTypes: string[] = []
