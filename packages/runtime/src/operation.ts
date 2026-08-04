@@ -1,4 +1,4 @@
-import type { Concat, Eval, MergeUnion } from "./common"
+import type { Concat, Eval, IsAny, IsEmptyObject, MergeUnion } from "./common"
 import { type StripVariable, type Variable } from "./var"
 
 // type Arguments<I, D extends unknown[] = []> = D["length"] extends 10 ? I | Variable
@@ -20,6 +20,7 @@ import { type StripVariable, type Variable } from "./var"
 //         : I | Variable
 
 export type Arguments<I, T> = (T & { [K in keyof I]: K extends keyof T ? I[K] : never }) | Variable
+// export type Arguments<I, T> = (T & { [K in keyof I]: K extends keyof T ? I[K] : never }) | Variable
 
 // export type Arguments<I extends Input> = _Arguments<I>
 // export type ArgsParam<I extends Input, A extends object> = {
@@ -72,9 +73,12 @@ export type Arguments<I, T> = (T & { [K in keyof I]: K extends keyof T ? I[K] : 
 //               }[keyof Arg]
 //             : never
 
-export type ToVars<I, P extends string[], Arg> = Eval<
-    Arg extends Variable<infer N> ? (N extends "$" ? _ToVars<I, P> : _ToVars<I, [N]>) : Extract<I, P, Arg>
->
+export type ToVars<I, P extends string[], Arg> =
+    IsEmpty<Arg> extends true
+        ? never
+        : Arg extends undefined | null
+          ? never
+          : Eval<Arg extends Variable<infer N> ? (N extends "$" ? _ToVars<I, P> : _ToVars<I, [N]>) : Extract<I, P, Arg>>
 
 type _ToVars<I, P extends string[]> = {
     [K in keyof I]: K extends string ? Prefixed<I[K], [...P, K]> : never
@@ -90,22 +94,26 @@ type ____Extract<I, P extends string[], Arg> = UnionToIntersection<_Extract<I, P
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
 
 type _Extract<I, P extends string[], A> =
-    A extends Variable<infer N>
-        ? N extends "$"
-            ? undefined extends I
-                ? { [K in Concat<"__", P>]?: StripVariable<I> }
-                : { [K in Concat<"__", P>]: StripVariable<I> }
-            : undefined extends I
-              ? { [k in N]?: StripVariable<I> }
-              : { [k in N]: StripVariable<I> }
-        : A extends Array<infer AV>
-          ? _ExtractArray<Clean<I>, P, AV>
-          : A extends Record<string, any>
-            ? //   {
-              //       [K in keyof A]: K extends string ? _Extract<ExtractProp<I, K>, [...P, K], A[K]> : never
-              //   }[keyof A]
-              _ExtractRecord<Clean<I>, P, A>
-            : never
+    IsEmpty<A> extends true
+        ? never
+        : A extends Variable<infer N>
+          ? N extends "$"
+              ? undefined extends I
+                  ? { [K in Concat<"__", P>]?: StripVariable<I> }
+                  : { [K in Concat<"__", P>]: StripVariable<I> }
+              : undefined extends I
+                ? { [k in N]?: StripVariable<I> }
+                : { [k in N]: StripVariable<I> }
+          : A extends Array<infer AV>
+            ? _ExtractArray<Clean<I>, P, AV>
+            : A extends Record<string, any>
+              ? //   {
+                //       [K in keyof A]: K extends string ? _Extract<ExtractProp<I, K>, [...P, K], A[K]> : never
+                //   }[keyof A]
+                _ExtractRecord<Clean<I>, P, A>
+              : never
+
+export type IsEmpty<T> = IsAny<T> extends true ? true : IsEmptyObject<T>
 
 // type ExtractProp<I, K extends string> = (I extends null | undefined ? never : I) extends infer U
 //     ? U extends any

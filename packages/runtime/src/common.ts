@@ -22,6 +22,8 @@ export type SObject = Record<string, unknown>
 
 export type IsEmptyObject<I> = I extends { [key: string]: any } ? (keyof I extends never ? true : false) : never
 
+export type IsAny<T> = 0 extends 1 & T ? true : false
+
 type AllKeys<T> = T extends any ? keyof T : never
 
 type TypeOfKey<T, TK extends AllKeys<T>> = T extends { [K in TK]?: any } ? T[TK] : never

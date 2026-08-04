@@ -4,1139 +4,1139 @@ type Attr {
 	value: String!
 }
 
-# input AttrFilter @oneOf {
-# 	and: [AttrFilter!]
-# 	or: [AttrFilter!]
-# 	not: AttrFilter
-# 	id: IDFilter
-# 	name: StringFilter
-# 	value: ValueGqlFilter
-# }
-
-# input AttrOrder @oneOf {
-# 	id: Direction
-# 	name: Direction
-# 	value: Direction
-# }
-
-# enum AuditAction {
-# 	CREATE
-# 	UPDATE
-# 	DELETE
-# }
-
-# input AuditActionFilter @oneOf {
-# 	and: [AuditActionFilter!]
-# 	or: [AuditActionFilter!]
-# 	not: AuditActionFilter
-# 	eq: AuditAction
-# 	in: [AuditAction!]
-# }
-
-# type AuditLog {
-# 	id: ID!
-# 	action: AuditAction!
-# 	data: JSON
-# 	oldData: JSON
-# 	time: DateTime!
-# 	user: User!
-# }
-
-# input AuditLogFilter @oneOf {
-# 	and: [AuditLogFilter!]
-# 	or: [AuditLogFilter!]
-# 	not: AuditLogFilter
-# 	id: IDFilter
-# 	action: AuditActionFilter
-# 	data: JsonFilter
-# 	oldData: JsonFilter
-# 	time: DateTimeFilter
-# 	user: UserFilter
-# }
-
-# input AuditLogOrder @oneOf {
-# 	id: Direction
-# 	action: Direction
-# 	data: Direction
-# 	oldData: Direction
-# 	time: Direction
-# 	user: UserOrder
-# }
-
-# input BoolFilter @oneOf {
-# 	and: [BoolFilter!]
-# 	or: [BoolFilter!]
-# 	not: BoolFilter
-# 	eq: Boolean
-# }
-
-# """
-# Base64-encoded binary data
-# """
-# scalar Bytes
-
-# input BytesFilter @oneOf {
-# 	and: [BytesFilter!]
-# 	or: [BytesFilter!]
-# 	not: BytesFilter
-# 	eq: Bytes
-# }
-
-# type Client {
-# 	id: ID!
-# 	name: String!
-# 	motherName: String
-# 	birthDate: Date
-# 	birthPlace: String
-# 	taj: String
-# 	kenyszi: KenysziClient
-# 	manager: User
-# 	attrs(filter: AttrFilter = null): [Attr!]!
-# }
-
-# input ClientFilter @oneOf {
-# 	and: [ClientFilter!]
-# 	or: [ClientFilter!]
-# 	not: ClientFilter
-# 	id: IDFilter
-# 	name: StringFilter
-# 	motherName: StringFilter
-# 	birthDate: DateFilter
-# 	birthPlace: StringFilter
-# 	taj: StringFilter
-# 	kenyszi: KenysziClientFilter
-# 	manager: UserFilter
-# 	attrs: AttrFilter
-# }
-
-# input ClientOrder @oneOf {
-# 	id: Direction
-# 	name: Direction
-# 	motherName: Direction
-# 	birthDate: Direction
-# 	birthPlace: Direction
-# 	taj: Direction
-# 	kenyszi: KenysziClientOrder
-# 	manager: UserOrder
-# 	attrs: AttrOrder
-# }
-
-# type ClientSection {
-# 	id: ID!
-# 	kind: ClientSectionKind!
-# 	name: String!
-# }
-
-# input ClientSectionFilter @oneOf {
-# 	and: [ClientSectionFilter!]
-# 	or: [ClientSectionFilter!]
-# 	not: ClientSectionFilter
-# 	id: IDFilter
-# 	kind: ClientSectionKindFilter
-# 	name: StringFilter
-# }
-
-# enum ClientSectionKind {
-# 	Feed
-# 	Activity
-# 	Flow
-# }
-
-# input ClientSectionKindFilter @oneOf {
-# 	and: [ClientSectionKindFilter!]
-# 	or: [ClientSectionKindFilter!]
-# 	not: ClientSectionKindFilter
-# 	eq: ClientSectionKind
-# 	in: [ClientSectionKind!]
-# }
-
-# input ClientSectionOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# }
-
-# scalar Date
-
-# input DateFilter @oneOf {
-# 	and: [DateFilter!]
-# 	or: [DateFilter!]
-# 	not: DateFilter
-# 	eq: Date
-# 	gt: Date
-# 	gte: Date
-# 	lt: Date
-# 	lte: Date
-# 	in: [Date!]
-# }
-
-# scalar DateTime
-
-# input DateTimeFilter @oneOf {
-# 	and: [DateTimeFilter!]
-# 	or: [DateTimeFilter!]
-# 	not: DateTimeFilter
-# 	eq: DateTime
-# 	gt: DateTime
-# 	gte: DateTime
-# 	lt: DateTime
-# 	lte: DateTime
-# 	in: [DateTime!]
-# }
-
-# enum Direction {
-# 	ASC
-# 	DESC
-# }
-
-# type Flow {
-# 	id: ID!
-# 	title: String!
-# 	schema: JSON!
-# 	isActive: Boolean!
-# }
-
-# type FlowBlueprint {
-# 	id: ID!
-# 	title: String!
-# 	category: FlowBlueprintCategory!
-# 	schema: JSON!
-# 	subflow: Flow
-# 	isActive: Boolean!
-# }
-
-# type FlowBlueprintCategory {
-# 	id: ID!
-# 	title: String!
-# 	position: Int!
-# }
-
-# input FlowBlueprintCategoryFilter @oneOf {
-# 	and: [FlowBlueprintCategoryFilter!]
-# 	or: [FlowBlueprintCategoryFilter!]
-# 	not: FlowBlueprintCategoryFilter
-# 	id: IDFilter
-# 	title: StringFilter
-# 	position: IntFilter
-# }
-
-# input FlowBlueprintCategoryOrder @oneOf {
-# 	id: Direction
-# 	title: Direction
-# 	position: Direction
-# }
-
-# input FlowBlueprintFilter @oneOf {
-# 	and: [FlowBlueprintFilter!]
-# 	or: [FlowBlueprintFilter!]
-# 	not: FlowBlueprintFilter
-# 	id: IDFilter
-# 	title: StringFilter
-# 	category: FlowBlueprintCategoryFilter
-# 	schema: JsonFilter
-# 	subflow: FlowFilter
-# 	isActive: BoolFilter
-# }
-
-# input FlowBlueprintOrder @oneOf {
-# 	id: Direction
-# 	title: Direction
-# 	category: FlowBlueprintCategoryOrder
-# 	schema: Direction
-# 	subflow: FlowOrder
-# 	isActive: Direction
-# }
-
-# input FlowFilter @oneOf {
-# 	and: [FlowFilter!]
-# 	or: [FlowFilter!]
-# 	not: FlowFilter
-# 	id: IDFilter
-# 	title: StringFilter
-# 	schema: JsonFilter
-# 	isActive: BoolFilter
-# }
-
-# input FlowOrder @oneOf {
-# 	id: Direction
-# 	title: Direction
-# 	schema: Direction
-# 	isActive: Direction
-# }
-
-# input Flow_EntityInput {
-# 	flowId: ID!
-# 	entityId: ID
-# 	unitId: ID
-# 	clientId: ID
-# }
-
-# input IDFilter @oneOf {
-# 	and: [IDFilter!]
-# 	or: [IDFilter!]
-# 	not: IDFilter
-# 	eq: ID
-# 	in: [ID!]
-# }
-
-# input IntFilter @oneOf {
-# 	and: [IntFilter!]
-# 	or: [IntFilter!]
-# 	not: IntFilter
-# 	eq: Int
-# 	gt: Int
-# 	gte: Int
-# 	lt: Int
-# 	lte: Int
-# 	in: [Int!]
-# }
-
-# """
-# A scalar that can represent any JSON value.
-# """
-# scalar JSON
-
-# input JsonFilter @oneOf {
-# 	and: [JsonFilter!]
-# 	or: [JsonFilter!]
-# 	not: JsonFilter
-# 	eq: JSON
-# }
-
-# type KenysziActivity {
-# 	id: ID!
-# 	label: String!
-# }
-
-# input KenysziActivityFilter @oneOf {
-# 	and: [KenysziActivityFilter!]
-# 	or: [KenysziActivityFilter!]
-# 	not: KenysziActivityFilter
-# 	id: IDFilter
-# 	label: StringFilter
-# }
-
-# input KenysziActivityOrder @oneOf {
-# 	id: Direction
-# 	label: Direction
-# }
-
-# type KenysziAgreement {
-# 	id: ID!
-# 	kenyszi: KenysziOrg!
-# 	client: KenysziClient!
-# 	begin: Date!
-# 	end: Date
-# }
-
-# input KenysziAgreementFilter @oneOf {
-# 	and: [KenysziAgreementFilter!]
-# 	or: [KenysziAgreementFilter!]
-# 	not: KenysziAgreementFilter
-# 	id: IDFilter
-# 	kenyszi: KenysziOrgFilter
-# 	client: KenysziClientFilter
-# 	begin: DateFilter
-# 	end: DateFilter
-# }
-
-# input KenysziAgreementOrder @oneOf {
-# 	id: Direction
-# 	kenyszi: KenysziOrgOrder
-# 	client: KenysziClientOrder
-# 	begin: Direction
-# 	end: Direction
-# }
-
-# type KenysziAuth {
-# 	username: String!
-# 	password: String!
-# }
-
-# input KenysziAuthFilter @oneOf {
-# 	and: [KenysziAuthFilter!]
-# 	or: [KenysziAuthFilter!]
-# 	not: KenysziAuthFilter
-# 	username: StringFilter
-# 	password: StringFilter
-# }
-
-# input KenysziAuthOrder @oneOf {
-# 	username: Direction
-# 	password: Direction
-# }
-
-# type KenysziClient {
-# 	id: ID!
-# 	agreements(filter: KenysziAgreementFilter = null): [KenysziAgreement!]!
-# }
-
-# input KenysziClientFilter @oneOf {
-# 	and: [KenysziClientFilter!]
-# 	or: [KenysziClientFilter!]
-# 	not: KenysziClientFilter
-# 	id: IDFilter
-# 	agreements: KenysziAgreementFilter
-# }
-
-# input KenysziClientOrder @oneOf {
-# 	id: Direction
-# 	agreements: KenysziAgreementOrder
-# }
-
-# type KenysziKind {
-# 	id: ID!
-# 	label: String!
-# }
-
-# input KenysziKindFilter @oneOf {
-# 	and: [KenysziKindFilter!]
-# 	or: [KenysziKindFilter!]
-# 	not: KenysziKindFilter
-# 	id: IDFilter
-# 	label: StringFilter
-# }
-
-# input KenysziKindOrder @oneOf {
-# 	id: Direction
-# 	label: Direction
-# }
-
-# type KenysziOrg {
-# 	id: ID!
-# 	nrszhId: NrszhId!
-# 	kind: KenysziKind!
-# 	activity: KenysziActivity!
-# }
-
-# input KenysziOrgFilter @oneOf {
-# 	and: [KenysziOrgFilter!]
-# 	or: [KenysziOrgFilter!]
-# 	not: KenysziOrgFilter
-# 	id: IDFilter
-# 	nrszhId: NrszhIdFilter
-# 	kind: KenysziKindFilter
-# 	activity: KenysziActivityFilter
-# }
-
-# input KenysziOrgOrder @oneOf {
-# 	id: Direction
-# 	nrszhId: NrszhIdOrder
-# 	kind: KenysziKindOrder
-# 	activity: KenysziActivityOrder
-# }
-
-# type Mutation {
-# 	anyMutationHere: ID!
-# 	saveFlow(id: ID, title: String!, schema: String!): Flow!
-# 	saveFlowEntity(value: Flow_EntityInput!): Boolean!
-# 	saveOrgSetting(unit: ID!, settings: [OrgSettingInput!]!): [OrgSetting!]!
-# }
-
-# type NrszhId {
-# 	id: ID!
-# }
-
-# input NrszhIdFilter @oneOf {
-# 	and: [NrszhIdFilter!]
-# 	or: [NrszhIdFilter!]
-# 	not: NrszhIdFilter
-# 	id: IDFilter
-# }
-
-# input NrszhIdOrder @oneOf {
-# 	id: Direction
-# }
-
-# type OrgActivity implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# 	activityType: OrgActivityType!
-# 	kenyszi: KenysziOrg
-# 	kenysziAuth: KenysziAuth
-# 	capacity: Int
-# }
-
-# input OrgActivityFilter @oneOf {
-# 	and: [OrgActivityFilter!]
-# 	or: [OrgActivityFilter!]
-# 	not: OrgActivityFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# 	activityType: OrgActivityTypeFilter
-# 	kenyszi: KenysziOrgFilter
-# 	kenysziAuth: KenysziAuthFilter
-# 	capacity: IntFilter
-# }
-
-# input OrgActivityOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# 	activityType: Direction
-# 	kenyszi: KenysziOrgOrder
-# 	kenysziAuth: KenysziAuthOrder
-# 	capacity: Direction
-# }
-
-# enum OrgActivityType {
-# 	Communal
-# 	Dispatcher
-# 	Medical
-# 	StreetCare
-# 	ResidentialCare
-# 	Other
-# }
-
-# input OrgActivityTypeFilter @oneOf {
-# 	and: [OrgActivityTypeFilter!]
-# 	or: [OrgActivityTypeFilter!]
-# 	not: OrgActivityTypeFilter
-# 	eq: OrgActivityType
-# 	in: [OrgActivityType!]
-# }
-
-# type OrgExternal implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# }
-
-# input OrgExternalFilter @oneOf {
-# 	and: [OrgExternalFilter!]
-# 	or: [OrgExternalFilter!]
-# 	not: OrgExternalFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# }
-
-# input OrgExternalOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# }
-
-# type OrgHeadquarter implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# }
-
-# input OrgHeadquarterFilter @oneOf {
-# 	and: [OrgHeadquarterFilter!]
-# 	or: [OrgHeadquarterFilter!]
-# 	not: OrgHeadquarterFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# }
-
-# input OrgHeadquarterOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# }
-
-# type OrgInstitution implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# }
-
-# input OrgInstitutionFilter @oneOf {
-# 	and: [OrgInstitutionFilter!]
-# 	or: [OrgInstitutionFilter!]
-# 	not: OrgInstitutionFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# }
-
-# input OrgInstitutionOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# }
-
-# type OrgMaintainer implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# }
-
-# input OrgMaintainerFilter @oneOf {
-# 	and: [OrgMaintainerFilter!]
-# 	or: [OrgMaintainerFilter!]
-# 	not: OrgMaintainerFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# }
-
-# input OrgMaintainerOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# }
-
-# type OrgRegion implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# }
-
-# input OrgRegionFilter @oneOf {
-# 	and: [OrgRegionFilter!]
-# 	or: [OrgRegionFilter!]
-# 	not: OrgRegionFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# }
-
-# input OrgRegionOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# }
-
-# type OrgRoot implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# }
-
-# input OrgRootFilter @oneOf {
-# 	and: [OrgRootFilter!]
-# 	or: [OrgRootFilter!]
-# 	not: OrgRootFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# }
-
-# input OrgRootOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# }
-
-# type OrgSection implements OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	isActive: Boolean!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter = null): [OrgUnit!]!
-# 	officialName: String
-# }
-
-# input OrgSectionFilter @oneOf {
-# 	and: [OrgSectionFilter!]
-# 	or: [OrgSectionFilter!]
-# 	not: OrgSectionFilter
-# 	id: IDFilter
-# 	kind: OrgUnitTypeFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	isActive: BoolFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# 	officialName: StringFilter
-# }
-
-# input OrgSectionOrder @oneOf {
-# 	id: Direction
-# 	kind: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	isActive: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# 	officialName: Direction
-# }
-
-# type OrgSetting {
-# 	id: ID!
-# 	unit: OrgUnit!
-# 	origin: OrgUnit!
-# 	isInherited: Boolean!
-# 	isActive: Boolean!
-# 	group: String!
-# 	key: String!
-# 	value: OrgSettingValue!
-# }
-
-# input OrgSettingFilter @oneOf {
-# 	and: [OrgSettingFilter!]
-# 	or: [OrgSettingFilter!]
-# 	not: OrgSettingFilter
-# 	id: IDFilter
-# 	unit: OrgUnitFilter
-# 	origin: OrgUnitFilter
-# 	isInherited: BoolFilter
-# 	isActive: BoolFilter
-# 	group: StringFilter
-# 	key: StringFilter
-# 	value: OrgSettingValueFilter
-# }
-
-# type OrgSettingFlow implements OrgSettingValue {
-# 	id: ID!
-# 	flow: Flow!
-# 	clientSection: ClientSection
-# 	position: Int!
-# }
-
-# input OrgSettingFlowFilter @oneOf {
-# 	and: [OrgSettingFlowFilter!]
-# 	or: [OrgSettingFlowFilter!]
-# 	not: OrgSettingFlowFilter
-# 	id: IDFilter
-# 	flow: FlowFilter
-# 	clientSection: ClientSectionFilter
-# 	position: IntFilter
-# }
-
-# input OrgSettingFlowInput {
-# 	flow: ID!
-# }
-
-# input OrgSettingFlowOrder @oneOf {
-# 	id: Direction
-# 	flow: FlowOrder
-# 	clientSection: ClientSectionOrder
-# 	position: Direction
-# }
-
-# input OrgSettingInput {
-# 	group: String!
-# 	key: String!
-# 	value: OrgSettingValueInput!
-# }
-
-# input OrgSettingOrder @oneOf {
-# 	id: Direction
-# 	unit: OrgUnitOrder
-# 	origin: OrgUnitOrder
-# 	isInherited: Direction
-# 	isActive: Direction
-# 	group: Direction
-# 	key: Direction
-# 	value: OrgSettingValueOrder
-# }
-
-# interface OrgSettingValue {
-# 	id: ID!
-# }
-
-# input OrgSettingValueFilter @oneOf {
-# 	and: [OrgSettingValueFilter!]
-# 	or: [OrgSettingValueFilter!]
-# 	not: OrgSettingValueFilter
-# 	type: OrgSettingValueTypeFilter
-# 	id: IDFilter
-# 	onFlow: OrgSettingFlowFilter
-# 	onWorker: OrgSettingWorkerFilter
-# }
-
-# input OrgSettingValueInput @oneOf {
-# 	Flow: OrgSettingFlowInput
-# 	Worker: OrgSettingWorkerInput
-# }
-
-# input OrgSettingValueOrder @oneOf {
-# 	id: Direction
-# 	onFlow: OrgSettingFlowOrder
-# 	onWorker: OrgSettingWorkerOrder
-# }
-
-# enum OrgSettingValueType {
-# 	Flow
-# 	Worker
-# }
-
-# input OrgSettingValueTypeFilter @oneOf {
-# 	and: [OrgSettingValueTypeFilter!]
-# 	or: [OrgSettingValueTypeFilter!]
-# 	not: OrgSettingValueTypeFilter
-# 	in: [OrgSettingValueType!]
-# 	eq: OrgSettingValueType
-# }
-
-# type OrgSettingWorker implements OrgSettingValue {
-# 	id: ID!
-# 	user: User!
-# 	role: Role!
-# }
-
-# input OrgSettingWorkerFilter @oneOf {
-# 	and: [OrgSettingWorkerFilter!]
-# 	or: [OrgSettingWorkerFilter!]
-# 	not: OrgSettingWorkerFilter
-# 	id: IDFilter
-# 	user: UserFilter
-# 	role: RoleFilter
-# }
-
-# input OrgSettingWorkerInput {
-# 	user: ID!
-# 	role: ID!
-# }
-
-# input OrgSettingWorkerOrder @oneOf {
-# 	id: Direction
-# 	user: UserOrder
-# 	role: RoleOrder
-# }
-
-# interface OrgUnit {
-# 	id: ID!
-# 	kind: OrgUnitType!
-# 	name: String!
-# 	path: [ID!]!
-# 	level: Int!
-# 	position: Int!
-# 	parent: OrgUnit
-# 	children(filter: OrgUnitFilter): [OrgUnit!]!
-# }
-
-# input OrgUnitFilter @oneOf {
-# 	and: [OrgUnitFilter!]
-# 	or: [OrgUnitFilter!]
-# 	not: OrgUnitFilter
-# 	type: OrgUnitTypeFilter
-# 	id: IDFilter
-# 	name: StringFilter
-# 	path: IDFilter
-# 	level: IntFilter
-# 	position: IntFilter
-# 	parent: OrgUnitFilter
-# 	children: OrgUnitFilter
-# 	onRoot: OrgRootFilter
-# 	onMaintainer: OrgMaintainerFilter
-# 	onInstitution: OrgInstitutionFilter
-# 	onRegion: OrgRegionFilter
-# 	onHeadquarter: OrgHeadquarterFilter
-# 	onSection: OrgSectionFilter
-# 	onActivity: OrgActivityFilter
-# 	onExternal: OrgExternalFilter
-# }
-
-# input OrgUnitOrder @oneOf {
-# 	id: Direction
-# 	name: Direction
-# 	path: Direction
-# 	level: Direction
-# 	position: Direction
-# 	parent: OrgUnitOrder
-# 	children: OrgUnitOrder
-# 	onRoot: OrgRootOrder
-# 	onMaintainer: OrgMaintainerOrder
-# 	onInstitution: OrgInstitutionOrder
-# 	onRegion: OrgRegionOrder
-# 	onHeadquarter: OrgHeadquarterOrder
-# 	onSection: OrgSectionOrder
-# 	onActivity: OrgActivityOrder
-# 	onExternal: OrgExternalOrder
-# }
-
-# enum OrgUnitType {
-# 	Root
-# 	Maintainer
-# 	Institution
-# 	Region
-# 	Headquarter
-# 	Section
-# 	Activity
-# 	External
-# }
-
-# input OrgUnitTypeFilter @oneOf {
-# 	and: [OrgUnitTypeFilter!]
-# 	or: [OrgUnitTypeFilter!]
-# 	not: OrgUnitTypeFilter
-# 	in: [OrgUnitType!]
-# 	eq: OrgUnitType
-# }
-
-# type Permission {
-# 	id: ID!
-# 	title: String!
-# }
-
-# input PermissionFilter @oneOf {
-# 	and: [PermissionFilter!]
-# 	or: [PermissionFilter!]
-# 	not: PermissionFilter
-# 	id: IDFilter
-# 	title: StringFilter
-# }
-
-# input PermissionOrder @oneOf {
-# 	id: Direction
-# 	title: Direction
-# }
-
-# type Query {
-# 	currentUserId: ID!
-# 	user(filter: UserFilter = null, order: [UserOrder!] = null, offset: Int = null, limit: Int = null): [User!]!
-# 	role(filter: RoleFilter = null, order: [RoleOrder!] = null, offset: Int = null, limit: Int = null): [Role!]!
-# 	permission(filter: PermissionFilter = null, order: [PermissionOrder!] = null, offset: Int = null, limit: Int = null): [Permission!]!
-# 	orgUnit(filter: OrgUnitFilter = null, order: [OrgUnitOrder!] = null, offset: Int = null, limit: Int = null): [OrgUnit!]!
-# 	orgSetting(filter: OrgSettingFilter = null, order: [OrgSettingOrder!] = null, offset: Int = null, limit: Int = null): [OrgSetting!]!
-# 	client(filter: ClientFilter = null, order: [ClientOrder!] = null, offset: Int = null, limit: Int = null): [Client!]!
-# 	flow(filter: FlowFilter = null, order: [FlowOrder!] = null, offset: Int = null, limit: Int = null): [Flow!]!
-# 	flowBlueprint(filter: FlowBlueprintFilter = null, order: [FlowBlueprintOrder!] = null, offset: Int = null, limit: Int = null): [FlowBlueprint!]!
-# 	flowBlueprintCategory(filter: FlowBlueprintCategoryFilter = null, order: [FlowBlueprintCategoryOrder!] = null, offset: Int = null, limit: Int = null): [FlowBlueprintCategory!]!
-# 	_service: _Service!
-# }
-
-# type Role {
-# 	id: ID!
-# 	title: String!
-# 	permissions(filter: PermissionFilter = null): [Permission!]!
-# }
-
-# input RoleFilter @oneOf {
-# 	and: [RoleFilter!]
-# 	or: [RoleFilter!]
-# 	not: RoleFilter
-# 	id: IDFilter
-# 	title: StringFilter
-# 	permissions: PermissionFilter
-# }
-
-# input RoleOrder @oneOf {
-# 	id: Direction
-# 	title: Direction
-# 	permissions: PermissionOrder
-# }
-
-# input StringFilter @oneOf {
-# 	and: [StringFilter!]
-# 	or: [StringFilter!]
-# 	not: StringFilter
-# 	eq: String
-# 	gt: String
-# 	gte: String
-# 	lt: String
-# 	lte: String
-# 	in: [String!]
-# 	proxEq: String
-# }
-
-# type User {
-# 	id: ID!
-# 	name: String!
-# 	username: String!
-# 	phones: [String!]!
-# 	isActive: Boolean!
-# 	created: AuditLog
-# 	updated: AuditLog
-# 	changes(filter: AuditLogFilter = null): [AuditLog!]!
-# 	attrs(filter: AttrFilter = null): [Attr!]!
-# }
-
-# input UserFilter @oneOf {
-# 	and: [UserFilter!]
-# 	or: [UserFilter!]
-# 	not: UserFilter
-# 	id: IDFilter
-# 	name: StringFilter
-# 	username: StringFilter
-# 	password: BytesFilter
-# 	secret: BytesFilter
-# 	phones: StringFilter
-# 	isActive: BoolFilter
-# 	created: AuditLogFilter
-# 	updated: AuditLogFilter
-# 	changes: AuditLogFilter
-# 	attrs: AttrFilter
-# }
-
-# input UserOrder @oneOf {
-# 	id: Direction
-# 	name: Direction
-# 	username: Direction
-# 	password: Direction
-# 	secret: Direction
-# 	phones: Direction
-# 	isActive: Direction
-# 	created: AuditLogOrder
-# 	updated: AuditLogOrder
-# 	changes: AuditLogOrder
-# 	attrs: AttrOrder
-# }
-
-# """
-# Represents the underlying value of the script engine.
-# """
-# scalar Value
-
-# input ValueGqlFilter @oneOf {
-# 	eq: Value
-# }
-
-# """
-# The `_Any` scalar is used to pass representations of entities from external
-# services into the root `_entities` field for execution.
-# """
-# scalar _Any
-
-# type _Service {
-# 	sdl: String
-# }
-
-# """
-# Directs the executor to include this field or fragment only when the `if` argument is true.
-# """
-# directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
-# """
-# Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)
-# """
-# directive @oneOf on INPUT_OBJECT
-# """
-# Directs the executor to skip this field or fragment when the `if` argument is true.
-# """
-# directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
-# schema {
-# 	query: Query
-# 	mutation: Mutation
-# }
+input AttrFilter @oneOf {
+	and: [AttrFilter!]
+	or: [AttrFilter!]
+	not: AttrFilter
+	id: IDFilter
+	name: StringFilter
+	value: ValueGqlFilter
+}
+
+input AttrOrder @oneOf {
+	id: Direction
+	name: Direction
+	value: Direction
+}
+
+enum AuditAction {
+	CREATE
+	UPDATE
+	DELETE
+}
+
+input AuditActionFilter @oneOf {
+	and: [AuditActionFilter!]
+	or: [AuditActionFilter!]
+	not: AuditActionFilter
+	eq: AuditAction
+	in: [AuditAction!]
+}
+
+type AuditLog {
+	id: ID!
+	action: AuditAction!
+	data: JSON
+	oldData: JSON
+	time: DateTime!
+	user: User!
+}
+
+input AuditLogFilter @oneOf {
+	and: [AuditLogFilter!]
+	or: [AuditLogFilter!]
+	not: AuditLogFilter
+	id: IDFilter
+	action: AuditActionFilter
+	data: JsonFilter
+	oldData: JsonFilter
+	time: DateTimeFilter
+	user: UserFilter
+}
+
+input AuditLogOrder @oneOf {
+	id: Direction
+	action: Direction
+	data: Direction
+	oldData: Direction
+	time: Direction
+	user: UserOrder
+}
+
+input BoolFilter @oneOf {
+	and: [BoolFilter!]
+	or: [BoolFilter!]
+	not: BoolFilter
+	eq: Boolean
+}
+
+"""
+Base64-encoded binary data
+"""
+scalar Bytes
+
+input BytesFilter @oneOf {
+	and: [BytesFilter!]
+	or: [BytesFilter!]
+	not: BytesFilter
+	eq: Bytes
+}
+
+type Client {
+	id: ID!
+	name: String!
+	motherName: String
+	birthDate: Date
+	birthPlace: String
+	taj: String
+	kenyszi: KenysziClient
+	manager: User
+	attrs(filter: AttrFilter = null): [Attr!]!
+}
+
+input ClientFilter @oneOf {
+	and: [ClientFilter!]
+	or: [ClientFilter!]
+	not: ClientFilter
+	id: IDFilter
+	name: StringFilter
+	motherName: StringFilter
+	birthDate: DateFilter
+	birthPlace: StringFilter
+	taj: StringFilter
+	kenyszi: KenysziClientFilter
+	manager: UserFilter
+	attrs: AttrFilter
+}
+
+input ClientOrder @oneOf {
+	id: Direction
+	name: Direction
+	motherName: Direction
+	birthDate: Direction
+	birthPlace: Direction
+	taj: Direction
+	kenyszi: KenysziClientOrder
+	manager: UserOrder
+	attrs: AttrOrder
+}
+
+type ClientSection {
+	id: ID!
+	kind: ClientSectionKind!
+	name: String!
+}
+
+input ClientSectionFilter @oneOf {
+	and: [ClientSectionFilter!]
+	or: [ClientSectionFilter!]
+	not: ClientSectionFilter
+	id: IDFilter
+	kind: ClientSectionKindFilter
+	name: StringFilter
+}
+
+enum ClientSectionKind {
+	Feed
+	Activity
+	Flow
+}
+
+input ClientSectionKindFilter @oneOf {
+	and: [ClientSectionKindFilter!]
+	or: [ClientSectionKindFilter!]
+	not: ClientSectionKindFilter
+	eq: ClientSectionKind
+	in: [ClientSectionKind!]
+}
+
+input ClientSectionOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+}
+
+scalar Date
+
+input DateFilter @oneOf {
+	and: [DateFilter!]
+	or: [DateFilter!]
+	not: DateFilter
+	eq: Date
+	gt: Date
+	gte: Date
+	lt: Date
+	lte: Date
+	in: [Date!]
+}
+
+scalar DateTime
+
+input DateTimeFilter @oneOf {
+	and: [DateTimeFilter!]
+	or: [DateTimeFilter!]
+	not: DateTimeFilter
+	eq: DateTime
+	gt: DateTime
+	gte: DateTime
+	lt: DateTime
+	lte: DateTime
+	in: [DateTime!]
+}
+
+enum Direction {
+	ASC
+	DESC
+}
+
+type Flow {
+	id: ID!
+	title: String!
+	schema: JSON!
+	isActive: Boolean!
+}
+
+type FlowBlueprint {
+	id: ID!
+	title: String!
+	category: FlowBlueprintCategory!
+	schema: JSON!
+	subflow: Flow
+	isActive: Boolean!
+}
+
+type FlowBlueprintCategory {
+	id: ID!
+	title: String!
+	position: Int!
+}
+
+input FlowBlueprintCategoryFilter @oneOf {
+	and: [FlowBlueprintCategoryFilter!]
+	or: [FlowBlueprintCategoryFilter!]
+	not: FlowBlueprintCategoryFilter
+	id: IDFilter
+	title: StringFilter
+	position: IntFilter
+}
+
+input FlowBlueprintCategoryOrder @oneOf {
+	id: Direction
+	title: Direction
+	position: Direction
+}
+
+input FlowBlueprintFilter @oneOf {
+	and: [FlowBlueprintFilter!]
+	or: [FlowBlueprintFilter!]
+	not: FlowBlueprintFilter
+	id: IDFilter
+	title: StringFilter
+	category: FlowBlueprintCategoryFilter
+	schema: JsonFilter
+	subflow: FlowFilter
+	isActive: BoolFilter
+}
+
+input FlowBlueprintOrder @oneOf {
+	id: Direction
+	title: Direction
+	category: FlowBlueprintCategoryOrder
+	schema: Direction
+	subflow: FlowOrder
+	isActive: Direction
+}
+
+input FlowFilter @oneOf {
+	and: [FlowFilter!]
+	or: [FlowFilter!]
+	not: FlowFilter
+	id: IDFilter
+	title: StringFilter
+	schema: JsonFilter
+	isActive: BoolFilter
+}
+
+input FlowOrder @oneOf {
+	id: Direction
+	title: Direction
+	schema: Direction
+	isActive: Direction
+}
+
+input Flow_EntityInput {
+	flowId: ID!
+	entityId: ID
+	unitId: ID
+	clientId: ID
+}
+
+input IDFilter @oneOf {
+	and: [IDFilter!]
+	or: [IDFilter!]
+	not: IDFilter
+	eq: ID
+	in: [ID!]
+}
+
+input IntFilter @oneOf {
+	and: [IntFilter!]
+	or: [IntFilter!]
+	not: IntFilter
+	eq: Int
+	gt: Int
+	gte: Int
+	lt: Int
+	lte: Int
+	in: [Int!]
+}
+
+"""
+A scalar that can represent any JSON value.
+"""
+scalar JSON
+
+input JsonFilter @oneOf {
+	and: [JsonFilter!]
+	or: [JsonFilter!]
+	not: JsonFilter
+	eq: JSON
+}
+
+type KenysziActivity {
+	id: ID!
+	label: String!
+}
+
+input KenysziActivityFilter @oneOf {
+	and: [KenysziActivityFilter!]
+	or: [KenysziActivityFilter!]
+	not: KenysziActivityFilter
+	id: IDFilter
+	label: StringFilter
+}
+
+input KenysziActivityOrder @oneOf {
+	id: Direction
+	label: Direction
+}
+
+type KenysziAgreement {
+	id: ID!
+	kenyszi: KenysziOrg!
+	client: KenysziClient!
+	begin: Date!
+	end: Date
+}
+
+input KenysziAgreementFilter @oneOf {
+	and: [KenysziAgreementFilter!]
+	or: [KenysziAgreementFilter!]
+	not: KenysziAgreementFilter
+	id: IDFilter
+	kenyszi: KenysziOrgFilter
+	client: KenysziClientFilter
+	begin: DateFilter
+	end: DateFilter
+}
+
+input KenysziAgreementOrder @oneOf {
+	id: Direction
+	kenyszi: KenysziOrgOrder
+	client: KenysziClientOrder
+	begin: Direction
+	end: Direction
+}
+
+type KenysziAuth {
+	username: String!
+	password: String!
+}
+
+input KenysziAuthFilter @oneOf {
+	and: [KenysziAuthFilter!]
+	or: [KenysziAuthFilter!]
+	not: KenysziAuthFilter
+	username: StringFilter
+	password: StringFilter
+}
+
+input KenysziAuthOrder @oneOf {
+	username: Direction
+	password: Direction
+}
+
+type KenysziClient {
+	id: ID!
+	agreements(filter: KenysziAgreementFilter = null): [KenysziAgreement!]!
+}
+
+input KenysziClientFilter @oneOf {
+	and: [KenysziClientFilter!]
+	or: [KenysziClientFilter!]
+	not: KenysziClientFilter
+	id: IDFilter
+	agreements: KenysziAgreementFilter
+}
+
+input KenysziClientOrder @oneOf {
+	id: Direction
+	agreements: KenysziAgreementOrder
+}
+
+type KenysziKind {
+	id: ID!
+	label: String!
+}
+
+input KenysziKindFilter @oneOf {
+	and: [KenysziKindFilter!]
+	or: [KenysziKindFilter!]
+	not: KenysziKindFilter
+	id: IDFilter
+	label: StringFilter
+}
+
+input KenysziKindOrder @oneOf {
+	id: Direction
+	label: Direction
+}
+
+type KenysziOrg {
+	id: ID!
+	nrszhId: NrszhId!
+	kind: KenysziKind!
+	activity: KenysziActivity!
+}
+
+input KenysziOrgFilter @oneOf {
+	and: [KenysziOrgFilter!]
+	or: [KenysziOrgFilter!]
+	not: KenysziOrgFilter
+	id: IDFilter
+	nrszhId: NrszhIdFilter
+	kind: KenysziKindFilter
+	activity: KenysziActivityFilter
+}
+
+input KenysziOrgOrder @oneOf {
+	id: Direction
+	nrszhId: NrszhIdOrder
+	kind: KenysziKindOrder
+	activity: KenysziActivityOrder
+}
+
+type Mutation {
+	anyMutationHere: ID!
+	saveFlow(id: ID, title: String!, schema: String!): Flow!
+	saveFlowEntity(value: Flow_EntityInput!): Boolean!
+	saveOrgSetting(unit: ID!, settings: [OrgSettingInput!]!): [OrgSetting!]!
+}
+
+type NrszhId {
+	id: ID!
+}
+
+input NrszhIdFilter @oneOf {
+	and: [NrszhIdFilter!]
+	or: [NrszhIdFilter!]
+	not: NrszhIdFilter
+	id: IDFilter
+}
+
+input NrszhIdOrder @oneOf {
+	id: Direction
+}
+
+type OrgActivity implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+	activityType: OrgActivityType!
+	kenyszi: KenysziOrg
+	kenysziAuth: KenysziAuth
+	capacity: Int
+}
+
+input OrgActivityFilter @oneOf {
+	and: [OrgActivityFilter!]
+	or: [OrgActivityFilter!]
+	not: OrgActivityFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+	activityType: OrgActivityTypeFilter
+	kenyszi: KenysziOrgFilter
+	kenysziAuth: KenysziAuthFilter
+	capacity: IntFilter
+}
+
+input OrgActivityOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+	activityType: Direction
+	kenyszi: KenysziOrgOrder
+	kenysziAuth: KenysziAuthOrder
+	capacity: Direction
+}
+
+enum OrgActivityType {
+	Communal
+	Dispatcher
+	Medical
+	StreetCare
+	ResidentialCare
+	Other
+}
+
+input OrgActivityTypeFilter @oneOf {
+	and: [OrgActivityTypeFilter!]
+	or: [OrgActivityTypeFilter!]
+	not: OrgActivityTypeFilter
+	eq: OrgActivityType
+	in: [OrgActivityType!]
+}
+
+type OrgExternal implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+}
+
+input OrgExternalFilter @oneOf {
+	and: [OrgExternalFilter!]
+	or: [OrgExternalFilter!]
+	not: OrgExternalFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+}
+
+input OrgExternalOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+}
+
+type OrgHeadquarter implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+}
+
+input OrgHeadquarterFilter @oneOf {
+	and: [OrgHeadquarterFilter!]
+	or: [OrgHeadquarterFilter!]
+	not: OrgHeadquarterFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+}
+
+input OrgHeadquarterOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+}
+
+type OrgInstitution implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+}
+
+input OrgInstitutionFilter @oneOf {
+	and: [OrgInstitutionFilter!]
+	or: [OrgInstitutionFilter!]
+	not: OrgInstitutionFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+}
+
+input OrgInstitutionOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+}
+
+type OrgMaintainer implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+}
+
+input OrgMaintainerFilter @oneOf {
+	and: [OrgMaintainerFilter!]
+	or: [OrgMaintainerFilter!]
+	not: OrgMaintainerFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+}
+
+input OrgMaintainerOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+}
+
+type OrgRegion implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+}
+
+input OrgRegionFilter @oneOf {
+	and: [OrgRegionFilter!]
+	or: [OrgRegionFilter!]
+	not: OrgRegionFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+}
+
+input OrgRegionOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+}
+
+type OrgRoot implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+}
+
+input OrgRootFilter @oneOf {
+	and: [OrgRootFilter!]
+	or: [OrgRootFilter!]
+	not: OrgRootFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+}
+
+input OrgRootOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+}
+
+type OrgSection implements OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	isActive: Boolean!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter = null): [OrgUnit!]!
+	officialName: String
+}
+
+input OrgSectionFilter @oneOf {
+	and: [OrgSectionFilter!]
+	or: [OrgSectionFilter!]
+	not: OrgSectionFilter
+	id: IDFilter
+	kind: OrgUnitTypeFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	isActive: BoolFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+	officialName: StringFilter
+}
+
+input OrgSectionOrder @oneOf {
+	id: Direction
+	kind: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	isActive: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+	officialName: Direction
+}
+
+type OrgSetting {
+	id: ID!
+	unit: OrgUnit!
+	origin: OrgUnit!
+	isInherited: Boolean!
+	isActive: Boolean!
+	group: String!
+	key: String!
+	value: OrgSettingValue!
+}
+
+input OrgSettingFilter @oneOf {
+	and: [OrgSettingFilter!]
+	or: [OrgSettingFilter!]
+	not: OrgSettingFilter
+	id: IDFilter
+	unit: OrgUnitFilter
+	origin: OrgUnitFilter
+	isInherited: BoolFilter
+	isActive: BoolFilter
+	group: StringFilter
+	key: StringFilter
+	value: OrgSettingValueFilter
+}
+
+type OrgSettingFlow implements OrgSettingValue {
+	id: ID!
+	flow: Flow!
+	clientSection: ClientSection
+	position: Int!
+}
+
+input OrgSettingFlowFilter @oneOf {
+	and: [OrgSettingFlowFilter!]
+	or: [OrgSettingFlowFilter!]
+	not: OrgSettingFlowFilter
+	id: IDFilter
+	flow: FlowFilter
+	clientSection: ClientSectionFilter
+	position: IntFilter
+}
+
+input OrgSettingFlowInput {
+	flow: ID!
+}
+
+input OrgSettingFlowOrder @oneOf {
+	id: Direction
+	flow: FlowOrder
+	clientSection: ClientSectionOrder
+	position: Direction
+}
+
+input OrgSettingInput {
+	group: String!
+	key: String!
+	value: OrgSettingValueInput!
+}
+
+input OrgSettingOrder @oneOf {
+	id: Direction
+	unit: OrgUnitOrder
+	origin: OrgUnitOrder
+	isInherited: Direction
+	isActive: Direction
+	group: Direction
+	key: Direction
+	value: OrgSettingValueOrder
+}
+
+interface OrgSettingValue {
+	id: ID!
+}
+
+input OrgSettingValueFilter @oneOf {
+	and: [OrgSettingValueFilter!]
+	or: [OrgSettingValueFilter!]
+	not: OrgSettingValueFilter
+	type: OrgSettingValueTypeFilter
+	id: IDFilter
+	onFlow: OrgSettingFlowFilter
+	onWorker: OrgSettingWorkerFilter
+}
+
+input OrgSettingValueInput @oneOf {
+	Flow: OrgSettingFlowInput
+	Worker: OrgSettingWorkerInput
+}
+
+input OrgSettingValueOrder @oneOf {
+	id: Direction
+	onFlow: OrgSettingFlowOrder
+	onWorker: OrgSettingWorkerOrder
+}
+
+enum OrgSettingValueType {
+	Flow
+	Worker
+}
+
+input OrgSettingValueTypeFilter @oneOf {
+	and: [OrgSettingValueTypeFilter!]
+	or: [OrgSettingValueTypeFilter!]
+	not: OrgSettingValueTypeFilter
+	in: [OrgSettingValueType!]
+	eq: OrgSettingValueType
+}
+
+type OrgSettingWorker implements OrgSettingValue {
+	id: ID!
+	user: User!
+	role: Role!
+}
+
+input OrgSettingWorkerFilter @oneOf {
+	and: [OrgSettingWorkerFilter!]
+	or: [OrgSettingWorkerFilter!]
+	not: OrgSettingWorkerFilter
+	id: IDFilter
+	user: UserFilter
+	role: RoleFilter
+}
+
+input OrgSettingWorkerInput {
+	user: ID!
+	role: ID!
+}
+
+input OrgSettingWorkerOrder @oneOf {
+	id: Direction
+	user: UserOrder
+	role: RoleOrder
+}
+
+interface OrgUnit {
+	id: ID!
+	kind: OrgUnitType!
+	name: String!
+	path: [ID!]!
+	level: Int!
+	position: Int!
+	parent: OrgUnit
+	children(filter: OrgUnitFilter): [OrgUnit!]!
+}
+
+input OrgUnitFilter @oneOf {
+	and: [OrgUnitFilter!]
+	or: [OrgUnitFilter!]
+	not: OrgUnitFilter
+	type: OrgUnitTypeFilter
+	id: IDFilter
+	name: StringFilter
+	path: IDFilter
+	level: IntFilter
+	position: IntFilter
+	parent: OrgUnitFilter
+	children: OrgUnitFilter
+	onRoot: OrgRootFilter
+	onMaintainer: OrgMaintainerFilter
+	onInstitution: OrgInstitutionFilter
+	onRegion: OrgRegionFilter
+	onHeadquarter: OrgHeadquarterFilter
+	onSection: OrgSectionFilter
+	onActivity: OrgActivityFilter
+	onExternal: OrgExternalFilter
+}
+
+input OrgUnitOrder @oneOf {
+	id: Direction
+	name: Direction
+	path: Direction
+	level: Direction
+	position: Direction
+	parent: OrgUnitOrder
+	children: OrgUnitOrder
+	onRoot: OrgRootOrder
+	onMaintainer: OrgMaintainerOrder
+	onInstitution: OrgInstitutionOrder
+	onRegion: OrgRegionOrder
+	onHeadquarter: OrgHeadquarterOrder
+	onSection: OrgSectionOrder
+	onActivity: OrgActivityOrder
+	onExternal: OrgExternalOrder
+}
+
+enum OrgUnitType {
+	Root
+	Maintainer
+	Institution
+	Region
+	Headquarter
+	Section
+	Activity
+	External
+}
+
+input OrgUnitTypeFilter @oneOf {
+	and: [OrgUnitTypeFilter!]
+	or: [OrgUnitTypeFilter!]
+	not: OrgUnitTypeFilter
+	in: [OrgUnitType!]
+	eq: OrgUnitType
+}
+
+type Permission {
+	id: ID!
+	title: String!
+}
+
+input PermissionFilter @oneOf {
+	and: [PermissionFilter!]
+	or: [PermissionFilter!]
+	not: PermissionFilter
+	id: IDFilter
+	title: StringFilter
+}
+
+input PermissionOrder @oneOf {
+	id: Direction
+	title: Direction
+}
+
+type Query {
+	currentUserId: ID!
+	user(filter: UserFilter = null, order: [UserOrder!] = null, offset: Int = null, limit: Int = null): [User!]!
+	role(filter: RoleFilter = null, order: [RoleOrder!] = null, offset: Int = null, limit: Int = null): [Role!]!
+	permission(filter: PermissionFilter = null, order: [PermissionOrder!] = null, offset: Int = null, limit: Int = null): [Permission!]!
+	orgUnit(filter: OrgUnitFilter = null, order: [OrgUnitOrder!] = null, offset: Int = null, limit: Int = null): [OrgUnit!]!
+	orgSetting(filter: OrgSettingFilter = null, order: [OrgSettingOrder!] = null, offset: Int = null, limit: Int = null): [OrgSetting!]!
+	client(filter: ClientFilter = null, order: [ClientOrder!] = null, offset: Int = null, limit: Int = null): [Client!]!
+	flow(filter: FlowFilter = null, order: [FlowOrder!] = null, offset: Int = null, limit: Int = null): [Flow!]!
+	flowBlueprint(filter: FlowBlueprintFilter = null, order: [FlowBlueprintOrder!] = null, offset: Int = null, limit: Int = null): [FlowBlueprint!]!
+	flowBlueprintCategory(filter: FlowBlueprintCategoryFilter = null, order: [FlowBlueprintCategoryOrder!] = null, offset: Int = null, limit: Int = null): [FlowBlueprintCategory!]!
+	_service: _Service!
+}
+
+type Role {
+	id: ID!
+	title: String!
+	permissions(filter: PermissionFilter = null): [Permission!]!
+}
+
+input RoleFilter @oneOf {
+	and: [RoleFilter!]
+	or: [RoleFilter!]
+	not: RoleFilter
+	id: IDFilter
+	title: StringFilter
+	permissions: PermissionFilter
+}
+
+input RoleOrder @oneOf {
+	id: Direction
+	title: Direction
+	permissions: PermissionOrder
+}
+
+input StringFilter @oneOf {
+	and: [StringFilter!]
+	or: [StringFilter!]
+	not: StringFilter
+	eq: String
+	gt: String
+	gte: String
+	lt: String
+	lte: String
+	in: [String!]
+	proxEq: String
+}
+
+type User {
+	id: ID!
+	name: String!
+	username: String!
+	phones: [String!]!
+	isActive: Boolean!
+	created: AuditLog
+	updated: AuditLog
+	changes(filter: AuditLogFilter = null): [AuditLog!]!
+	attrs(filter: AttrFilter = null): [Attr!]!
+}
+
+input UserFilter @oneOf {
+	and: [UserFilter!]
+	or: [UserFilter!]
+	not: UserFilter
+	id: IDFilter
+	name: StringFilter
+	username: StringFilter
+	password: BytesFilter
+	secret: BytesFilter
+	phones: StringFilter
+	isActive: BoolFilter
+	created: AuditLogFilter
+	updated: AuditLogFilter
+	changes: AuditLogFilter
+	attrs: AttrFilter
+}
+
+input UserOrder @oneOf {
+	id: Direction
+	name: Direction
+	username: Direction
+	password: Direction
+	secret: Direction
+	phones: Direction
+	isActive: Direction
+	created: AuditLogOrder
+	updated: AuditLogOrder
+	changes: AuditLogOrder
+	attrs: AttrOrder
+}
+
+"""
+Represents the underlying value of the script engine.
+"""
+scalar Value
+
+input ValueGqlFilter @oneOf {
+	eq: Value
+}
+
+"""
+The `_Any` scalar is used to pass representations of entities from external
+services into the root `_entities` field for execution.
+"""
+scalar _Any
+
+type _Service {
+	sdl: String
+}
+
+"""
+Directs the executor to include this field or fragment only when the `if` argument is true.
+"""
+directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"""
+Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)
+"""
+directive @oneOf on INPUT_OBJECT
+"""
+Directs the executor to skip this field or fragment when the `if` argument is true.
+"""
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+schema {
+	query: Query
+	mutation: Mutation
+}

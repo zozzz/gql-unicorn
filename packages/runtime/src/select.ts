@@ -3,7 +3,6 @@ import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
 
 import { type ALIAS, SELECTION, SELECTION_DEF } from "./symbols"
 import type { SimpleType } from "./type"
-import type { Vars } from "./var"
 
 // TODO: rename to GQL
 // export type BuildReturn<OP extends string, T, S extends SelectionDef, V extends Vars> = TypedDocumentNode<
@@ -11,7 +10,7 @@ import type { Vars } from "./var"
 //     V extends Record<string, any> ? ExcludeEmpty<V> : V
 // >
 
-export type BuildReturn<OP extends string, T, V extends Vars> = TypedDocumentNode<Record<OP, T>, V>
+export type BuildReturn<OP extends string, T, V> = TypedDocumentNode<Record<OP, T>, V>
 
 // export type TypeOf<T> =
 //     T extends TypedDocumentNode<infer R, any>
@@ -215,7 +214,7 @@ export type LetSelectionDef<SD extends SelectionDef> = {
 
 export type GetSelectionDef<T> = T extends { [SELECTION_DEF]: infer SD extends SelectionDef } ? SD : never
 
-export class Selection<T, V extends Vars> {
+export class Selection<T, V> {
     [SELECTION]?: [T, V]
 }
 

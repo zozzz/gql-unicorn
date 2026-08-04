@@ -3,7 +3,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
-import { beforeAll, describe, expect } from "bun:test"
+import { beforeAll, describe, expect, test } from "bun:test"
 import { buildSchema, parse } from "graphql"
 
 import { transform } from "../src/transform"
@@ -48,12 +48,13 @@ describe("runtime", () => {
     })
 
     describe("org", () => {
-        type Alma = import("./__generated__/rege").OrgUnit<["id", "name", "parent"]>
-        const x: Alma = {} as any
+        // type Alma = import("./__generated__/rege").OrgUnit<["id", "name", "parent"]>
 
-        const query = G.queryOrgUnit(q => q.id.kind.name)
+        test("orgUnit", () => {
+            const query = G.queryOrgUnit(q => q.id.name.level)
 
-        testQuery<"orgUnit", { id: string }, never>(query, `query{orgUnit{id}}`)
+            testQuery<"orgUnit", Array<{ id: string }>, never>(query, `query{orgUnit{__typename,id,name,level}}`)
+        })
     })
 
     // test("saveFlow", () => {

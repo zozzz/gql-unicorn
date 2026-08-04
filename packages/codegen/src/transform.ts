@@ -48,7 +48,7 @@ export function transform(schema: GraphQLSchema, config?: TransformConfig) {
     return new Transformer(schema, { typeinfo: true, ...(config || {}) }).transform()
 }
 
-const SelectTypeArgs = `R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never`
+const SelectTypeArgs = `S extends SelectionDef, V, P extends string[], E extends string = never`
 
 class Transformer {
     readonly #scalarMap: ScalarMap
@@ -78,22 +78,23 @@ class Transformer {
 
     transform(): string {
         const builders: string[] = [
-            `type AsBuilder = { input: Input; output: BuilderOutputFlags; operation: string }`,
-            `type BuilderOutputFlags = { nullable: boolean, many: "nullable" | "must" | "none" }`,
-            `type ResultByOutputFlags<T, F extends BuilderOutputFlags> =
-                F extends { nullable: infer N, many: infer M }
-                    ? N extends true
-                        ? M extends "nullable"
-                            ? Array<T | null> | null
-                            : M extends "must"
-                                ? Array<T>
-                                : T | null
-                        : M extends "nullable"
-                            ? Array<T | null>
-                            : M extends "must"
-                                ? Array<T>
-                                : T
-                    : never`
+            // `type AsBuilder = { input: Input; output: BuilderOutputFlags; operation: string }`,
+            // `type BuilderOutputFlags = { nullable: boolean, many: "nullable" | "must" | "none" }`,
+            // `type ResultByOutputFlags<T, F extends BuilderOutputFlags> =
+            //     F extends { nullable: infer N, many: infer M }
+            //         ? N extends true
+            //             ? M extends "nullable"
+            //                 ? Array<T | null> | null
+            //                 : M extends "must"
+            //                     ? Array<T>
+            //                     : T | null
+            //             : M extends "nullable"
+            //                 ? Array<T | null>
+            //                 : M extends "must"
+            //                     ? Array<T>
+            //                     : T
+            //         : never`,
+            // `type Prettify<T> = { [K in keyof T]: T[K] } & {};`
         ]
 
         const query = this.schema.getQueryType()
@@ -496,76 +497,123 @@ class Transformer {
             let argInfo: string | undefined
             let argOptional: boolean
             let typeValue: string = "any"
-            let builderT: string = "any"
-            let builderFn: string | undefined
+            const builderFns = []
 
             this.#import(RuntimeLib, "BuildReturn", true)
-            // const selectedType = this.#selectedType(type)
-            // console.log({ selectedType })
 
             if (args.length > 0) {
                 this.#import(RuntimeLib, "Arguments", true)
                 ;[argType, argInfo, argOptional] = this.#argInfoType(args)
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
-                    const optArgs = argOptional ? " | [string] | []" : ""
-                    // <AA extends Arguments<A>>(...args: [string, AA] | [AA]): BuildReturn<T, {} & ToVars<A, [], AA>>
-                    builderT =
-                        `<AA extends Arguments<AA, ${argType}>>(...args: [string, AA] | [AA]${optArgs}) `
-                        + `=> BuildReturn<"${name}", ${typeValue}, {} & ToVars<${argType}, [], AA>>`
+
+                    builderFns.push(
+                        `<A>(queryName: string, args: Arguments<A, ${argType}>): `
+                            + `BuildReturn<"${name}", ${typeValue}, ToVars<${argType}, [], A>>`
+                    )
+
+                    builderFns.push(
+                        `<A>(args: Arguments<A, ${argType}>): `
+                            + `BuildReturn<"${name}", ${typeValue}, ToVars<${argType}, [], A>>`
+                    )
+
+                    if (argOptional) {
+                        builderFns.push(`(queryName: string): ` + `BuildReturn<"${name}", ${typeValue}, never>`)
+                        builderFns.push(`(): ` + `BuildReturn<"${name}", ${typeValue}, never>`)
+                    }
                 } else {
                     this.#import(RuntimeLib, "SelectionDef", true)
-
-                    const R = this.#selectR(type)
-                    typeValue = this.#subSelectType(this.#selectName(type), R, "{}", "[]")
+                    const S = this.#selectR(type)
+                    typeValue = this.#subSelectType(this.#selectName(type), S, "{}", "[]")
                     argInfo = `[${argInfo}, ${this.#bareTypename(type)}]`
                     const sfn = `(select: ${typeValue}) => Selection<ST, SV>`
-                    const optArgs = argOptional ? ` | [string, ${sfn}] | [${sfn}]` : ""
 
-                    builderT =
-                        `<ST, SV extends Vars, AA extends Arguments<AA, ${argType}>>`
-                        + `(...args: [string, AA, ${sfn}] | [AA, ${sfn}]${optArgs}) `
-                        + `=> BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV & ToVars<${argType}, [], AA>>`
-
-                    const outputFlags = this.#typeIntoBuilderOutputFlags(type)
-                    const builderFnRet = this.#selectType(
-                        this.#selectName(type),
-                        R,
-                        "AA",
-                        "[]",
-                        `{ input: ${argType}, output: ${JSON.stringify(outputFlags)}, operation: "${name}" }`
+                    builderFns.push(
+                        `<ST, SV extends Vars, A>`
+                            + `(queryName: string, args: Arguments<A, ${argType}>, select: ${sfn})`
+                            + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, MergeVars<SV, ToVars<${argType}, [], A>>>`
                     )
-                    const builderFnOptArgs = argOptional ? ` | [string] | []` : ""
-                    builderFn = `<AA extends Arguments<AA, ${argType}>>(...args: [string, AA] | [AA]${builderFnOptArgs}) => ${builderFnRet}`
+
+                    builderFns.push(
+                        `<ST, SV extends Vars, A>`
+                            + `(args: Arguments<A, ${argType}>, select: ${sfn})`
+                            + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, MergeVars<SV, ToVars<${argType}, [], A>>>`
+                    )
+
+                    const builderReturn = this.#subSelectType(
+                        this.#selectName(type),
+                        S,
+                        `ToVars<${argType}, [], A>`,
+                        "[]",
+                        `never`
+                    )
+                    builderFns.push(`builder<A>(queryName: string, args: Arguments<A, ${argType}>): ${builderReturn}`)
+                    builderFns.push(`builder<A>(args: Arguments<A, ${argType}>): ${builderReturn}`)
+
+                    if (argOptional) {
+                        builderFns.push(
+                            `<ST, SV extends Vars>`
+                                + `(queryName: string, select: ${sfn})`
+                                + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
+                        )
+
+                        builderFns.push(
+                            `<ST, SV extends Vars>`
+                                + `(select: ${sfn})`
+                                + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
+                        )
+
+                        const builderReturn = this.#subSelectType(this.#selectName(type), S, `{}`, "[]", `never`)
+                        builderFns.push(`builder(queryName: string): ${builderReturn}`)
+                        builderFns.push(`builder(): ${builderReturn}`)
+                    }
                 }
             } else {
                 if (bareIsScalar(type)) {
                     typeValue = this.#typename(type)
 
-                    builderT = `(name?: string) => BuildReturn<"${name}", ${typeValue}, never>`
+                    builderFns.push(`(queryName: string): BuildReturn<"${name}", ${typeValue}, never>`)
+                    builderFns.push(`(): BuildReturn<"${name}", ${typeValue}, never>`)
                 } else {
                     this.#import(RuntimeLib, "SelectionDef", true)
 
-                    // const R = this.#rootBuilderResult(type)
-                    const R = this.#selectR(type)
-                    typeValue = this.#subSelectType(this.#selectName(type), R, "{}", "[]")
+                    const S = this.#selectR(type)
+                    typeValue = this.#subSelectType(this.#selectName(type), S, "{}", "[]")
                     argInfo = this.#bareTypename(type)
                     const sfn = `(select: ${typeValue}) => Selection<ST, SV>`
 
-                    builderT =
-                        `<ST, SV extends Vars, >`
-                        + `(...args: [string, ${sfn}] | [${sfn}])`
-                        + `=> BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
+                    builderFns.push(
+                        `<ST, SV extends Vars>`
+                            + `(queryName: string, select: ${sfn})`
+                            + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
+                    )
+
+                    builderFns.push(
+                        `<ST, SV extends Vars>`
+                            + `(select: ${sfn})`
+                            + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
+                    )
+
+                    const builderReturn = this.#subSelectType(this.#selectName(type), S, `{}`, "[]", `never`)
+                    builderFns.push(`builder(queryName: string): ${builderReturn}`)
+                    builderFns.push(`builder(): ${builderReturn}`)
                 }
             }
 
+            const builderIName = `${pascalCase(varName)}BuilderFn`
+            const builderInterface = [
+                `export interface ${builderIName} {`,
+                ...builderFns.map(v => `${this.#indent}${v}`),
+                `}`
+            ]
+
             const argInfoRes = argInfo ? `, ${argInfo}` : ""
 
-            const _builderFn = `{ builder: ${builderFn} }`
+            // const _builderFn = `{ builder: ${builderFn} }`
             result.push(
+                ...builderInterface,
                 ...this.#comment(description, deprecationReason),
-                `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})${builderFn ? ` & ${_builderFn}` : ""}`
-                // `export const ${varName} = ${builder}("${name}"${argInfoRes}) as (${builderT})`
+                `export const ${varName} = ${builder}("${name}"${argInfoRes}) as ${builderIName}`
             )
         }
 
@@ -606,18 +654,16 @@ class Transformer {
         const fields = isUnionType(type) ? [] : this.#selectFields(type, type.getFields())
         const typeName = this.#selectName(type)
 
-        fields.push(...this.#onFns(type))
-        fields.push(...this.#buildFn(type))
+        fields.push(this.#onFns(type).join("\n"))
+        const buildFn = this.#buildFn(type).join("\n")
+        fields.push(`("$build" extends E ? unknown : ${buildFn})`)
 
         // const R = isObjectType(type) ? `[...R, "__typename"]` : "R"
         // R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never
         result.push(
             ...this.#comment(type.description),
-            `export type ${typeName}<${SelectTypeArgs}> = Omit<_${typeName}<R, V, P, B, E>, E>`,
-            `export interface _${typeName}<${SelectTypeArgs}> `
-                + `extends Selection<${this.#bareTypename(type)}<R>, V> {`,
-            ...fields.map(v => `${this.#indent}${v}`),
-            `}`
+            `export type ${typeName}<${SelectTypeArgs}> = Selection<${this.#bareTypename(type)}<S>, V>`,
+            ...fields.map(v => `${this.#indent}& ${v}`)
         )
 
         return result
@@ -626,10 +672,15 @@ class Transformer {
     #selectFields(context: GraphQLType, fields: GraphQLFieldMap<any, any>): string[] {
         const result: string[] = []
         for (const { name, args, type, description, deprecationReason } of Object.values(fields)) {
-            result.push(
+            const blockItems = [
                 ...this.#comment(description, deprecationReason, undefined),
                 ...this.#selectField(context, name, args, type)
+            ]
+            const block = ["{", ...blockItems.map(v => `${this.#indent}${this.#indent}${v}`), `${this.#indent}}`].join(
+                "\n"
             )
+
+            result.push(`(${JSON.stringify(name)} extends E ? unknown : ${block})`)
         }
         return result
     }
@@ -649,45 +700,58 @@ class Transformer {
         if (args.length > 0) {
             this.#import(RuntimeLib, "Arguments", true)
             this.#import(RuntimeLib, "ToVars", true)
+            this.#import(RuntimeLib, "MergeVars", true)
             const [argumentType, _, argOptional] = this.#argInfoType(args)
             const VP = `[...P, ${JSON.stringify(name)}]`
 
             if (bareIsScalar(type)) {
-                const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
-                const V = `V & ToVars<${argumentType}, ${VP}, A>`
+                const S = `ExtendSelection<S, ${JSON.stringify(name)}>`
+                const V = `MergeVars<V, ToVars<${argumentType}, ${VP}, A>>`
                 const E = `E | ${JSON.stringify(name)}`
-                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
-                const qm = argOptional ? "?" : ""
-                result.push(`${name}<A extends Arguments<A, ${argumentType}>>(args${qm}: A): ${returnType}`)
+                const returnType = this.#selectType(contextName, S, V, "P", E)
+
+                result.push(`${name}<A>(args: Arguments<A, ${argumentType}>): ${returnType}`)
+
+                if (argOptional) {
+                    const returnType = this.#selectType(contextName, S, "V", "P", E)
+                    result.push(`${name}(): ${returnType}`)
+                }
             } else {
-                const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
-                const V = `V & SV & ToVars<${argumentType}, ${VP}, A>`
+                const S = `ExtendSelection<S, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
+                const V = `MergeVars<MergeVars<V, SV>, ToVars<${argumentType}, ${VP}, A>>`
                 const E = `E | ${JSON.stringify(name)}`
-                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
+                const returnType = this.#selectType(contextName, S, V, "P", E)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SV>`
-                const optArgs = argOptional ? ` | [${subf}]` : ""
+
                 result.push(
-                    `${name}<A extends Arguments<A, ${argumentType}>, ST, SV extends Vars>(...args: [A, ${subf}]${optArgs}): ${returnType}`
+                    `${name}<A, ST, SV extends Vars>(args: Arguments<A, ${argumentType}>, select: ${subf}): ${returnType}`
                 )
+
+                if (argOptional) {
+                    const V = `MergeVars<V, SV>`
+                    const returnType = this.#selectType(contextName, S, V, "P", E)
+                    result.push(`${name}<ST, SV extends Vars>(select: ${subf}): ${returnType}`)
+                }
             }
         } else {
             if (bareIsScalar(type)) {
-                const R = `ExtendSelection<R, ${JSON.stringify(name)}>`
+                const S = `ExtendSelection<S, ${JSON.stringify(name)}>`
                 const V = `V`
                 const E = `E | ${JSON.stringify(name)}`
-                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
+                const returnType = this.#selectType(contextName, S, V, "P", E)
                 result.push(`${name}: ${returnType}`)
             } else {
-                const R = `ExtendSelection<R, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
-                const V = `V & SV`
+                const S = `ExtendSelection<S, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
+                const V = `MergeVars<V, SV>`
                 const E = `E | ${JSON.stringify(name)}`
-                const returnType = this.#selectType(contextName, R, V, "P", "B", E)
+                const returnType = this.#selectType(contextName, S, V, "P", E)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SV>`
                 result.push(`${name}<ST, SV extends Vars>(select: ${subf}): ${returnType}`)
             }
         }
+
         return result
     }
 
@@ -699,10 +763,9 @@ class Transformer {
         // this.#import(RuntimeLib, "OnFnResult", true)
         const selfT = this.#selectType(
             this.#selectName(type),
-            `ExtendSelection<R, { $on: Record<GetTypeName<ST>, GetSelectionDef<ST>> }>`,
-            "V & SV",
+            `ExtendSelection<S, { $on: Record<GetTypeName<ST>, GetSelectionDef<ST>> }>`,
+            "MergeVars<V, SV>",
             "P",
-            "B",
             "E"
         )
 
@@ -731,7 +794,7 @@ class Transformer {
         //     result.push(`$on<SR, SV extends Vars>(fragments: ${fragmentTypes.join(" | ")}): ${selfT} | ${otherSelfT}`)
         // }
 
-        return result
+        return ["{", result.map(v => `${this.#indent}${this.#indent}${v}`).join("\n"), `${this.#indent}}`]
     }
 
     #buildFn(_type: GraphQLType): string[] {
@@ -741,11 +804,11 @@ class Transformer {
         const result: string[] = ["/**", " * Build the typed document node", " */"]
         result.push(
             // `$build: B extends { input: infer BI, output: infer OF extends BuilderOutputFlags, operation: infer OP extends string } ? () => BuildReturn<OP, ResultByOutputFlags<${typeName}<R>, OF>, ToVars<BI, P, V>> : never`
-            `$build: [B] extends [never] ? never : () => any`
+            `$build(): any`
         )
         // result.push(`$build(...args: any[]): any`)
 
-        return result
+        return ["{", result.map(v => `${this.#indent}${this.#indent}${v}`).join("\n"), `${this.#indent}}`]
     }
 
     #__typenames(type: GraphQLType): string[] {
@@ -774,8 +837,8 @@ class Transformer {
         }
     }
 
-    #selectType(name: string, R: string, V: string, P: string, B: string = "never", E: string = "never"): string {
-        return `${name}<${R}, ${V}, ${P}, ${B}, ${E}>`
+    #selectType(name: string, R: string, V: string, P: string, E: string = "never"): string {
+        return `${name}<${R}, ${V}, ${P}, ${E}>`
     }
 
     #selectR(type: GraphQLType): string {
@@ -790,8 +853,8 @@ class Transformer {
         }
     }
 
-    #subSelectType(name: string, R: string, V: string, P: string): string {
-        return this.#selectType(name, R, V, P, "never", `"$build"`)
+    #subSelectType(name: string, S: string, V: string, P: string, E: string = `"$build"`): string {
+        return this.#selectType(name, S, V, P, E)
     }
 
     #argInfoType(args: ReadonlyArray<GraphQLArgument>): [string, string, boolean] {
