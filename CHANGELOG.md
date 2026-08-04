@@ -1,5 +1,10 @@
 # Changelog
 
+# [0.7.0](https://github.com/zozzz/gql-unicorn/compare/0.6.2...0.7.0) (2026-08-04)
+
+
+* dramatically increase tsc performance ([4af5a5d](https://github.com/zozzz/gql-unicorn/commit/4af5a5d5400aafbc152e969acf91fef3c073d42f))
+
 ## [0.6.2](https://github.com/zozzz/gql-unicorn/compare/0.6.1...0.6.2) (2026-07-28)
 
 
