@@ -117,7 +117,6 @@ class Transformer {
         const reexport = ["$", "$$"]
         this.#import(RuntimeLib, "TypeOf", true)
         this.#import(RuntimeLib, "VarOf", true)
-        this.#import(RuntimeLib, "Selected", true)
 
         const tiDefs: string[] = []
         const argTypes: string[] = []
@@ -148,7 +147,7 @@ class Transformer {
             // ...Object.values(this.#selectedTypes).flat(),
             ...builders,
             ...reexport.map(v => `export const ${v} = __runtime.${v}`),
-            "export type { TypeOf, VarOf, Selected }"
+            "export type { TypeOf, VarOf }"
         ].join("\n")
     }
 

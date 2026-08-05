@@ -1,8 +1,6 @@
-/* eslint-disable unused-imports/no-unused-vars */
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
 
-import { type ALIAS, SELECTION, SELECTION_DEF } from "./symbols"
-import type { SimpleType } from "./type"
+import { SELECTION, SELECTION_DEF } from "./symbols"
 
 // TODO: rename to GQL
 // export type BuildReturn<OP extends string, T, S extends SelectionDef, V extends Vars> = TypedDocumentNode<
@@ -98,64 +96,6 @@ export type MergeSelection<A extends SelectionDef, B extends SelectionDef> = B["
     : B extends [...infer B1 extends SelectionItem[], infer B2 extends SelectionItem]
       ? ExtendSelection<MergeSelection<A, B1>, B2>
       : A
-
-export type Selected<T, S extends SelectionDef, D extends unknown[] = []> = D["length"] extends 10
-    ? unknown
-    : T extends null
-      ? Selected<NonNullable<T>, S, [...D, unknown]> | null
-      : T extends Array<infer TA>
-        ? Array<Selected<TA, S, [...D, unknown]>>
-        : T extends SimpleType
-          ? T extends { __typename: infer TN extends string }
-              ? /*{ __typename: TN } &*/ _Selected<T, _SelectionByType<TN, S>, [...D, unknown]>
-              : never
-          : T
-
-type _SelectionByType<TN extends string, S extends SelectionDef, D extends unknown[] = []> = D["length"] extends 10
-    ? never
-    : S extends [...infer S1 extends SelectionDef, infer S2 extends SelectionItem]
-      ? S2 extends SelectionOn
-          ? S2["$on"][TN] extends infer S2D extends SelectionDef
-              ? MergeSelection<_SelectionByType<TN, S1, [...D, unknown]>, S2D>
-              : S1["length"] extends 0
-                ? never
-                : _SelectionByType<TN, S1, [...D, unknown]>
-          : ExtendSelection<_SelectionByType<TN, S1, [...D, unknown]>, S2>
-      : S
-
-type _Selected<T extends SimpleType, S extends SelectionDef, D extends unknown[] = []> = D["length"] extends 10
-    ? unknown
-    : OmitNever<{
-          [K in keyof T]: S extends Array<infer A>
-              ? K extends A
-                  ? T[K]
-                  : A extends Record<string, any>
-                    ? K extends keyof A
-                        ? A[K] extends SelectionDef
-                            ? Selected<T[K], A[K], [...D, unknown]>
-                            : never
-                        : never
-                    : never
-              : never
-      }>
-
-type OmitNever<T extends Record<string, any>> = Omit<T, NeverKeys<T>>
-
-type NeverKeys<T extends Record<string, any>> = { [K in keyof T]: T[K] extends never ? K : never }[keyof T]
-
-type AliasKeys<T extends Record<string, any>> = {
-    [K in keyof T]: Alias<T[K], string> extends T[K] ? K : never
-}[keyof T]
-
-type ApplyAlias<T extends Record<string, any>> = {
-    [K in keyof T]: T[K] extends Alias<T[K], infer A> ? (A extends string ? Record<A, T[K]> : never) : never
-}[keyof T]
-
-// type ApplyAlias<T extends Record<string, any>> = {
-//     [K in keyof T]: T[K] extends Alias<T[K], infer A> ? A : never
-// }[keyof T]
-
-type Alias<T, N extends string> = T & { [ALIAS]: N }
 
 // TODO: Handle aliases
 // export type SelectionDef = Array<string | Record<string, string> | Record<string, SelectionDef>>
