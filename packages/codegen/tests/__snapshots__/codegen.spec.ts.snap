@@ -116,10 +116,10 @@ export type UserSelect<S extends SelectionDef, V, P extends string[], E extends 
         $build(): any
     })
 export interface QueryUserBuilderFn {
-    <ST, SV extends Vars, A>(queryName: string, args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"user", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    <ST, SV extends Vars, A>(args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"user", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    builder<A>(queryName: string, args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
-    builder<A>(args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    <ST, SV extends Vars, A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"user", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    <ST, SV extends Vars, A extends Record<string, any>>(args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"user", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    builder<A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    builder<A extends Record<string, any>>(args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
 }
 export const queryUser = queryBuilder("user", [__Arguments0, User]) as QueryUserBuilderFn
 export const $ = __runtime.$
@@ -197,10 +197,10 @@ export type UserSelect<S extends SelectionDef, V, P extends string[], E extends 
         $build(): any
     })
 export interface QueryUpdateUserBuilderFn {
-    <ST, SV extends Vars, A>(queryName: string, args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"updateUser", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    <ST, SV extends Vars, A>(args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"updateUser", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    builder<A>(queryName: string, args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
-    builder<A>(args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    <ST, SV extends Vars, A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"updateUser", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    <ST, SV extends Vars, A extends Record<string, any>>(args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"updateUser", ST | null, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    builder<A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    builder<A extends Record<string, any>>(args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
 }
 export const queryUpdateUser = queryBuilder("updateUser", [__Arguments0, User]) as QueryUpdateUserBuilderFn
 export const $ = __runtime.$
@@ -265,10 +265,10 @@ export type SomeEventSelect<S extends SelectionDef, V, P extends string[], E ext
         $build(): any
     })
 export interface SubscribeOnChangeSomethingBuilderFn {
-    <ST, SV extends Vars, A>(queryName: string, args: Arguments<A, Arguments0>, select: (select: SomeEventSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"onChangeSomething", ST, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    <ST, SV extends Vars, A>(args: Arguments<A, Arguments0>, select: (select: SomeEventSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"onChangeSomething", ST, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    builder<A>(queryName: string, args: Arguments<A, Arguments0>): SomeEventSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
-    builder<A>(args: Arguments<A, Arguments0>): SomeEventSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    <ST, SV extends Vars, A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>, select: (select: SomeEventSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"onChangeSomething", ST, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    <ST, SV extends Vars, A extends Record<string, any>>(args: Arguments<A, Arguments0>, select: (select: SomeEventSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"onChangeSomething", ST, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    builder<A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>): SomeEventSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    builder<A extends Record<string, any>>(args: Arguments<A, Arguments0>): SomeEventSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
 }
 export const subscribeOnChangeSomething = subscriptionBuilder("onChangeSomething", [__Arguments0, SomeEvent]) as SubscribeOnChangeSomethingBuilderFn
 export const $ = __runtime.$
@@ -343,10 +343,10 @@ export type UserSelect<S extends SelectionDef, V, P extends string[], E extends 
         $build(): any
     })
 export interface QueryUsersBuilderFn {
-    <ST, SV extends Vars, A>(queryName: string, args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"users", Array<ST>, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    <ST, SV extends Vars, A>(args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"users", Array<ST>, MergeVars<SV, ToVars<Arguments0, [], A>>>
-    builder<A>(queryName: string, args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
-    builder<A>(args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    <ST, SV extends Vars, A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"users", Array<ST>, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    <ST, SV extends Vars, A extends Record<string, any>>(args: Arguments<A, Arguments0>, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"users", Array<ST>, MergeVars<SV, ToVars<Arguments0, [], A>>>
+    builder<A extends Record<string, any>>(queryName: string, args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
+    builder<A extends Record<string, any>>(args: Arguments<A, Arguments0>): UserSelect<["__typename"], ToVars<Arguments0, [], A>, [], never>
     <ST, SV extends Vars>(queryName: string, select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"users", Array<ST>, SV>
     <ST, SV extends Vars>(select: (select: UserSelect<["__typename"], {}, [], "$build">) => Selection<ST, SV>): BuildReturn<"users", Array<ST>, SV>
     builder(queryName: string): UserSelect<["__typename"], {}, [], never>
