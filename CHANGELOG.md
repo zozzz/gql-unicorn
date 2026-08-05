@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.3](https://github.com/zozzz/gql-unicorn/compare/0.7.2...0.7.3) (2026-08-05)
+
+
+* remove unused Selected type ([c44a5a2](https://github.com/zozzz/gql-unicorn/commit/c44a5a203f2f766532773a7fd304647075cb73c5))
+
 ## [0.7.2](https://github.com/zozzz/gql-unicorn/compare/0.7.1...0.7.2) (2026-08-05)
 
 ## [0.7.1](https://github.com/zozzz/gql-unicorn/compare/0.7.0...0.7.1) (2026-08-04)
