@@ -87,8 +87,8 @@ type InArray<T, X> = T extends readonly [X, ...infer _Rest]
         ? InArray<Rest, X>
         : false
 
-export type ExactlyOne<T> = {
-    [K in keyof T]: { [P in K]: T[P] } & {
-        [P in Exclude<keyof T, K>]?: never
-    }
-}[keyof T]
+// export type ExactlyOne<T> = {
+//     [K in keyof T]: { [P in K]: T[P] } & {
+//         [P in Exclude<keyof T, K>]?: never
+//     }
+// }[keyof T]

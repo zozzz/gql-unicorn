@@ -5,7 +5,6 @@ import {
     type GraphQLEnumType,
     type GraphQLEnumValue,
     type GraphQLFieldMap,
-    type GraphQLInputFieldMap,
     type GraphQLInputObjectType,
     type GraphQLInterfaceType,
     type GraphQLNamedType,
@@ -377,45 +376,77 @@ class Transformer {
     #generateInput(type: GraphQLInputObjectType, name: string): string[] {
         this.#import(RuntimeLib, "Variable", true)
 
-        const fname = type.isOneOf ? `${name}OneOf` : name
-        const result = [
-            ...this.#comment(type.description),
-            `export type ${fname} = {`,
-            ...this.#generateInputFields(type.getFields(), type.isOneOf),
-            `}`
-        ]
-
         if (type.isOneOf) {
-            this.#import(RuntimeLib, "ExactlyOne", true)
-            result.push(`export type ${name} = ExactlyOne<${fname}>`)
+            return this.#generateOnOfInput(type, name)
+        } else {
+            return this.#generateCommonInput(type, name)
         }
-
-        return result
     }
 
-    #generateInputFields(fields: GraphQLInputFieldMap, isOneOf: boolean): string[] {
-        const result: string[] = []
-        for (const [name, { type, description, deprecationReason, defaultValue }] of Object.entries(fields)) {
+    #generateOnOfInput(type: GraphQLInputObjectType, name: string): string[] {
+        const fieldNames = Object.keys(type.getFields())
+        const fields = []
+
+        for (const [name, { type: ftype, description, deprecationReason, defaultValue }] of Object.entries(
+            type.getFields()
+        )) {
             if (name === "__typename") {
                 continue
             }
 
-            const fieldDef = []
-            fieldDef.push(
-                ...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`)
-            )
-
-            if (isNonNullType(type)) {
-                fieldDef.push(`${this.#indent}${name}: ${this.#typename(type.ofType, false)} | Variable`)
-            } else {
-                fieldDef.push(
-                    `${this.#indent}${name}${isOneOf ? "" : "?"}: ${this.#typename(type, false)} | Variable | null`
+            const block = [
+                `{`,
+                ...this.#comment(description, deprecationReason, defaultValue).map(
+                    v => `${this.#indent}${this.#indent}${v}`
                 )
+            ]
+
+            const typeName = isNonNullType(ftype) ? this.#typename(ftype.ofType, false) : this.#typename(ftype, false)
+
+            block.push(`${this.#indent}${this.#indent}${name}: ${typeName} | Variable`)
+
+            // TODO: better method to handle oneOf types exactly one field inside objects: {id: 1, [name: "x"] <- not allowed}
+            // i think this is the best method to create some kind of arguments validator type, like the current Arguments type
+            for (const otherName of fieldNames) {
+                if (otherName === name) {
+                    continue
+                }
+
+                block.push(`${this.#indent}${this.#indent}${otherName}?: never`)
             }
 
-            result.push(...fieldDef)
+            block.push(`${this.#indent}}`)
+
+            fields.push(block.join("\n"))
         }
-        return result
+
+        return [
+            ...this.#comment(type.description),
+            `export type ${name} = `,
+            ...fields.map(v => `${this.#indent}| ${v}`)
+        ]
+    }
+
+    #generateCommonInput(type: GraphQLInputObjectType, name: string): string[] {
+        const fields = []
+
+        for (const [name, { type: ftype, description, deprecationReason, defaultValue }] of Object.entries(
+            type.getFields()
+        )) {
+            if (name === "__typename") {
+                continue
+            }
+
+            fields.push(...this.#comment(description, deprecationReason, defaultValue).map(v => `${this.#indent}${v}`))
+
+            if (isNonNullType(ftype)) {
+                fields.push(`${this.#indent}${name}: ${this.#typename(ftype.ofType, false)} | Variable`)
+            } else {
+                fields.push(`${this.#indent}${name}?: ${this.#typename(ftype, false)} | Variable | null`)
+            }
+        }
+
+        return [...this.#comment(type.description), `export type ${name} = {`, ...fields, `}`]
     }
 
     // #generateField(
@@ -506,12 +537,12 @@ class Transformer {
                     typeValue = this.#typename(type)
 
                     builderFns.push(
-                        `<A>(queryName: string, args: Arguments<A, ${argType}>): `
+                        `<A extends Record<string, any>>(queryName: string, args: Arguments<A, ${argType}>): `
                             + `BuildReturn<"${name}", ${typeValue}, ToVars<${argType}, [], A>>`
                     )
 
                     builderFns.push(
-                        `<A>(args: Arguments<A, ${argType}>): `
+                        `<A extends Record<string, any>>(args: Arguments<A, ${argType}>): `
                             + `BuildReturn<"${name}", ${typeValue}, ToVars<${argType}, [], A>>`
                     )
 
@@ -527,13 +558,13 @@ class Transformer {
                     const sfn = `(select: ${typeValue}) => Selection<ST, SV>`
 
                     builderFns.push(
-                        `<ST, SV extends Vars, A>`
+                        `<ST, SV extends Vars, A extends Record<string, any>>`
                             + `(queryName: string, args: Arguments<A, ${argType}>, select: ${sfn})`
                             + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, MergeVars<SV, ToVars<${argType}, [], A>>>`
                     )
 
                     builderFns.push(
-                        `<ST, SV extends Vars, A>`
+                        `<ST, SV extends Vars, A extends Record<string, any>>`
                             + `(args: Arguments<A, ${argType}>, select: ${sfn})`
                             + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, MergeVars<SV, ToVars<${argType}, [], A>>>`
                     )
@@ -545,8 +576,12 @@ class Transformer {
                         "[]",
                         `never`
                     )
-                    builderFns.push(`builder<A>(queryName: string, args: Arguments<A, ${argType}>): ${builderReturn}`)
-                    builderFns.push(`builder<A>(args: Arguments<A, ${argType}>): ${builderReturn}`)
+                    builderFns.push(
+                        `builder<A extends Record<string, any>>(queryName: string, args: Arguments<A, ${argType}>): ${builderReturn}`
+                    )
+                    builderFns.push(
+                        `builder<A extends Record<string, any>>(args: Arguments<A, ${argType}>): ${builderReturn}`
+                    )
 
                     if (argOptional) {
                         builderFns.push(
@@ -723,7 +758,7 @@ class Transformer {
                 const subf = `(select: ${subs}) => Selection<ST, SV>`
 
                 result.push(
-                    `${name}<A, ST, SV extends Vars>(args: Arguments<A, ${argumentType}>, select: ${subf}): ${returnType}`
+                    `${name}<A extends Record<string, any>, ST, SV extends Vars>(args: Arguments<A, ${argumentType}>, select: ${subf}): ${returnType}`
                 )
 
                 if (argOptional) {

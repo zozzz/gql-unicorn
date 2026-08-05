@@ -55,6 +55,18 @@ describe("runtime", () => {
 
             testQuery<"orgUnit", Array<{ id: string }>, never>(query, `query{orgUnit{__typename,id,name,level}}`)
         })
+
+        test("orgUnit with variable", () => {
+            const queryCurrentSection = G.queryOrgUnit(
+                // { filter: { type: { eq: OrgUnitType.Section }, id: { eq: $("sectionId") } }, offset: 0, limit: 1 },
+                {
+                    filter: { and: [{ type: { eq: G.OrgUnitType.Section } }, { id: { eq: G.$("sectionId") } }] },
+                    offset: 0,
+                    limit: 1
+                },
+                q => q.id.name.children(q => q.id.name.$on(G.OrgActivity(q => q.kind.isActive.activityType)))
+            )
+        })
     })
 
     // test("saveFlow", () => {

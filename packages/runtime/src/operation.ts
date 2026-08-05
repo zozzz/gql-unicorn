@@ -19,7 +19,9 @@ import { type StripVariable, type Variable } from "./var"
 //               | Variable
 //         : I | Variable
 
+// export type Arguments<I, T> = (T & { [K in keyof I]: K extends keyof T ? I[K] : never }) | Variable
 export type Arguments<I, T> = (T & { [K in keyof I]: K extends keyof T ? I[K] : never }) | Variable
+
 // export type Arguments<I, T> = (T & { [K in keyof I]: K extends keyof T ? I[K] : never }) | Variable
 
 // export type Arguments<I extends Input> = _Arguments<I>
