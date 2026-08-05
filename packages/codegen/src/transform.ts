@@ -286,7 +286,6 @@ class Transformer {
     #generateObject(type: GraphQLObjectType, name: string): string[] {
         this.#import(RuntimeLib, "SelectionDef", true)
         this.#import(RuntimeLib, "FlattenOnSelection", true)
-        this.#import(RuntimeLib, "LetSelectionDef", true)
 
         if (this.config.typeinfo) {
             this.#typeInfoVar[type.name] = this.#typeInfo(type).name
@@ -321,7 +320,6 @@ class Transformer {
         return [
             ...this.#comment(type.description),
             `export type _${name}<SD extends SelectionDef> = `,
-            `${this.#indent}& LetSelectionDef<SD>`,
             `${this.#indent}& { __typename: ${typeNameStr} }`,
             ...fields.map(v => `${this.#indent}& ${v}`),
             `export type ${name}<SD extends SelectionDef> = _${name}<FlattenOnSelection<SD, ${typeNameStr}>>`,
@@ -557,13 +555,13 @@ class Transformer {
                     const sfn = `(select: ${typeValue}) => Selection<ST, SV>`
 
                     builderFns.push(
-                        `<ST, SV extends Vars, A extends Record<string, any>>`
+                        `<ST extends SelectionDef, SV extends Vars, A extends Record<string, any>>`
                             + `(queryName: string, args: Arguments<A, ${argType}>, select: ${sfn})`
                             + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, MergeVars<SV, ToVars<${argType}, [], A>>>`
                     )
 
                     builderFns.push(
-                        `<ST, SV extends Vars, A extends Record<string, any>>`
+                        `<ST extends SelectionDef, SV extends Vars, A extends Record<string, any>>`
                             + `(args: Arguments<A, ${argType}>, select: ${sfn})`
                             + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, MergeVars<SV, ToVars<${argType}, [], A>>>`
                     )
@@ -584,13 +582,13 @@ class Transformer {
 
                     if (argOptional) {
                         builderFns.push(
-                            `<ST, SV extends Vars>`
+                            `<ST extends SelectionDef, SV extends Vars>`
                                 + `(queryName: string, select: ${sfn})`
                                 + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
                         )
 
                         builderFns.push(
-                            `<ST, SV extends Vars>`
+                            `<ST extends SelectionDef, SV extends Vars>`
                                 + `(select: ${sfn})`
                                 + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
                         )
@@ -615,13 +613,13 @@ class Transformer {
                     const sfn = `(select: ${typeValue}) => Selection<ST, SV>`
 
                     builderFns.push(
-                        `<ST, SV extends Vars>`
+                        `<ST extends SelectionDef, SV extends Vars>`
                             + `(queryName: string, select: ${sfn})`
                             + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
                     )
 
                     builderFns.push(
-                        `<ST, SV extends Vars>`
+                        `<ST extends SelectionDef, SV extends Vars>`
                             + `(select: ${sfn})`
                             + `: BuildReturn<"${name}", ${this.#builderResultType(type, "ST")}, SV>`
                     )
@@ -658,7 +656,8 @@ class Transformer {
         } else if (isListType(type)) {
             return `Array<${this.#builderResultType(type.ofType, typeVar)}>${nullable ? " | null" : ""}`
         }
-        return `${typeVar}${nullable ? " | null" : ""}`
+        const tn = this.#bareTypename(type)
+        return `${tn}<${typeVar}>${nullable ? " | null" : ""}`
     }
 
     #typeIntoBuilderOutputFlags(type: GraphQLType): Record<string, any> {
@@ -694,7 +693,7 @@ class Transformer {
         // R extends SelectionDef, V extends Vars, P extends string[], B extends AsBuilder = never, E extends string = never
         result.push(
             ...this.#comment(type.description),
-            `export type ${typeName}<${SelectTypeArgs}> = Selection<${this.#bareTypename(type)}<S>, V>`,
+            `export type ${typeName}<${SelectTypeArgs}> = Selection<S, V>`,
             ...fields.map(v => `${this.#indent}& ${v}`)
         )
 
@@ -727,7 +726,6 @@ class Transformer {
         const result: string[] = []
 
         this.#import(RuntimeLib, "ExtendSelection", true)
-        this.#import(RuntimeLib, "GetSelectionDef", true)
 
         if (args.length > 0) {
             this.#import(RuntimeLib, "Arguments", true)
@@ -749,7 +747,7 @@ class Transformer {
                     result.push(`${name}(): ${returnType}`)
                 }
             } else {
-                const S = `ExtendSelection<S, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
+                const S = `ExtendSelection<S, Record<${JSON.stringify(name)}, ST>>`
                 const V = `MergeVars<MergeVars<V, SV>, ToVars<${argumentType}, ${VP}, A>>`
                 const E = `E | ${JSON.stringify(name)}`
                 const returnType = this.#selectType(contextName, S, V, "P", E)
@@ -757,13 +755,13 @@ class Transformer {
                 const subf = `(select: ${subs}) => Selection<ST, SV>`
 
                 result.push(
-                    `${name}<A extends Record<string, any>, ST, SV extends Vars>(args: Arguments<A, ${argumentType}>, select: ${subf}): ${returnType}`
+                    `${name}<A extends Record<string, any>, ST extends SelectionDef, SV extends Vars>(args: Arguments<A, ${argumentType}>, select: ${subf}): ${returnType}`
                 )
 
                 if (argOptional) {
                     const V = `MergeVars<V, SV>`
                     const returnType = this.#selectType(contextName, S, V, "P", E)
-                    result.push(`${name}<ST, SV extends Vars>(select: ${subf}): ${returnType}`)
+                    result.push(`${name}<ST extends SelectionDef, SV extends Vars>(select: ${subf}): ${returnType}`)
                 }
             }
         } else {
@@ -774,13 +772,13 @@ class Transformer {
                 const returnType = this.#selectType(contextName, S, V, "P", E)
                 result.push(`${name}: ${returnType}`)
             } else {
-                const S = `ExtendSelection<S, Record<${JSON.stringify(name)}, GetSelectionDef<ST>>>`
+                const S = `ExtendSelection<S, Record<${JSON.stringify(name)}, ST>>`
                 const V = `MergeVars<V, SV>`
                 const E = `E | ${JSON.stringify(name)}`
                 const returnType = this.#selectType(contextName, S, V, "P", E)
                 const subs = this.#subSelectType(this.#selectName(type), `["__typename"]`, "{}", `[...P, "${name}"]`)
                 const subf = `(select: ${subs}) => Selection<ST, SV>`
-                result.push(`${name}<ST, SV extends Vars>(select: ${subf}): ${returnType}`)
+                result.push(`${name}<ST extends SelectionDef, SV extends Vars>(select: ${subf}): ${returnType}`)
             }
         }
 
@@ -788,20 +786,19 @@ class Transformer {
     }
 
     #onFns(type: GraphQLType): string[] {
+        this.#import(RuntimeLib, "Fragment", true)
         this.#import(RuntimeLib, "ExtendSelection", true)
-        this.#import(RuntimeLib, "GetSelectionDef", true)
-        this.#import(RuntimeLib, "GetTypeName", true)
 
         // this.#import(RuntimeLib, "OnFnResult", true)
         const selfT = this.#selectType(
             this.#selectName(type),
-            `ExtendSelection<S, { $on: Record<GetTypeName<ST>, GetSelectionDef<ST>> }>`,
+            `ExtendSelection<S, { $on: Record<TN, ST> }>`,
             "MergeVars<V, SV>",
             "P",
             "E"
         )
 
-        const onSelf = `$on<ST, SV extends Vars>(fragment: Selection<ST, SV>): ${selfT}`
+        const onSelf = `$on<TN extends string, ST extends SelectionDef, SV extends Vars>(fragment: Fragment<TN, ST, SV>): ${selfT}`
         const result: string[] = ["/**", " * Constraint type selection", " */", onSelf]
 
         // TODO: maybe once upon a time

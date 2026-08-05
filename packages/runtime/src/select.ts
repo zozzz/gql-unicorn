@@ -1,6 +1,6 @@
 import type { TypedDocumentNode } from "@graphql-typed-document-node/core"
 
-import { SELECTION, SELECTION_DEF } from "./symbols"
+import { FRAGMENT, SELECTION } from "./symbols"
 
 // TODO: rename to GQL
 // export type BuildReturn<OP extends string, T, S extends SelectionDef, V extends Vars> = TypedDocumentNode<
@@ -148,14 +148,18 @@ type _SelectionIntoFields<I extends SelectionItem, AllowOn extends boolean> = I 
 
 // type AppendNestedPath<SD extends Record<string, SelectionDef>, P extends string[], K extends string> = unknown
 
-export type LetSelectionDef<SD extends SelectionDef> = {
-    [SELECTION_DEF]: SD
+// export type LetSelectionDef<SD extends SelectionDef> = {
+//     [SELECTION_DEF]: SD
+// }
+
+// export type GetSelectionDef<T> = T extends { [SELECTION_DEF]: infer SD extends SelectionDef } ? SD : never
+
+export class Selection<S extends SelectionDef, V> {
+    [SELECTION]?: [S, V]
 }
 
-export type GetSelectionDef<T> = T extends { [SELECTION_DEF]: infer SD extends SelectionDef } ? SD : never
-
-export class Selection<T, V> {
-    [SELECTION]?: [T, V]
+export class Fragment<TN extends string, S, V> {
+    [FRAGMENT]?: [TN, S, V]
 }
 
 export type IsSelected<S extends SelectionDef, ON extends string, K extends string, V> = NeverToUnknown<

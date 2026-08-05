@@ -4,7 +4,7 @@ import { isPlainObject } from "es-toolkit"
 import { parse as parseGql } from "graphql"
 
 import type { MergeUnion } from "./common"
-import type { Selection } from "./select"
+import type { Fragment, Selection, SelectionDef } from "./select"
 import { CONTEXT } from "./symbols"
 import type { SimpleType } from "./type"
 import { isVariable, variableName, type Vars } from "./var"
@@ -396,12 +396,24 @@ interface ProxyTarget {
 type BField = string
 
 export interface TypeBuilder<T, TN extends string> {
-    fragment<S extends Selection<any, any>>(name: string, select: (select: T) => S): S
     // @ts-expect-error V is assignable to TypeVariant<V, TN>, but TS is not liking it, but works
     is<V extends SimpleType | null | undefined>(obj: V): obj is TypeVariant<V, TN> & NonNullable<V>
-    <ST, SV extends Vars>(
-        ...args: [string, (select: T) => Selection<ST, SV>] | [(select: T) => Selection<ST, SV>]
-    ): Selection<ST, SV>
+
+    fragment<ST extends SelectionDef, SV extends Vars>(
+        name: string,
+        select: (select: T) => Selection<ST, SV>
+    ): Fragment<TN, ST, SV>
+
+    <ST extends SelectionDef, SV extends Vars>(
+        name: string,
+        select: (select: T) => Selection<ST, SV>
+    ): Fragment<TN, ST, SV>
+
+    <ST extends SelectionDef, SV extends Vars>(select: (select: T) => Selection<ST, SV>): Fragment<TN, ST, SV>
+
+    // <ST, SV extends Vars>(
+    //     ...args: [string, (select: T) => Selection<ST, SV>] | [(select: T) => Selection<ST, SV>]
+    // ): Selection<ST, SV>
 }
 
 type TypeVariant<V extends SimpleType, TN extends string> = MergeUnion<{ __typename: TN } & V>

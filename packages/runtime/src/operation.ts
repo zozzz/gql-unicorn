@@ -91,9 +91,9 @@ type Prefixed<I, P extends string[]> = undefined extends I
     : { [K in Concat<"__", P>]-?: I }
 
 type Extract<I, P extends string[], Arg> = MergeUnion<_Extract<I, P, Arg>>
-type ____Extract<I, P extends string[], Arg> = UnionToIntersection<_Extract<I, P, Arg>>
+// type ____Extract<I, P extends string[], Arg> = UnionToIntersection<_Extract<I, P, Arg>>
 
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
+// type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
 
 type _Extract<I, P extends string[], A> =
     IsEmpty<A> extends true
